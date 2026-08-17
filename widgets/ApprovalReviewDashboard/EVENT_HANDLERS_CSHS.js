@@ -1,119 +1,174 @@
 /**
- * ApprovalReviewDashboard — CSHS Event Handler Scripts
+ * ApprovalReviewDashboard — CSHS Coach View Event Handler Scripts
  *
+ * ─────────────────────────────────────────────────────────────────────────────
  * WHERE TO PASTE:
- *   Open the Coach node (double-click to open the Coach editor)
- *   → click the widget (ApprovalReviewDashboard) on the canvas
- *   → Right Properties panel → [Events] tab
- *   → You see one script box per event — paste each section below
- *     into the matching box.
- *
- * RULES (shown in the BAW panel header):
- *   ✅ JavaScript ES6
- *   ✅ Runs in the client browser
- *   ❌ No template literals (no backtick ` strings)
- *   ❌ No tw.object.* constructors
- *   ❌ No new tw.object.listOf.*
- *
- * PREREQUISITE — CSHS Variables tab must have:
- *   dashboardData   ApprovalReviewDashboard   Private ✓
- *   actionKey       String                    Private ✓
- *   ctaAction       String                    Private ✓
- *   approverIndex   Integer                   Private ✓
- *   comment         String                    Private ✓
- *   stepIndex       Integer                   Private ✓
- *
- * HOW TO FIND THE EVENTS PANEL:
- *   1. Double-click Coach node to open it
+ *   Inside the Coach editor:
+ *   1. Double-click the Coach node to open it
  *   2. Click the ApprovalReviewDashboard widget on the canvas
  *   3. Right Properties panel → [Events] tab
- *   4. You see: CTA Clicked / Action Button Clicked / Urge Button Clicked
- *               Comment Changed / Route Step Clicked
- *   5. Paste the matching script into each box
+ *   4. Paste each section into its matching script box
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ARCHITECTURE — how BAW Coach View events work:
+ *
+ *   WIDGET (browser)                   CSHS FLOW (server)
+ *   ─────────────────                  ──────────────────
+ *   inlineJavascript.js                Script nodes / Service flows
+ *   calls context.trigger("event",     ← boundary event fires here
+ *     { parameterName: value })            tw.local.actionKey is set
+ *                                          server-side logic runs
+ *   ↑ Event handler script box
+ *     runs HERE in the browser
+ *     Use: this.context API
+ *     Do NOT use: tw.local (server only)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * KEY RULES (shown in the BAW panel header):
+ *   ✅ JavaScript ES6 — runs in the CLIENT BROWSER
+ *   ✅ Use this.context.trigger() to fire the boundary event
+ *   ✅ Use this.context.binding.get("value") to read bound data
+ *   ✅ Use console.log() for browser logging
+ *   ❌ tw.local — server-side only, NOT available here
+ *   ❌ log.info() — server-side only, use console.log() instead
+ *   ❌ Hardcode data changes here — data updates via binding, not scripts
+ *   ❌ Template literals (no backtick ` strings)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * DATA BINDING SETUP (do this in Properties → General, NOT in scripts):
+ *   Widget selected → Properties → General → Binding:
+ *     tw.local.dashboardData     (type: ApprovalReviewDashboard)
+ *
+ *   The widget's inlineJavascript.js already calls context.trigger() with
+ *   the correct parameter values. The event handler script boxes below
+ *   are optional — only needed if you want extra client-side logic
+ *   BEFORE the boundary event fires on the server.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHAT EACH EVENT HANDLER BOX SHOULD DO:
+ *   - Fire this.context.trigger() to activate the CSHS boundary event
+ *   - Read bound data with this.context.binding.get("value") if needed
+ *   - console.log() for debugging
+ *   - NO tw.local, NO data writes — those happen server-side after trigger
  */
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  CTA Clicked  (box label: "CTA Clicked:")
-//  Fired when:  top-right "已完成 → 外部簽署 →" button or AI suggestion link
-//  Parameter:   tw.local.ctaAction  e.g. "proceed_to_external_signing"
-// ─────────────────────────────────────────────────────────────────────────────
-if (tw.local.ctaAction === "proceed_to_external_signing") {
-    tw.local.dashboardData.progress.currentStageIndex = 2;
-    tw.local.dashboardData.progress.stages[1].status = "completed";
-    tw.local.dashboardData.progress.stages[2].status = "current";
-    tw.local.dashboardData.progress.ctaLabel = "查看 DocuSign 狀態";
-    tw.local.dashboardData.progress.ctaAction = "view_docusign";
-}
+// =============================================================================
+//  CTA Clicked  —  paste into "CTA Clicked:" box
+// =============================================================================
+//
+//  The widget already called context.trigger("ctaClicked", { ctaAction: "..." })
+//  This script box runs AFTER that trigger, in the browser.
+//
+//  The ctaAction value is carried as the event parameter — it is automatically
+//  mapped to tw.local.ctaAction on the server side (via the binding config).
+//
+//  Here we can read the bound data to do client-side UI work before navigating.
+
+var dashData = this.context.binding.get("value");
+var ctaAction = dashData && dashData.progress ? dashData.progress.ctaAction : "";
+
+console.log("[ApprovalReviewDashboard] CTA clicked — ctaAction: " + ctaAction);
+
+// The boundary event fires automatically. No additional code needed here
+// unless you want to show a client-side confirmation dialog before proceeding.
+// Example: add a confirm dialog before external signing:
+//
+// if (ctaAction === "proceed_to_external_signing") {
+//     if (!confirm("確認移交外部簽署（DocuSign）？")) {
+//         return; // cancel — do not fire boundary event
+//     }
+// }
+//
+// this.context.trigger();  // ← call only if you intercepted and want to proceed
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Action Button Clicked  (box label: "Action Button Clicked:")
-//  Fired when:  退回 / 轉派 / 核准 buttons clicked
-//  Parameter:   tw.local.actionKey  "return" | "delegate" | "approve"
-// ─────────────────────────────────────────────────────────────────────────────
-tw.local.dashboardData.approverAction.decision = tw.local.actionKey;
+// =============================================================================
+//  Action Button Clicked  —  paste into "Action Button Clicked:" box
+// =============================================================================
+//
+//  The widget calls context.trigger("actionClicked", { actionKey: "approve" })
+//  actionKey is automatically mapped to tw.local.actionKey on the server.
+//  The server-side gateway then routes: approve → Approved, return → Rejected.
+//
+//  This script box runs in the browser. Use it for client-side confirmation
+//  before the boundary event fires.
 
-tw.local.dashboardData.auditLog.events.listAdd();
-var idx = tw.local.dashboardData.auditLog.events.listLength - 1;
-tw.local.dashboardData.auditLog.events[idx].isHighlighted = true;
-tw.local.dashboardData.auditLog.events[idx].actor = tw.system.user.fullName;
+var actionData = this.context.binding.get("value");
+var actionKey = actionData && actionData.approverAction ? actionData.approverAction.decision : "";
 
-if (tw.local.actionKey === "approve") {
-    tw.local.dashboardData.auditLog.events[idx].action = "核准";
-    tw.local.dashboardData.auditLog.events[idx].detail =
-        tw.system.user.fullName + " 核准 — 「" +
-        (tw.local.dashboardData.approverAction.comment || "同意") + "」";
+console.log("[ApprovalReviewDashboard] Action clicked — actionKey: " + actionKey);
 
-} else if (tw.local.actionKey === "return") {
-    tw.local.dashboardData.auditLog.events[idx].action = "退回";
-    tw.local.dashboardData.auditLog.events[idx].detail =
-        tw.system.user.fullName + " 退回 — 「" +
-        (tw.local.dashboardData.approverAction.comment || "請修正後重新送審") + "」";
-
-} else if (tw.local.actionKey === "delegate") {
-    tw.local.dashboardData.auditLog.events[idx].action = "轉派";
-    tw.local.dashboardData.auditLog.events[idx].detail =
-        tw.system.user.fullName + " 轉派此案給其他審核人";
-}
+// Optional: require a comment before approving
+// var comment = actionData && actionData.approverAction ? actionData.approverAction.comment : "";
+// if (actionKey === "return" && !comment) {
+//     alert("請填寫退回原因（審核意見）");
+//     return; // prevent the boundary event from firing
+// }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Urge Button Clicked  (box label: "Urge Button Clicked:")
-//  Fired when:  催辦 button on an approver row clicked
-//  Parameter:   tw.local.approverIndex  Integer 0-based
-//                 0 = 王志明 (Layer 1)
-//                 1 = 李雅婷 (Layer 2)
-//                 2 = 張文豪 (Layer 3)
-// ─────────────────────────────────────────────────────────────────────────────
-var urgedApprover = tw.local.dashboardData.approvalChain.approvers[tw.local.approverIndex];
+// =============================================================================
+//  Urge Button Clicked  —  paste into "Urge Button Clicked:" box
+// =============================================================================
+//
+//  The widget calls context.trigger("urgeClicked", { approverIndex: 1 })
+//  approverIndex is automatically mapped to tw.local.approverIndex on server.
+//
+//  Read the approver name from the binding for a client-side confirmation.
 
-tw.local.dashboardData.auditLog.events.listAdd();
-var urgeIdx = tw.local.dashboardData.auditLog.events.listLength - 1;
-tw.local.dashboardData.auditLog.events[urgeIdx].actor = "系統";
-tw.local.dashboardData.auditLog.events[urgeIdx].action = "催辦";
-tw.local.dashboardData.auditLog.events[urgeIdx].detail =
-    "已催辦 " + urgedApprover.name + "（第 " + urgedApprover.layer + " 層）";
-tw.local.dashboardData.auditLog.events[urgeIdx].isHighlighted = false;
+var urgeData = this.context.binding.get("value");
+var approverIndex = 0; // default — actual value comes from widget trigger parameter
+
+// Get the approver list from the binding to show their name in confirmation
+var approvers = urgeData && urgeData.approvalChain && urgeData.approvalChain.approvers
+    ? urgeData.approvalChain.approvers
+    : [];
+
+// approverIndex is available as the event parameter value passed by the widget
+// Access it via the event parameter mapping in Properties → Events tab
+console.log("[ApprovalReviewDashboard] 催辦 clicked — approvers list length: " + approvers.listLength);
+
+// Optional: confirm before sending urge notification
+// var approver = approvers[approverIndex];
+// if (approver && !confirm("確認催辦 " + approver.name + "？")) {
+//     return;
+// }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Comment Changed  (box label: "Comment Changed:")
-//  Fired when:  approver types in the 審核意見 textarea
-//  Parameter:   tw.local.comment  String — current textarea value
-// ─────────────────────────────────────────────────────────────────────────────
-tw.local.dashboardData.approverAction.comment = tw.local.comment;
+// =============================================================================
+//  Comment Changed  —  paste into "Comment Changed:" box
+// =============================================================================
+//
+//  Leave this box EMPTY or use only console.log for debugging.
+//
+//  The correct way to capture the comment is through DATA BINDING:
+//    Widget → Properties → General → Binding → tw.local.dashboardData
+//    The widget's changeFunction (config.json: "changeFunction": true) ensures
+//    the entire bound BO including the comment is synced back automatically
+//    when the user types — no script needed here.
+//
+//  If you need to capture just the comment string separately, declare a
+//  tw.local.comment variable and map it in Properties → Events:
+//    Event: commentChanged → Output parameter: comment → tw.local.comment
+//  Then tw.local.comment is available server-side after the boundary event.
+
+console.log("[ApprovalReviewDashboard] Comment changed");
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Route Step Clicked  (box label: "Route Step Clicked:")
-//  Fired when:  a step box in the route flow diagram is clicked
-//  Parameter:   tw.local.stepIndex  Integer 0-based
-//                 0 = 申請人送審
-//                 1 = 直屬主管核准
-//                 2 = 上一階核准
-//                 3 = 最終核准執行
-//                 4 = 外部簽署
-// ─────────────────────────────────────────────────────────────────────────────
-var labels = ["申請人送審", "直屬主管核准", "上一階核准", "最終核准執行", "外部簽署"];
-log.info("Step clicked: " + labels[tw.local.stepIndex] + " (" + tw.local.stepIndex + ")");
+// =============================================================================
+//  Route Step Clicked  —  paste into "Route Step Clicked:" box
+// =============================================================================
+//
+//  The widget calls context.trigger("stepClicked", { stepIndex: 2 })
+//  stepIndex is automatically mapped to tw.local.stepIndex on the server.
+//
+//  This is informational — use console.log for client-side debugging.
+//  Server-side: read tw.local.stepIndex in a Script node after the boundary event.
+
+var stepData = this.context.binding.get("value");
+var stepLabels = ["申請人送審", "直屬主管核准", "上一階核准", "最終核准執行", "外部簽署"];
+
+// stepIndex value comes from the widget trigger parameter mapping
+// Log the route explanation text for debugging
+var routeText = stepData && stepData.routeExplanation ? stepData.routeExplanation.explanationText : "";
+console.log("[ApprovalReviewDashboard] Route step clicked — route: " + routeText);
