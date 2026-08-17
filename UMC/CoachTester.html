@@ -663,12 +663,12 @@ function WIDGET_SCRIPT(){
     routeExplanation:{explanationText:"本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。",steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"completed"},{label:"上一階\n核准",sublabel:"",status:"current"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
   };
   // Phase 1
-  if(ctaBtn){ctaBtn.addEventListener('click',function(){me.context.trigger('ctaClicked',ctaBtn.getAttribute('data-cta-action')||FB.progress.ctaAction);});}
-  if(aiLinkEl){aiLinkEl.addEventListener('click',function(e){e.preventDefault();me.context.trigger('ctaClicked',aiLinkEl.getAttribute('data-ai-action')||FB.processStatus.aiSuggestionAction);});}
-  if(commentArea){commentArea.addEventListener('input',function(){me.context.trigger('commentChanged',commentArea.value);});}
-  if(actionBtnsEl){actionBtnsEl.addEventListener('click',function(e){var b=e.target.closest('.ard-action-btn');if(!b||b.disabled){return;}me.context.trigger('actionClicked',b.getAttribute('data-action-key')||'');});}
-  if(chainListEl){chainListEl.addEventListener('click',function(e){var b=e.target.closest('.ard-urge-btn');if(!b){return;}me.context.trigger('urgeClicked',toNum(b.getAttribute('data-approver-index')));});}
-  if(routeFlowEl){routeFlowEl.addEventListener('click',function(e){var b=e.target.closest('.ard-route-step-box');if(!b){return;}me.context.trigger('stepClicked',toNum(b.getAttribute('data-step-index')));});}
+  if(ctaBtn){ctaBtn.addEventListener('click',function(){var v=ctaBtn.getAttribute('data-cta-action')||FB.progress.ctaAction;me.context.trigger('ctaClicked',{ctaAction:v});});}
+  if(aiLinkEl){aiLinkEl.addEventListener('click',function(e){e.preventDefault();var v=aiLinkEl.getAttribute('data-ai-action')||FB.processStatus.aiSuggestionAction;me.context.trigger('ctaClicked',{ctaAction:v});});}
+  if(commentArea){commentArea.addEventListener('input',function(){me.context.trigger('commentChanged',{comment:commentArea.value});});}
+  if(actionBtnsEl){actionBtnsEl.addEventListener('click',function(e){var b=e.target.closest('.ard-action-btn');if(!b||b.disabled){return;}var v=b.getAttribute('data-action-key')||'';me.context.trigger('actionClicked',{actionKey:v});});}
+  if(chainListEl){chainListEl.addEventListener('click',function(e){var b=e.target.closest('.ard-urge-btn');if(!b){return;}var v=toNum(b.getAttribute('data-approver-index'));me.context.trigger('urgeClicked',{approverIndex:v});});}
+  if(routeFlowEl){routeFlowEl.addEventListener('click',function(e){var b=e.target.closest('.ard-route-step-box');if(!b){return;}var v=toNum(b.getAttribute('data-step-index'));me.context.trigger('stepClicked',{stepIndex:v});});}
   // Phase 2 renderers
   function renderProgress(d){
     var stages=normList(d.stages,['label','status']),ci=toNum(d.currentStageIndex),cl=toStr(d.ctaLabel),ca=toStr(d.ctaAction);

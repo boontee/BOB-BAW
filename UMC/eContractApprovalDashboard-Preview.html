@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<!--
+  eContractApprovalDashboard — Standalone Preview
+  Pixel-perfect replica of UMC/UI.jpeg
+  Self-contained: no external dependencies, no server required.
+  Open directly in any browser.
+-->
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>eContract — 簽核審查</title>
+<style>
+/* ── Reset ────────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+  font-size:14px;color:#161616;background:#f0f4f8;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+.app-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* Top nav */
+.top-nav{display:flex;align-items:center;height:48px;background:#fff;
+  border-bottom:1px solid #e0e0e0;padding:0 24px;flex-shrink:0;z-index:20}
+.brand{font-size:20px;font-weight:800;color:#161616;letter-spacing:-.8px;
+  margin-right:32px;white-space:nowrap;font-style:italic;cursor:default}
+.brand .c{color:#0f62fe}
+.nav-tabs{display:flex;height:100%;align-items:stretch;flex:1}
+.nav-tab{display:flex;align-items:center;padding:0 22px;font-size:14px;color:#525252;
+  cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;user-select:none;
+  transition:color .15s}
+.nav-tab:hover{color:#161616}
+.nav-tab.active{color:#161616;font-weight:600;border-bottom-color:#0f62fe;background:#f0f4ff}
+.nav-right{display:flex;align-items:center;gap:16px;margin-left:auto}
+.nav-bell{font-size:18px;color:#525252;cursor:pointer;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s}
+.nav-bell:hover{background:#f4f4f4}
+.nav-avatar{width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#6929c4,#a56eff);
+  color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;flex-shrink:0}
+
+/* App body */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:196px;flex-shrink:0;background:#fff;border-right:1px solid #e0e0e0;
+  padding:16px 0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sg-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:#8d8d8d;padding:14px 20px 6px}
+.si{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13.5px;
+  color:#525252;cursor:pointer;border-left:3px solid transparent;transition:background .12s,color .12s}
+.si:hover{background:#f0f4f8;color:#161616}
+.si.active{background:#e8f0fe;color:#0043ce;font-weight:600;border-left-color:#0f62fe}
+.si .ico{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.si .lbl{flex:1}
+.sbadge{background:#0f62fe;color:#fff;font-size:11px;font-weight:700;
+  border-radius:10px;padding:1px 7px;min-width:20px;text-align:center;line-height:18px}
+.si.active .sbadge{background:#0043ce}
+
+/* Main content area */
+.main-content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── Widget root ─────────────────────────────────────────────────────────── */
+.ard-root{font-family:inherit;background:#f4f6f9;min-height:100%;color:#161616;
+  font-size:14px;line-height:1.5}
+
+/* Progress bar */
+.ard-progress-row{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:4px;gap:16px}
+.ard-progress-left{flex:1;min-width:0}
+.ard-progress-title{font-size:22px;font-weight:700;color:#161616;margin-bottom:14px;letter-spacing:-.3px}
+.ard-stages-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ard-stages{display:flex;align-items:center;flex:1;min-width:0}
+.ard-stage{display:flex;flex-direction:column;align-items:center;min-width:72px}
+.ard-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;
+  border:2px solid transparent;transition:background .2s}
+.ard-circle.completed{background:#198038;color:#fff;border-color:#198038}
+.ard-circle.current{background:#0f62fe;color:#fff;border-color:#0f62fe}
+.ard-circle.pending{background:#fff;color:#8d8d8d;border:2px solid #c6c6c6}
+.ard-stage-label{font-size:12px;color:#6f6f6f;text-align:center;margin-top:6px;white-space:nowrap}
+.ard-stage-label.current{color:#0f62fe;font-weight:600}
+.ard-connector{flex:1;height:2px;background:#c6c6c6;min-width:20px;
+  margin-bottom:22px;align-self:flex-start;margin-top:19px}
+.ard-connector.completed{background:#198038}
+.ard-cta-btn{background:#0f4880;color:#fff;border:none;border-radius:6px;
+  padding:10px 20px;font-size:14px;font-weight:600;font-family:inherit;
+  cursor:pointer;white-space:nowrap;transition:background .15s,opacity .15s;flex-shrink:0;
+  align-self:center}
+.ard-cta-btn:hover{background:#0353e9}
+.ard-cta-btn:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+
+.ard-contract-title{font-size:14px;color:#525252;margin:8px 0 20px}
+
+/* Main two-column grid */
+.ard-main{display:flex;gap:20px;align-items:flex-start}
+.ard-left{flex:6;min-width:0;display:flex;flex-direction:column;gap:16px}
+.ard-right{flex:4;min-width:0;display:flex;flex-direction:column;gap:16px}
+
+/* Panel base */
+.ard-panel{background:#fff;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden}
+.ard-panel-header{display:flex;align-items:center;gap:8px;padding:14px 18px 12px;
+  font-size:15px;font-weight:600;color:#161616;border-bottom:1px solid #f0f0f0}
+.ard-panel-icon{font-size:16px;line-height:1}
+
+/* Approval chain */
+.ard-chain-list{padding:8px 0}
+.ard-approver-row{display:flex;align-items:center;padding:13px 18px;
+  border-bottom:1px solid #f4f4f4;gap:14px;transition:background .1s}
+.ard-approver-row:last-child{border-bottom:none}
+.ard-approver-row:hover{background:#fafafa}
+.ard-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;color:#fff}
+.ard-avatar.completed{background:#198038}
+.ard-avatar.current{background:#0f62fe}
+.ard-avatar.pending{background:#a8a8a8}
+.ard-avatar.rejected{background:#da1e28}
+.ard-approver-info{flex:1;min-width:0}
+.ard-approver-name{font-size:14px;font-weight:600;color:#161616}
+.ard-approver-meta{font-size:12px;color:#6f6f6f;margin-top:2px}
+.ard-approver-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ard-urge-btn{border:1.5px solid #c8a04a;background:#fff;color:#8a6a1a;
+  border-radius:20px;padding:5px 18px;font-size:13px;font-weight:500;
+  font-family:inherit;cursor:pointer;transition:background .15s;white-space:nowrap}
+.ard-urge-btn:hover{background:#fdf5e0}
+.ard-urge-btn:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+.ard-status-badge{border-radius:20px;padding:5px 18px;font-size:13px;
+  font-weight:500;white-space:nowrap}
+.ard-status-badge.approved{background:#defbe6;color:#198038;border:1px solid #a7f0ba}
+.ard-status-badge.current{background:#fff3cd;color:#8a5700;border:1px solid #f0c040}
+.ard-status-badge.pending{background:#f4f4f4;color:#6f6f6f;border:1px solid #e0e0e0}
+.ard-status-badge.rejected{background:#fff1f1;color:#da1e28;border:1px solid #ffb3b8}
+
+/* Process status */
+.ard-status-grid{padding:4px 18px 6px}
+.ard-status-row{display:flex;align-items:baseline;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid #f4f4f4;font-size:14px;gap:12px}
+.ard-status-row:last-child{border-bottom:none}
+.ard-status-label{color:#525252;flex-shrink:0}
+.ard-status-value{color:#161616;font-weight:500;text-align:right}
+.ard-ai-score-val{color:#0f62fe;font-weight:600;display:flex;align-items:center;
+  gap:8px;justify-content:flex-end}
+.ard-ai-link{color:#0f62fe;cursor:pointer;font-weight:600;font-size:13px;text-decoration:none}
+.ard-ai-link:hover{text-decoration:underline}
+.ard-ai-link:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+
+/* Audit timeline */
+.ard-audit-list{padding:8px 18px 14px}
+.ard-audit-event{display:flex;align-items:flex-start;gap:12px;padding:11px 0;
+  border-bottom:1px solid #f4f4f4}
+.ard-audit-event:last-child{border-bottom:none}
+.ard-audit-dot{width:10px;height:10px;border-radius:50%;background:#c6c6c6;
+  flex-shrink:0;margin-top:5px}
+.ard-audit-dot.highlighted{background:#0f62fe}
+.ard-audit-dot.approved{background:#198038}
+.ard-audit-dot.rejected{background:#da1e28}
+.ard-audit-body{flex:1;min-width:0}
+.ard-audit-ts{font-size:12px;color:#6f6f6f;font-weight:500;margin-bottom:3px}
+.ard-audit-detail{font-size:13px;color:#161616;word-break:break-word;line-height:1.5}
+.ard-audit-detail.highlighted{color:#c28a00;font-weight:600}
+
+/* Action panel (right, cream card) */
+.ard-action-panel{background:#fffbf0;border:1.5px solid #e8d48a;border-radius:10px;
+  padding:0 0 16px;overflow:hidden}
+.ard-action-header{display:flex;align-items:center;gap:8px;background:#fffbf0;
+  border-bottom:1px solid #f0e0a0;padding:14px 18px 12px;font-size:15px;
+  font-weight:600;color:#161616}
+.ard-context-msg{font-size:13px;color:#525252;padding:14px 18px 6px;margin:0;line-height:1.7}
+.ard-action-buttons{display:flex;gap:10px;padding:12px 18px}
+.ard-action-btn{flex:1;padding:12px 8px;border:none;border-radius:6px;font-size:14px;
+  font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s,background .15s;
+  color:#fff}
+.ard-action-btn:hover{opacity:.88}
+.ard-action-btn:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+.ard-action-btn.danger{background:#8b2020}
+.ard-action-btn.secondary{background:#6f6f6f}
+.ard-action-btn.primary{background:#0f4880}
+.ard-comment-section{padding:6px 18px 0}
+.ard-comment-label{display:block;font-size:12px;color:#525252;margin-bottom:7px;font-weight:500}
+.ard-comment-area{width:100%;box-sizing:border-box;border:1px solid #d0d0d0;
+  border-radius:6px;padding:10px 12px;font-size:13px;font-family:inherit;color:#161616;
+  background:#fff;resize:vertical;min-height:90px;line-height:1.6;outline:none;
+  transition:border-color .15s}
+.ard-comment-area::placeholder{color:#a8a8a8}
+.ard-comment-area:focus{border-color:#0f62fe;box-shadow:0 0 0 2px rgba(15,98,254,.15)}
+
+/* Route explanation */
+.ard-route-panel{background:#fff}
+.ard-route-text{font-size:13px;color:#525252;padding:14px 18px 12px;margin:0;line-height:1.75}
+.ard-route-flow{display:flex;align-items:center;flex-wrap:nowrap;
+  padding:6px 18px 18px;overflow-x:auto;gap:0}
+.ard-route-step{display:flex;align-items:center}
+.ard-route-step-box{border-radius:8px;border:1.5px solid #c6c6c6;background:#f4f4f4;
+  padding:9px 12px;font-size:12px;font-weight:600;text-align:center;min-width:62px;
+  line-height:1.45;color:#525252;white-space:pre-line;cursor:pointer;font-family:inherit;
+  transition:background .15s,box-shadow .15s;appearance:none;-webkit-appearance:none}
+.ard-route-step-box:hover{filter:brightness(.96)}
+.ard-route-step-box:focus-visible{outline:2px solid #0f62fe;outline-offset:2px;box-shadow:none}
+.ard-route-step-box.completed{background:#defbe6;border-color:#a7f0ba;color:#198038}
+.ard-route-step-box.current{background:#d4e5f0;border-color:#9ec8e0;color:#1a4d7a}
+.ard-route-step-box.pending{background:#f4f4f4;border-color:#c6c6c6;color:#525252}
+.ard-route-arrow{font-size:16px;color:#a8a8a8;margin:0 6px;flex-shrink:0;line-height:1;
+  margin-bottom:0;user-select:none}
+.ard-route-arrow.completed{color:#198038}
+
+/* Responsive */
+@media(max-width:900px){
+  .ard-main{flex-direction:column}
+  .ard-left,.ard-right{flex:none;width:100%}
+  .ard-cta-btn{font-size:12px;padding:8px 14px}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ── Top nav ──────────────────────────────────────────────────────────── -->
+  <nav class="top-nav" aria-label="主導覽">
+    <div class="brand">e<span class="c">Contr</span>act</div>
+    <div class="nav-tabs" role="tablist">
+      <div class="nav-tab" role="tab">起草</div>
+      <div class="nav-tab active" role="tab" aria-selected="true">簽核</div>
+      <div class="nav-tab" role="tab">外部簽署</div>
+      <div class="nav-tab" role="tab">合約列表</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-bell" aria-label="通知">🔔</div>
+      <div class="nav-avatar" aria-label="目前使用者：陳" title="陳大明">陳</div>
+    </div>
+  </nav>
+
+  <div class="app-body">
+
+    <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
+    <aside class="sidebar" aria-label="側邊選單">
+      <div class="sg-label">我的工作</div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">＋</span><span class="lbl">新增合約</span>
+      </div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">📄</span><span class="lbl">我的合約</span>
+        <span class="sbadge" aria-label="3 件">3</span>
+      </div>
+      <div class="si active" role="button" tabindex="0" aria-current="page">
+        <span class="ico">✓</span><span class="lbl">待我審核</span>
+        <span class="sbadge" aria-label="2 件">2</span>
+      </div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">✍</span><span class="lbl">待簽署</span>
+      </div>
+      <div class="sg-label">系統</div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">□</span><span class="lbl">合約範本</span>
+      </div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">■</span><span class="lbl">儀表板</span>
+      </div>
+      <div class="si" role="button" tabindex="0">
+        <span class="ico">⚙</span><span class="lbl">設定</span>
+      </div>
+    </aside>
+
+    <!-- ── Main content ─────────────────────────────────────────────────── -->
+    <main class="main-content" id="main">
+      <div class="ard-root">
+
+        <!-- ── Progress bar row ──────────────────────────────────────────── -->
+        <div class="ard-progress-row">
+          <div class="ard-progress-left">
+            <div class="ard-progress-title">簽核進度</div>
+            <div class="ard-stages-wrap">
+
+              <div class="ard-stages" id="ard-stages" role="list" aria-label="簽核進度步驟">
+
+                <!-- Step 1: 起草送件 — completed -->
+                <div class="ard-stage" role="listitem">
+                  <div class="ard-circle completed" aria-label="已完成">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                      <path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/>
+                    </svg>
+                  </div>
+                  <div class="ard-stage-label">起草送件</div>
+                </div>
+
+                <div class="ard-connector completed" aria-hidden="true"></div>
+
+                <!-- Step 2: 簽核路由 — current (active) -->
+                <div class="ard-stage" role="listitem">
+                  <div class="ard-circle current" aria-current="step" aria-label="目前步驟 3">3</div>
+                  <div class="ard-stage-label current">簽核路由</div>
+                </div>
+
+                <div class="ard-connector" aria-hidden="true"></div>
+
+                <!-- Step 3: 外部查署 — pending -->
+                <div class="ard-stage" role="listitem">
+                  <div class="ard-circle pending" aria-label="步驟 4 待辦">4</div>
+                  <div class="ard-stage-label">外部查署</div>
+                </div>
+
+                <div class="ard-connector" aria-hidden="true"></div>
+
+                <!-- Step 4: 完成詳情 — pending -->
+                <div class="ard-stage" role="listitem">
+                  <div class="ard-circle pending" aria-label="步驟 5 待辦">5</div>
+                  <div class="ard-stage-label">完成詳情</div>
+                </div>
+
+              </div><!-- /ard-stages -->
+
+              <!-- CTA button -->
+              <button class="ard-cta-btn" id="ard-cta-btn" type="button"
+                      aria-label="已完成，前往外部簽署">
+                已完成 → 外部簽署 →
+              </button>
+
+            </div><!-- /ard-stages-wrap -->
+          </div><!-- /ard-progress-left -->
+        </div><!-- /ard-progress-row -->
+
+        <!-- Contract subtitle -->
+        <div class="ard-contract-title" id="ard-contract-title">
+          2026 年度軟體維護服務合約
+        </div>
+
+        <!-- ── Main two-column layout ──────────────────────────────────── -->
+        <div class="ard-main">
+
+          <!-- LEFT COLUMN -->
+          <div class="ard-left">
+
+            <!-- ── Approval chain ────────────────────────────────────── -->
+            <div class="ard-panel" role="region" aria-labelledby="ard-chain-title">
+              <div class="ard-panel-header">
+                <span class="ard-panel-icon" aria-hidden="true">🐎</span>
+                <span id="ard-chain-title">串簽流程（3 層）</span>
+              </div>
+              <div class="ard-chain-list" id="ard-chain-list">
+
+                <!-- Row 1: 王志明 — 已核准 -->
+                <div class="ard-approver-row" data-approver-index="0" data-status="approved">
+                  <div class="ard-avatar completed" aria-hidden="true">王</div>
+                  <div class="ard-approver-info">
+                    <div class="ard-approver-name">王志明</div>
+                    <div class="ard-approver-meta">直屬主管・採購部門</div>
+                  </div>
+                  <div class="ard-approver-actions">
+                    <span class="ard-status-badge approved" role="status">已核准</span>
+                  </div>
+                </div>
+
+                <!-- Row 2: 李雅婷 — 催辦 + 審核中 -->
+                <div class="ard-approver-row" data-approver-index="1" data-status="current">
+                  <div class="ard-avatar current" aria-hidden="true">李</div>
+                  <div class="ard-approver-info">
+                    <div class="ard-approver-name">李雅婷</div>
+                    <div class="ard-approver-meta">上一層主管・採購總監</div>
+                  </div>
+                  <div class="ard-approver-actions">
+                    <button class="ard-urge-btn" type="button"
+                            data-approver-index="1"
+                            aria-label="催辦 李雅婷"
+                            onclick="fire('urgeClicked',{approverIndex:1})">催辦</button>
+                    <span class="ard-status-badge current" role="status">審核中</span>
+                  </div>
+                </div>
+
+                <!-- Row 3: 張文豪 — 待簽 -->
+                <div class="ard-approver-row" data-approver-index="2" data-status="pending">
+                  <div class="ard-avatar pending" aria-hidden="true">張</div>
+                  <div class="ard-approver-info">
+                    <div class="ard-approver-name">張文豪</div>
+                    <div class="ard-approver-meta">最終核准・副總經理</div>
+                  </div>
+                  <div class="ard-approver-actions">
+                    <span class="ard-status-badge pending" role="status">待簽</span>
+                  </div>
+                </div>
+
+              </div><!-- /ard-chain-list -->
+            </div><!-- /approval chain -->
+
+            <!-- ── Process status ────────────────────────────────────── -->
+            <div class="ard-panel" role="region" aria-label="流程狀態">
+              <div class="ard-panel-header">
+                <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+                <span>流程狀態</span>
+              </div>
+              <div class="ard-status-grid">
+                <div class="ard-status-row">
+                  <span class="ard-status-label">路由類型</span>
+                  <span class="ard-status-value">串簽 Sequential</span>
+                </div>
+                <div class="ard-status-row">
+                  <span class="ard-status-label">送審時間</span>
+                  <span class="ard-status-value">2026-07-14 09:32</span>
+                </div>
+                <div class="ard-status-row">
+                  <span class="ard-status-label">預計完成</span>
+                  <span class="ard-status-value">2026-07-16</span>
+                </div>
+                <div class="ard-status-row">
+                  <span class="ard-status-label">AI 審查結果</span>
+                  <span class="ard-status-value ard-ai-score-val">
+                    <span>82 / 100</span>
+                    <a href="#" class="ard-ai-link" role="button"
+                       aria-label="查看 AI 建議修改報告"
+                       onclick="fire('ctaClicked',{ctaAction:'view_ai_report'});return false;">
+                      建議修改
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div><!-- /process status -->
+
+            <!-- ── Audit timeline ─────────────────────────────────────── -->
+            <div class="ard-panel" role="region" aria-label="審核歷程">
+              <div class="ard-panel-header">
+                <span class="ard-panel-icon" aria-hidden="true">↺</span>
+                <span>審核歷程</span>
+              </div>
+              <div class="ard-audit-list">
+
+                <div class="ard-audit-event">
+                  <div class="ard-audit-dot" aria-hidden="true"></div>
+                  <div class="ard-audit-body">
+                    <div class="ard-audit-ts">07-14 09:32</div>
+                    <div class="ard-audit-detail">陳大明送審，附 AI 報告</div>
+                  </div>
+                </div>
+
+                <div class="ard-audit-event">
+                  <div class="ard-audit-dot highlighted" aria-hidden="true"></div>
+                  <div class="ard-audit-body">
+                    <div class="ard-audit-ts" style="color:#c28a00">07-14 11:05</div>
+                    <div class="ard-audit-detail highlighted">
+                      王志明核准 — 「條款無誤，同意送上級」
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ard-audit-event">
+                  <div class="ard-audit-dot" aria-hidden="true"></div>
+                  <div class="ard-audit-body">
+                    <div class="ard-audit-ts">07-14 11:05</div>
+                    <div class="ard-audit-detail">系統通知李雅婷待審</div>
+                  </div>
+                </div>
+
+              </div>
+            </div><!-- /audit timeline -->
+
+          </div><!-- /ard-left -->
+
+          <!-- RIGHT COLUMN -->
+          <div class="ard-right">
+
+            <!-- ── Approver action panel ──────────────────────────────── -->
+            <div class="ard-action-panel" role="region" aria-labelledby="ard-action-title">
+              <div class="ard-action-header">
+                <span class="ard-panel-icon" aria-hidden="true">⏰</span>
+                <span id="ard-action-title">待我審核</span>
+              </div>
+
+              <p class="ard-context-msg" id="ard-context-msg">
+                您目前為本案第 2 層審核人，請確認合約條款並做出決策。
+              </p>
+
+              <div class="ard-action-buttons" role="group" aria-label="審核動作">
+                <button class="ard-action-btn danger" type="button"
+                        data-action-key="return"
+                        aria-label="退回此合約"
+                        onclick="fire('actionClicked',{actionKey:'return'})">退回</button>
+                <button class="ard-action-btn secondary" type="button"
+                        data-action-key="delegate"
+                        aria-label="轉派給他人"
+                        onclick="fire('actionClicked',{actionKey:'delegate'})">轉派</button>
+                <button class="ard-action-btn primary" type="button"
+                        data-action-key="approve"
+                        aria-label="核准此合約"
+                        onclick="fire('actionClicked',{actionKey:'approve'})">核准</button>
+              </div>
+
+              <div class="ard-comment-section">
+                <label class="ard-comment-label" for="ard-comment-area">
+                  審核意見（選填）
+                </label>
+                <textarea class="ard-comment-area"
+                          id="ard-comment-area"
+                          placeholder="填寫審核意見…"
+                          rows="4"
+                          aria-label="填寫審核意見"
+                          oninput="fire('commentChanged',{comment:this.value})"></textarea>
+              </div>
+            </div><!-- /action panel -->
+
+            <!-- ── Route explanation ──────────────────────────────────── -->
+            <div class="ard-panel ard-route-panel" role="region" aria-label="路由說明">
+              <div class="ard-panel-header">
+                <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+                <span>路由說明</span>
+              </div>
+
+              <p class="ard-route-text">
+                本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。
+              </p>
+
+              <div class="ard-route-flow" role="list" aria-label="路由步驟">
+
+                <div class="ard-route-step" role="listitem">
+                  <button class="ard-route-step-box completed" type="button"
+                          data-step-index="0"
+                          aria-label="步驟 1：申請人送審（已完成）"
+                          onclick="fire('stepClicked',{stepIndex:0})">申請人&#10;送審</button>
+                </div>
+                <div class="ard-route-step" aria-hidden="true">
+                  <span class="ard-route-arrow completed">→</span>
+                </div>
+
+                <div class="ard-route-step" role="listitem">
+                  <button class="ard-route-step-box completed" type="button"
+                          data-step-index="1"
+                          aria-label="步驟 2：直屬主管核准（已完成）"
+                          onclick="fire('stepClicked',{stepIndex:1})">直屬主管&#10;核准</button>
+                </div>
+                <div class="ard-route-step" aria-hidden="true">
+                  <span class="ard-route-arrow completed">→</span>
+                </div>
+
+                <div class="ard-route-step" role="listitem">
+                  <button class="ard-route-step-box current" type="button"
+                          data-step-index="2"
+                          aria-current="step"
+                          aria-label="步驟 3：上一階核准（進行中）"
+                          onclick="fire('stepClicked',{stepIndex:2})">上一階&#10;核准</button>
+                </div>
+                <div class="ard-route-step" aria-hidden="true">
+                  <span class="ard-route-arrow">→</span>
+                </div>
+
+                <div class="ard-route-step" role="listitem">
+                  <button class="ard-route-step-box pending" type="button"
+                          data-step-index="3"
+                          aria-label="步驟 4：最終核准執行（待辦）"
+                          onclick="fire('stepClicked',{stepIndex:3})">最終核准&#10;執行</button>
+                </div>
+                <div class="ard-route-step" aria-hidden="true">
+                  <span class="ard-route-arrow">→</span>
+                </div>
+
+                <div class="ard-route-step" role="listitem">
+                  <button class="ard-route-step-box pending" type="button"
+                          data-step-index="4"
+                          aria-label="步驟 5：外部簽署（待辦）"
+                          onclick="fire('stepClicked',{stepIndex:4})">外部&#10;簽署</button>
+                </div>
+
+              </div><!-- /ard-route-flow -->
+            </div><!-- /route explanation -->
+
+          </div><!-- /ard-right -->
+        </div><!-- /ard-main -->
+      </div><!-- /ard-root -->
+    </main><!-- /main-content -->
+
+  </div><!-- /app-body -->
+</div><!-- /app-shell -->
+
+<!-- ── Event toast ──────────────────────────────────────────────────────── -->
+<div id="ev-toast" role="status" aria-live="polite"
+     style="position:fixed;bottom:24px;right:24px;
+            background:#161616;color:#fff;border-radius:8px;
+            padding:10px 18px;font-size:13px;font-weight:600;
+            box-shadow:0 4px 20px rgba(0,0,0,.28);
+            opacity:0;transform:translateY(8px);
+            transition:opacity .2s,transform .2s;
+            pointer-events:none;z-index:9999;max-width:380px;
+            display:flex;align-items:center;gap:10px">
+  <span id="ev-t-icon"></span>
+  <span id="ev-t-name" style="color:#78a9ff"></span>
+  <span style="color:#6f6f6f">→</span>
+  <span id="ev-t-val" style="color:#a8ff78;word-break:break-all"></span>
+</div>
+
+<script>
+'use strict';
+
+// ── Event fire helper ─────────────────────────────────────────────────────
+var _toastTimer = null;
+
+var EVENT_META = {
+  ctaClicked:     { icon: '🔵', color: '#78a9ff' },
+  actionClicked:  { icon: '🟢', color: '#42be65' },
+  urgeClicked:    { icon: '🟠', color: '#ff832b' },
+  commentChanged: { icon: '✏️',  color: '#3ddbd9' },
+  stepClicked:    { icon: '🔶', color: '#f1c21b' }
+};
+
+function fire(eventName, payload) {
+  console.log('[eContractApprovalDashboard]', eventName, payload);
+
+  var meta = EVENT_META[eventName] || { icon: '⚡', color: '#fff' };
+  var payloadStr = JSON.stringify(payload);
+
+  // Show toast
+  var toast   = document.getElementById('ev-toast');
+  var icon    = document.getElementById('ev-t-icon');
+  var nameEl  = document.getElementById('ev-t-name');
+  var valEl   = document.getElementById('ev-t-val');
+  icon.textContent  = meta.icon;
+  nameEl.textContent = eventName;
+  nameEl.style.color = meta.color;
+  valEl.textContent  = payloadStr;
+  toast.style.opacity   = '1';
+  toast.style.transform = 'none';
+
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function () {
+    toast.style.opacity   = '0';
+    toast.style.transform = 'translateY(8px)';
+  }, 2400);
+}
+
+// Wire CTA button
+document.getElementById('ard-cta-btn').addEventListener('click', function () {
+  fire('ctaClicked', { ctaAction: 'proceed_to_external_signing' });
+});
+</script>
+</body>
+</html>

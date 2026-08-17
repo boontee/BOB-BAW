@@ -192,24 +192,24 @@ var FALLBACK = {
 // CTA button — fires ctaClicked(ctaAction)
 if (ctaBtn) {
     ctaBtn.addEventListener("click", function () {
-        me.context.trigger("ctaClicked",
-            ctaBtn.getAttribute("data-cta-action") || FALLBACK.progress.ctaAction);
+        var val = ctaBtn.getAttribute("data-cta-action") || FALLBACK.progress.ctaAction;
+        me.context.trigger("ctaClicked", { ctaAction: val });
     });
 }
 
-// AI suggestion link — fires ctaClicked(aiSuggestionAction)
+// AI suggestion link — fires ctaClicked({ ctaAction: aiSuggestionAction })
 if (aiLinkEl) {
     aiLinkEl.addEventListener("click", function (e) {
         e.preventDefault();
-        me.context.trigger("ctaClicked",
-            aiLinkEl.getAttribute("data-ai-action") || FALLBACK.processStatus.aiSuggestionAction);
+        var val = aiLinkEl.getAttribute("data-ai-action") || FALLBACK.processStatus.aiSuggestionAction;
+        me.context.trigger("ctaClicked", { ctaAction: val });
     });
 }
 
-// Comment textarea — fires commentChanged(text) on every keystroke
+// Comment textarea — fires commentChanged({ comment: text }) on every keystroke
 if (commentArea) {
     commentArea.addEventListener("input", function () {
-        me.context.trigger("commentChanged", commentArea.value);
+        me.context.trigger("commentChanged", { comment: commentArea.value });
     });
 }
 
@@ -218,7 +218,8 @@ if (actionBtnsEl) {
     actionBtnsEl.addEventListener("click", function (e) {
         var btn = e.target.closest(".ard-action-btn");
         if (!btn || btn.disabled) { return; }
-        me.context.trigger("actionClicked", btn.getAttribute("data-action-key") || "");
+        var val = btn.getAttribute("data-action-key") || "";
+        me.context.trigger("actionClicked", { actionKey: val });
     });
 }
 
@@ -227,7 +228,8 @@ if (chainListEl) {
     chainListEl.addEventListener("click", function (e) {
         var btn = e.target.closest(".ard-urge-btn");
         if (!btn) { return; }
-        me.context.trigger("urgeClicked", toNum(btn.getAttribute("data-approver-index")));
+        var val = toNum(btn.getAttribute("data-approver-index"));
+        me.context.trigger("urgeClicked", { approverIndex: val });
     });
 }
 
@@ -236,7 +238,8 @@ if (routeFlowEl) {
     routeFlowEl.addEventListener("click", function (e) {
         var box = e.target.closest(".ard-route-step-box");
         if (!box) { return; }
-        me.context.trigger("stepClicked", toNum(box.getAttribute("data-step-index")));
+        var val = toNum(box.getAttribute("data-step-index"));
+        me.context.trigger("stepClicked", { stepIndex: val });
     });
 }
 
