@@ -4,7 +4,12 @@ MJ_UI_extracted
 Breadcrumb/.DS_Store
 DateOutput/.DS_Store
 FileNetImport/.DS_Store
-output/
+
+# output/ — ignore all TWX/ZIP files except named releases
+output/*.twx
+output/*.zip
+!output/CustomWidgetTester*.twx
+
 .env
 .bob/mcp.json
 sample/
@@ -18,6 +23,7 @@ business-process/*
 templates/Localisation
 widgets/Carousel
 widgets/MultiDocumentUpload
+
 # Large binary template files (>5 MB — excluded to stay under GitHub limits)
 templates/BaseTWX/
 templates/OLD/
