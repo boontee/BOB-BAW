@@ -1,0 +1,251 @@
+<!--
+ #BEGIN COPYRIGHT 
+ Licensed Materials - Property of IBM
+ 5725-C95
+ (C) Copyright IBM Corporation 2026. All Rights Reserved.
+ #END COPYRIGHT 
+-->
+
+<style>
+/* FileNetImport Widget Preview Styles */
+/* Scoped to widget preview - integrates with BAW Designer */
+
+.fnimport-preview-wrap {
+  font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif; /* @bpm-font-family-sans-serif */
+  font-size: 14px; /* @bpm-font-size-base */
+  color: #161616; /* @bpm-text-color */
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+/* Drop Zone */
+.fnimport-preview-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 180px;
+  border: 2px dashed #a8a8a8; /* Gray 40 */
+  border-radius: 4px;
+  background-color: #f4f4f4; /* Gray 10 */
+  padding: 32px 24px;
+  cursor: default;
+}
+
+.fnimport-preview-dropzone-icon {
+  width: 40px;
+  height: 40px;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox%3D'0 0 32 32'%3E%3Cpath d%3D'M26 15H24a8 8 0 1 0-16 0H6a6 6 0 0 0 0 12h4v-2H6a4 4 0 0 1 0-8h2v-2a6 6 0 1 1 12 0v2h2a4 4 0 0 1 0 8h-4v2h4a6 6 0 0 0 0-12z' fill%3D'%230f62fe'%2F%3E%3Cpath d%3D'M17 21.586V14h-2v7.586l-3.293-3.293-1.414 1.414L16 25.414l5.707-5.707-1.414-1.414z' fill%3D'%230f62fe'%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.fnimport-preview-dropzone-title {
+  margin: 0;
+  font-size: 16px; /* @bpm-font-size-large */
+  font-weight: 600; /* @bpm-font-weight-semibold */
+  color: #161616; /* @bpm-text-color */
+}
+
+.fnimport-preview-dropzone-subtitle {
+  margin: 0;
+  font-size: 12px; /* @bpm-font-size-small */
+  color: #6f6f6f; /* Gray 60 */
+  text-align: center;
+  max-width: 360px;
+}
+
+.fnimport-preview-browse-btn {
+  margin-top: 8px;
+  padding: 8px 20px;
+  background-color: #0f62fe; /* @bpm-color-primary */
+  color: #ffffff; /* @bpm-body-bg */
+  border: none;
+  border-radius: 4px;
+  font-size: 14px; /* @bpm-font-size-base */
+  font-weight: 600; /* @bpm-font-weight-semibold */
+  cursor: default;
+}
+
+/* Queue */
+.fnimport-preview-queue {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fnimport-preview-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: #f4f4f4; /* Gray 10 */
+  border-left: 3px solid #f1620a; /* Orange */
+  border-radius: 0 4px 4px 0;
+  font-size: 12px; /* @bpm-font-size-small */
+  font-weight: 600; /* @bpm-font-weight-semibold */
+  color: #393939; /* Gray 80 */
+  margin-top: 8px;
+}
+
+.fnimport-preview-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #ffffff; /* @bpm-body-bg */
+  border: 1px solid #e0e0e0; /* Gray 20 */
+  border-radius: 4px;
+  font-size: 13px; /* @bpm-font-size-small */
+}
+
+.fnimport-preview-item-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+
+.fnimport-preview-icon-folder {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox%3D'0 0 32 32'%3E%3Cpath d%3D'M11.17 6l3.42 3.41.58.59H28v16H4V6h7.17m0-2H4a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H16L12.59 4.59A2 2 0 0 0 11.17 4z' fill%3D'%23f1620a'%2F%3E%3C%2Fsvg%3E");
+}
+
+.fnimport-preview-icon-document {
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox%3D'0 0 32 32'%3E%3Cpath d%3D'M25.7 9.3l-7-7A1 1 0 0 0 18 2H8a2 2 0 0 0-2 2v24a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V10a1 1 0 0 0-.3-.7zM18 4.4l5.6 5.6H18zM24 28H8V4h8v6a2 2 0 0 0 2 2h6z' fill%3D'%230f62fe'%2F%3E%3C%2Fsvg%3E");
+}
+
+.fnimport-preview-item-path {
+  flex: 1;
+  overflow: hidden;
+}
+
+.fnimport-preview-item-folder-prefix {
+  font-size: 11px; /* @bpm-font-size-xsmall */
+  color: #6f6f6f; /* Gray 60 */
+  display: block;
+}
+
+.fnimport-preview-item-name {
+  font-weight: 500;
+  color: #393939; /* Gray 80 */
+}
+
+.fnimport-preview-item-size {
+  font-size: 11px; /* @bpm-font-size-xsmall */
+  color: #6f6f6f; /* Gray 60 */
+  flex-shrink: 0;
+}
+
+.fnimport-preview-badge {
+  flex-shrink: 0;
+  font-size: 11px; /* @bpm-font-size-xsmall */
+  font-weight: 600; /* @bpm-font-weight-semibold */
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.fnimport-preview-badge-pending {
+  background-color: #e0e0e0; /* Gray 20 */
+  color: #6f6f6f; /* Gray 60 */
+}
+
+.fnimport-preview-badge-success {
+  background-color: #defbe6; /* Success light */
+  color: #24a148; /* @bpm-color-success */
+}
+
+.fnimport-preview-badge-error {
+  background-color: #fff1f1; /* Error light */
+  color: #da1e28; /* @bpm-color-alert */
+}
+
+/* Actions */
+.fnimport-preview-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.fnimport-preview-btn-import {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background-color: #0f62fe; /* @bpm-color-primary */
+  color: #ffffff; /* @bpm-body-bg */
+  border: none;
+  border-radius: 4px;
+  font-size: 14px; /* @bpm-font-size-base */
+  font-weight: 600; /* @bpm-font-weight-semibold */
+  cursor: default;
+}
+
+.fnimport-preview-btn-clear {
+  padding: 10px 20px;
+  background-color: transparent;
+  color: #393939; /* Gray 80 */
+  border: 1px solid #a8a8a8; /* Gray 40 */
+  border-radius: 4px;
+  font-size: 14px; /* @bpm-font-size-base */
+  cursor: default;
+}
+
+/* Log */
+.fnimport-preview-log {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fnimport-preview-log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px; /* @bpm-font-size-small */
+  line-height: 1.4;
+}
+
+.fnimport-preview-log-success {
+  background-color: #defbe6; /* Success light */
+  color: #0e6027; /* Success dark */
+}
+
+.fnimport-preview-log-info {
+  background-color: #edf5ff; /* Info light */
+  color: #0043ce; /* @bpm-link-text-color-hover */
+}
+
+.fnimport-preview-log-error {
+  background-color: #fff1f1; /* Error light */
+  color: #a2191f; /* Error dark */
+}
+
+/* Config hint */
+.fnimport-preview-config-hint {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background-color: #fdf6dd; /* Warning light */
+  border-left: 3px solid #f1c21b; /* @bpm-color-warning */
+  border-radius: 0 4px 4px 0;
+  font-size: 12px; /* @bpm-font-size-small */
+  color: #8a3800; /* Warning dark */
+}
+</style>
+
+<div class="SPARKPanel panel">
+    <div class="widget-heading">
+        <span class="widget-title">FileNet Import Preview</span>
+    </div>
+    <div class="widget-body">
+        <!-- Preview content generated by FileNetImportSnippet.js -->
+    </div>
+</div>

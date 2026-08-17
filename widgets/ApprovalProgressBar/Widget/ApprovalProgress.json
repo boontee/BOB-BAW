@@ -1,0 +1,50 @@
+{
+  "type": "ApprovalProgress",
+  "description": "Business object for the horizontal approval progress bar with stage tracking and CTA button",
+  "properties": [
+    {
+      "name": "stages",
+      "type": "ApprovalStage",
+      "isList": true,
+      "description": "Ordered list of approval stages"
+    },
+    {
+      "name": "currentStageIndex",
+      "type": "Integer",
+      "description": "Zero-based index of the active stage"
+    },
+    {
+      "name": "ctaLabel",
+      "type": "String",
+      "description": "Label text for the call-to-action button"
+    },
+    {
+      "name": "ctaAction",
+      "type": "String",
+      "description": "Action key emitted when the CTA button is clicked"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "ApprovalStage",
+      "description": "A single stage in the approval progress bar",
+      "properties": [
+        {
+          "name": "index",
+          "type": "Integer",
+          "description": "Zero-based position of this stage"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "description": "Display label for the stage node"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "description": "Stage status: 'completed', 'current', 'pending'"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+    "mcpServers": {
+        "baw-admin": {
+           "command": "npx",
+            "args": [
+                "-y",
+                "github:MalekJabri/baw-admin-mcp-server-standalone",
+                "baw-admin-mcp-server"
+            ],
+            "env": {
+                "BAW_BASE_URL": "https://server/bas/ops",
+                "BAW_USERNAME": "user",
+                "BAW_PASSWORD": "pasword",
+                 "BAW_REJECT_UNAUTHORIZED": "false"
+            },
+            "alwaysAllow": [
+                "get_install_status",
+                "login"
+            ]
+        }
+    }
+}

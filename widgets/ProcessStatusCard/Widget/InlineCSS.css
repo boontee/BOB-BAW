@@ -1,0 +1,118 @@
+/* ProcessStatusCard Widget - Carbon Design System */
+
+.processStatusContainer {
+    width: 100%;
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.psc-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.psc-route-banner {
+    background: #0043ce;
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.psc-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.psc-meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.psc-meta-item {
+    flex: 1;
+    min-width: 120px;
+}
+
+.psc-meta-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #525252;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.psc-meta-value {
+    font-size: 13px;
+    color: #161616;
+}
+
+.psc-divider {
+    height: 1px;
+    background: #e0e0e0;
+}
+
+.psc-ai-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.psc-ai-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #525252;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.psc-ai-gauge-track {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 80px;
+}
+
+.psc-ai-gauge-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #0043ce;
+    transition: width 0.4s ease;
+}
+
+.psc-ai-score-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #161616;
+    white-space: nowrap;
+}
+
+.psc-ai-suggestion {
+    font-size: 12px;
+    color: #0043ce;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.psc-ai-suggestion:hover {
+    color: #0035a3;
+}
+
+/* Made with Bob */

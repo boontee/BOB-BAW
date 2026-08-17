@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<!--
+  ApprovalReviewDashboard — Widget Tester
+  Simulates full BAW runtime:
+  • context.binding.connect() reactive feed
+  • context.trigger() event capture + log
+  • Live JSON binding editor
+  • Scenario presets
+  • Event log panel
+-->
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Widget Tester — ApprovalReviewDashboard</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+  font-size: 14px; color: #161616; background: #f0f4f8; min-height: 100vh;
+}
+
+/* ── Top bar ───────────────────────────────────────────────────────────────── */
+.tester-header {
+  display:flex; align-items:center; background:#161616; color:#fff;
+  padding:0 20px; height:48px; gap:16px; flex-shrink:0;
+}
+.tester-header .brand { font-size:16px; font-weight:700; letter-spacing:-0.3px; }
+.tester-header .brand em { color:#78a9ff; font-style:normal; }
+.tester-header .badge {
+  background:#0f62fe; color:#fff; font-size:11px; font-weight:600;
+  border-radius:4px; padding:2px 8px; letter-spacing:0.5px;
+}
+.tester-header .spacer { flex:1; }
+.tester-header .hint { font-size:12px; color:#a8a8a8; }
+
+/* ── Layout ────────────────────────────────────────────────────────────────── */
+.tester-body { display:flex; height:calc(100vh - 48px); overflow:hidden; }
+
+/* ── Sidebar ───────────────────────────────────────────────────────────────── */
+.sidebar {
+  width:340px; min-width:260px; max-width:400px;
+  background:#fff; border-right:1px solid #e0e0e0;
+  display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;
+}
+.sidebar-section { border-bottom:1px solid #e0e0e0; }
+.sidebar-section-title {
+  font-size:11px; font-weight:700; letter-spacing:0.8px;
+  text-transform:uppercase; color:#525252;
+  padding:10px 16px 8px; background:#f4f4f4;
+}
+
+/* ── Scenario presets ──────────────────────────────────────────────────────── */
+.preset-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px 16px; }
+.preset-btn {
+  padding:8px 6px; border:1.5px solid #e0e0e0; border-radius:6px;
+  background:#fff; font-size:12px; font-weight:600; font-family:inherit;
+  color:#161616; cursor:pointer; transition:all 0.15s; text-align:center; line-height:1.4;
+}
+.preset-btn:hover { background:#f0f0f0; border-color:#a8a8a8; }
+.preset-btn.active { background:#e8f0fe; border-color:#0f62fe; color:#0043ce; }
+.preset-btn.danger  { border-color:#ffb3b8; color:#da1e28; }
+.preset-btn.success { border-color:#a7f0ba; color:#198038; }
+.preset-btn.warn    { border-color:#f0c040; color:#8a5700; }
+
+/* ── Editor ────────────────────────────────────────────────────────────────── */
+.editor-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:160px; }
+.editor-toolbar {
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  background:#f4f4f4; border-bottom:1px solid #e0e0e0;
+}
+.editor-toolbar button {
+  padding:4px 12px; border:1px solid #c6c6c6; border-radius:4px; background:#fff;
+  font-size:12px; font-family:inherit; cursor:pointer; font-weight:600; transition:background 0.12s;
+}
+.editor-toolbar button:hover { background:#e8e8e8; }
+.editor-toolbar button.push  { background:#0f62fe; color:#fff; border-color:#0f62fe; }
+.editor-toolbar button.push:hover { background:#0353e9; }
+.editor-status { font-size:11px; color:#6f6f6f; margin-left:auto; }
+.editor-status.error { color:#da1e28; font-weight:600; }
+.editor-status.ok    { color:#198038; font-weight:600; }
+#binding-editor {
+  flex:1; width:100%; border:none; outline:none; padding:12px;
+  font-size:11.5px; font-family:"IBM Plex Mono","Fira Code","Consolas",monospace;
+  color:#161616; background:#fafafa; resize:none; line-height:1.6; overflow:auto;
+}
+
+/* ── Event log ─────────────────────────────────────────────────────────────── */
+.event-log-wrap {
+  height:220px; display:flex; flex-direction:column; overflow:hidden;
+  border-top:1px solid #e0e0e0;
+}
+.event-log-header {
+  display:flex; align-items:center; gap:8px; padding:8px 12px;
+  background:#f4f4f4; border-bottom:1px solid #e0e0e0; flex-shrink:0;
+}
+.event-log-header span {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.8px; color:#525252;
+}
+.event-log-header button {
+  margin-left:auto; padding:2px 10px; border:1px solid #c6c6c6;
+  border-radius:4px; background:#fff; font-size:11px; font-family:inherit; cursor:pointer;
+}
+#event-log { flex:1; overflow-y:auto; padding:6px 0; }
+.event-entry {
+  display:flex; align-items:baseline; gap:8px;
+  padding:5px 12px; border-bottom:1px solid #f4f4f4;
+  font-size:12px; line-height:1.4;
+  animation:fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-3px)} to{opacity:1;transform:none} }
+.event-entry:last-child { border-bottom:none; }
+.event-ts    { color:#a8a8a8; font-size:11px; white-space:nowrap; font-family:monospace; }
+.event-name  { font-weight:700; white-space:nowrap; }
+.event-payload { color:#525252; word-break:break-all; flex:1; }
+.event-entry.ctaClicked     .event-name { color:#6929c4; }
+.event-entry.actionClicked  .event-name { color:#0043ce; }
+.event-entry.urgeClicked    .event-name { color:#8a5700; }
+.event-entry.commentChanged .event-name { color:#006161; }
+.event-entry.stepClicked    .event-name { color:#9a1b1b; }
+.event-empty { padding:20px; text-align:center; color:#a8a8a8; font-size:12px; }
+
+/* ── Widget canvas ─────────────────────────────────────────────────────────── */
+.widget-canvas {
+  flex:1; overflow-y:auto; padding:0; background:#f0f4f8;
+  display:flex; flex-direction:column;
+}
+.canvas-toolbar {
+  display:flex; align-items:center; gap:12px; background:#fff;
+  border-bottom:1px solid #e0e0e0; padding:8px 20px; flex-shrink:0;
+}
+.canvas-toolbar .label { font-size:12px; color:#525252; }
+.chip {
+  display:inline-flex; align-items:center; gap:4px;
+  border-radius:20px; padding:3px 10px; font-size:11px; font-weight:600;
+}
+.chip.info  { background:#e8f0fe; color:#0043ce; }
+.chip.live  { background:#defbe6; color:#198038; }
+.chip.stale { background:#fff3cd; color:#8a5700; }
+.width-controls { margin-left:auto; display:flex; gap:6px; align-items:center; }
+.width-controls label { font-size:11px; color:#6f6f6f; }
+.width-controls select {
+  border:1px solid #c6c6c6; border-radius:4px; padding:3px 8px;
+  font-size:12px; font-family:inherit; background:#fff; cursor:pointer;
+}
+#widget-container {
+  margin:20px auto; background:#fff;
+  border:1px solid #e0e0e0; border-radius:10px; overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06); transition:width 0.2s;
+  width:100%;
+}
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     WIDGET CSS — verbatim copy of InlineCSS.css
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<style>
+.ard-root {
+  font-family:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:#f4f6f9; min-height:100%; padding:20px 24px;
+  box-sizing:border-box; color:#161616; font-size:14px; line-height:1.5;
+}
+.ard-progress-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px; }
+.ard-progress-left { flex:1; }
+.ard-progress-title { font-size:22px; font-weight:700; color:#161616; margin-bottom:12px; letter-spacing:-0.3px; }
+.ard-stages-wrap { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.ard-stages { display:flex; align-items:center; gap:0; flex:1; }
+.ard-stage { display:flex; flex-direction:column; align-items:center; min-width:72px; }
+.ard-stage-node { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.ard-circle {
+  width:36px; height:36px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:15px; font-weight:600; flex-shrink:0;
+  border:2px solid transparent; transition:background 0.2s;
+}
+.ard-circle.completed { background:#198038; color:#fff; border-color:#198038; }
+.ard-circle.current   { background:#0f62fe; color:#fff; border-color:#0f62fe; }
+.ard-circle.pending   { background:#fff; color:#8d8d8d; border:2px solid #c6c6c6; }
+.ard-stage-label { font-size:12px; color:#6f6f6f; text-align:center; white-space:nowrap; }
+.ard-stage-label.current { color:#0f62fe; font-weight:600; }
+.ard-connector { flex:1; height:2px; background:#c6c6c6; min-width:24px; margin-bottom:22px; align-self:flex-start; margin-top:19px; }
+.ard-connector.completed { background:#198038; }
+.ard-cta-btn {
+  background:#0f4880; color:#fff; border:none; border-radius:6px;
+  padding:10px 20px; font-size:14px; font-weight:600; font-family:inherit;
+  cursor:pointer; white-space:nowrap; transition:background 0.15s; flex-shrink:0;
+}
+.ard-cta-btn:hover { background:#0353e9; }
+.ard-contract-title { font-size:14px; color:#525252; margin:6px 0 18px; }
+.ard-main { display:flex; gap:20px; align-items:flex-start; }
+.ard-left  { flex:6; min-width:0; display:flex; flex-direction:column; gap:16px; }
+.ard-right { flex:4; min-width:0; display:flex; flex-direction:column; gap:16px; }
+.ard-panel { background:#fff; border-radius:10px; border:1px solid #e0e0e0; overflow:hidden; }
+.ard-panel-header {
+  display:flex; align-items:center; gap:8px; padding:14px 18px 10px;
+  font-size:15px; font-weight:600; color:#161616; border-bottom:1px solid #f0f0f0;
+}
+.ard-panel-icon { font-size:16px; line-height:1; }
+.ard-chain-list { padding:8px 0; }
+.ard-approver-row { display:flex; align-items:center; padding:12px 18px; border-bottom:1px solid #f4f4f4; gap:14px; }
+.ard-approver-row:last-child { border-bottom:none; }
+.ard-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; flex-shrink:0; color:#fff; }
+.ard-avatar.completed { background:#198038; }
+.ard-avatar.current   { background:#0f62fe; }
+.ard-avatar.pending   { background:#a8a8a8; }
+.ard-avatar.rejected  { background:#da1e28; }
+.ard-approver-info { flex:1; min-width:0; }
+.ard-approver-name { font-size:14px; font-weight:600; color:#161616; }
+.ard-approver-meta { font-size:12px; color:#6f6f6f; margin-top:2px; }
+.ard-approver-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.ard-urge-btn {
+  border:1.5px solid #c8a04a; background:#fff; color:#8a6a1a;
+  border-radius:20px; padding:4px 16px; font-size:13px; font-weight:500;
+  font-family:inherit; cursor:pointer; transition:background 0.15s;
+}
+.ard-urge-btn:hover { background:#fdf5e0; }
+.ard-status-badge { border-radius:20px; padding:4px 16px; font-size:13px; font-weight:500; white-space:nowrap; }
+.ard-status-badge.approved { background:#defbe6; color:#198038; border:1px solid #a7f0ba; }
+.ard-status-badge.current  { background:#fff3cd; color:#8a5700; border:1px solid #f0c040; }
+.ard-status-badge.pending  { background:#f4f4f4; color:#6f6f6f; border:1px solid #e0e0e0; }
+.ard-status-badge.rejected { background:#fff1f1; color:#da1e28; border:1px solid #ffb3b8; }
+.ard-status-grid { padding:14px 18px; display:flex; flex-direction:column; gap:0; }
+.ard-status-row { display:flex; align-items:baseline; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f4f4f4; font-size:14px; }
+.ard-status-row:last-child { border-bottom:none; }
+.ard-status-label { color:#525252; }
+.ard-status-value { color:#161616; font-weight:500; text-align:right; }
+.ard-ai-score-val { color:#0f62fe; font-weight:600; display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+.ard-ai-link { color:#0f62fe; cursor:pointer; font-weight:600; font-size:13px; text-decoration:none; }
+.ard-ai-link:hover { text-decoration:underline; }
+.ard-audit-list { padding:8px 18px 14px; }
+.ard-audit-event { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid #f4f4f4; }
+.ard-audit-event:last-child { border-bottom:none; }
+.ard-audit-dot { width:10px; height:10px; border-radius:50%; background:#c6c6c6; flex-shrink:0; margin-top:5px; }
+.ard-audit-dot.highlighted { background:#0f62fe; }
+.ard-audit-dot.approved    { background:#198038; }
+.ard-audit-dot.rejected    { background:#da1e28; }
+.ard-audit-body { flex:1; min-width:0; }
+.ard-audit-ts { font-size:12px; color:#6f6f6f; font-weight:500; margin-bottom:2px; }
+.ard-audit-detail { font-size:13px; color:#161616; word-break:break-word; }
+.ard-audit-detail.highlighted { color:#c28a00; font-weight:600; }
+.ard-action-panel { background:#fffbf0; border:1.5px solid #e8d48a; border-radius:10px; padding:0 0 16px; overflow:hidden; }
+.ard-action-header { display:flex; align-items:center; gap:8px; background:#fffbf0; border-bottom:1px solid #f0e0a0; padding:14px 18px 10px; font-size:15px; font-weight:600; color:#161616; }
+.ard-context-msg { font-size:13px; color:#525252; padding:12px 18px 4px; margin:0; line-height:1.6; }
+.ard-action-buttons { display:flex; gap:10px; padding:10px 18px; }
+.ard-action-btn { flex:1; padding:11px 8px; border:none; border-radius:6px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; transition:opacity 0.15s,background 0.15s; color:#fff; }
+.ard-action-btn:disabled { opacity:0.5; cursor:not-allowed; }
+.ard-action-btn:hover:not(:disabled) { opacity:0.88; }
+.ard-action-btn.danger    { background:#8b2020; }
+.ard-action-btn.secondary { background:#6f6f6f; }
+.ard-action-btn.primary   { background:#0f4880; }
+.ard-comment-section { padding:6px 18px 0; }
+.ard-comment-label { display:block; font-size:12px; color:#525252; margin-bottom:6px; font-weight:500; }
+.ard-comment-area { width:100%; box-sizing:border-box; border:1px solid #d0d0d0; border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; color:#161616; background:#fff; resize:vertical; min-height:80px; line-height:1.5; outline:none; transition:border-color 0.15s; }
+.ard-comment-area::placeholder { color:#a8a8a8; }
+.ard-comment-area:focus { border-color:#0f62fe; box-shadow:0 0 0 2px rgba(15,98,254,0.15); }
+.ard-route-panel { background:#fff; }
+.ard-route-text { font-size:13px; color:#525252; padding:12px 18px 10px; margin:0; line-height:1.7; }
+.ard-route-flow { display:flex; align-items:center; flex-wrap:wrap; gap:0; padding:6px 18px 18px; overflow-x:auto; }
+.ard-route-step { display:flex; align-items:center; }
+button.ard-route-step-box { appearance:none; -webkit-appearance:none; font-family:inherit; outline:none; }
+button.ard-route-step-box:focus-visible { box-shadow:0 0 0 2px #0f62fe; }
+.ard-route-step-box { border-radius:8px; border:1.5px solid #c6c6c6; background:#f4f4f4; padding:8px 12px; font-size:12px; font-weight:600; text-align:center; min-width:58px; line-height:1.4; color:#525252; white-space:pre-line; cursor:pointer; transition:background 0.15s,box-shadow 0.15s; }
+.ard-route-step-box:hover { filter:brightness(0.96); }
+.ard-route-step-box.completed { background:#defbe6; border-color:#a7f0ba; color:#198038; }
+.ard-route-step-box.current   { background:#d4e5f0; border-color:#9ec8e0; color:#1a4d7a; }
+.ard-route-step-box.pending   { background:#f4f4f4; border-color:#c6c6c6; color:#525252; }
+.ard-route-arrow { font-size:16px; color:#a8a8a8; margin:0 4px; flex-shrink:0; line-height:1; }
+.ard-route-arrow.completed { color:#198038; }
+.ard-cta-btn:focus-visible,.ard-action-btn:focus-visible,.ard-urge-btn:focus-visible,.ard-ai-link:focus-visible { outline:2px solid #0f62fe; outline-offset:2px; }
+@media(max-width:900px){.ard-main{flex-direction:column}.ard-left,.ard-right{flex:none;width:100%}.ard-cta-btn{font-size:12px;padding:8px 14px}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     TESTER CHROME
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<header class="tester-header">
+  <span class="brand"><em>e</em>Contract</span>
+  <span class="badge">WIDGET TESTER</span>
+  <span class="spacer"></span>
+  <span class="hint">ApprovalReviewDashboard · BAW Binding Simulator</span>
+</header>
+
+<div class="tester-body">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <!-- Scenario presets -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Scenario Presets</div>
+      <div class="preset-grid">
+        <button class="preset-btn active" onclick="loadPreset('layer2')" id="preset-layer2">
+          🔵 Layer 2<br>審核中
+        </button>
+        <button class="preset-btn warn" onclick="loadPreset('layer1')" id="preset-layer1">
+          🟡 Layer 1<br>等待第 1 層
+        </button>
+        <button class="preset-btn success" onclick="loadPreset('approved')" id="preset-approved">
+          ✅ All<br>已全部核准
+        </button>
+        <button class="preset-btn danger" onclick="loadPreset('rejected')" id="preset-rejected">
+          ❌ Rejected<br>退回重審
+        </button>
+        <button class="preset-btn" onclick="loadPreset('external')" id="preset-external">
+          📨 External<br>外部簽署中
+        </button>
+        <button class="preset-btn danger" onclick="loadPreset('disabled')" id="preset-disabled">
+          🔒 Disabled<br>按鈕停用
+        </button>
+      </div>
+    </div>
+
+    <!-- Binding data editor -->
+    <div class="sidebar-section editor-wrap">
+      <div class="editor-toolbar">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#525252;">Binding Data</span>
+        <button class="push" onclick="pushBinding()" title="Push JSON to widget (Ctrl+Enter)">▶ Push</button>
+        <button onclick="formatEditor()" title="Format JSON">{ }</button>
+        <button onclick="resetEditor()" title="Reset to current preset">↺</button>
+        <span class="editor-status" id="editor-status">ready</span>
+      </div>
+      <textarea id="binding-editor" spellcheck="false" aria-label="Binding data JSON editor"></textarea>
+    </div>
+
+    <!-- Event log -->
+    <div class="event-log-wrap">
+      <div class="event-log-header">
+        <span>Event Log</span>
+        <span id="event-count" style="font-size:11px;color:#a8a8a8;font-weight:400;margin-left:4px;"></span>
+        <button onclick="clearLog()">Clear</button>
+      </div>
+      <div id="event-log">
+        <div class="event-empty" id="event-empty">No events yet — interact with the widget →</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── Widget canvas ────────────────────────────────────────────────────── -->
+  <main class="widget-canvas">
+    <div class="canvas-toolbar">
+      <span class="label">Widget:</span>
+      <span class="chip info">ApprovalReviewDashboard</span>
+      <span class="chip info">Binding: <strong id="binding-type-label">ApprovalReviewDashboard BO</strong></span>
+      <span class="chip live" id="binding-status-chip">● LIVE</span>
+      <div class="width-controls">
+        <label for="width-select">Canvas:</label>
+        <select id="width-select" onchange="setWidth(this.value)">
+          <option value="100%">Full width</option>
+          <option value="1200px">1200 px</option>
+          <option value="960px">960 px</option>
+          <option value="768px">768 px (tablet)</option>
+          <option value="480px">480 px (mobile)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Widget mount point -->
+    <div id="widget-container">
+      <!-- WIDGET Layout.html is injected here at runtime by the tester harness -->
+      <div class="ard-root" id="ard-widget-root">
+        <!-- Static Layout.html markup — replaced by JS init -->
+      </div>
+    </div>
+  </main>
+
+</div><!-- /tester-body -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     WIDGET Layout.html — injected verbatim as template
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<template id="widget-layout-template">
+<div class="ard-root">
+  <div class="ard-progress-row">
+    <div class="ard-progress-left">
+      <div class="ard-progress-title">簽核進度</div>
+      <div class="ard-stages-wrap">
+        <div class="ard-stages" id="ard-stages">
+          <div class="ard-stage">
+            <div class="ard-circle completed">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/></svg>
+            </div>
+            <div class="ard-stage-label">起草送件</div>
+          </div>
+          <div class="ard-connector completed"></div>
+          <div class="ard-stage">
+            <div class="ard-circle current" aria-current="step">2</div>
+            <div class="ard-stage-label current">簽核路由</div>
+          </div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage">
+            <div class="ard-circle pending">3</div>
+            <div class="ard-stage-label">外部查署</div>
+          </div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage">
+            <div class="ard-circle pending">4</div>
+            <div class="ard-stage-label">完成詳情</div>
+          </div>
+        </div>
+        <button class="ard-cta-btn" id="ard-cta-btn" type="button" aria-label="前往下一步">已完成 → 外部簽署 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="ard-contract-title" id="ard-contract-title">2026 年度軟體維護服務合約</div>
+  <div class="ard-main">
+    <div class="ard-left">
+      <div class="ard-panel" role="region" aria-labelledby="ard-chain-title">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">🐎</span>
+          <span id="ard-chain-title">串簽流程（3 層）</span>
+        </div>
+        <div class="ard-chain-list" id="ard-chain-list">
+          <div class="ard-approver-row" data-approver-index="0" data-status="approved">
+            <div class="ard-avatar completed" aria-hidden="true">王</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">王志明</div>
+              <div class="ard-approver-meta">直屬主管・採購部門</div>
+            </div>
+            <div class="ard-approver-actions">
+              <span class="ard-status-badge approved">已核准</span>
+            </div>
+          </div>
+          <div class="ard-approver-row" data-approver-index="1" data-status="current">
+            <div class="ard-avatar current" aria-hidden="true">李</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">李雅婷</div>
+              <div class="ard-approver-meta">上一層主管・採購總監</div>
+            </div>
+            <div class="ard-approver-actions">
+              <button class="ard-urge-btn" type="button" data-approver-index="1" aria-label="催辦 李雅婷">催辦</button>
+              <span class="ard-status-badge current">審核中</span>
+            </div>
+          </div>
+          <div class="ard-approver-row" data-approver-index="2" data-status="pending">
+            <div class="ard-avatar pending" aria-hidden="true">張</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">張文豪</div>
+              <div class="ard-approver-meta">最終核准・副總經理</div>
+            </div>
+            <div class="ard-approver-actions">
+              <span class="ard-status-badge pending">待簽</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ard-panel" role="region" aria-label="流程狀態">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+          <span>流程狀態</span>
+        </div>
+        <div class="ard-status-grid" id="ard-status-grid">
+          <div class="ard-status-row">
+            <span class="ard-status-label">路由類型</span>
+            <span class="ard-status-value" id="ard-route-type">串簽 Sequential</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">送審時間</span>
+            <span class="ard-status-value" id="ard-submitted-at">2026-07-14 09:32</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">預計完成</span>
+            <span class="ard-status-value" id="ard-est-completion">2026-07-16</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">AI 審查結果</span>
+            <span class="ard-status-value ard-ai-score-val">
+              <span id="ard-ai-score">82 / 100</span>
+              <a href="#" class="ard-ai-link" id="ard-ai-link" role="button" aria-label="查看 AI 建議">建議修改</a>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="ard-panel" role="region" aria-label="審核歷程">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">↺</span>
+          <span>審核歷程</span>
+        </div>
+        <div class="ard-audit-list" id="ard-audit-list">
+          <div class="ard-audit-event">
+            <div class="ard-audit-dot"></div>
+            <div class="ard-audit-body">
+              <div class="ard-audit-ts">07-14 09:32</div>
+              <div class="ard-audit-detail">陳大明送審，附 AI 報告</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ard-right">
+      <div class="ard-action-panel" role="region" aria-labelledby="ard-action-title">
+        <div class="ard-action-header">
+          <span class="ard-panel-icon" aria-hidden="true">⏰</span>
+          <span id="ard-action-title">待我審核</span>
+        </div>
+        <p class="ard-context-msg" id="ard-context-msg">您目前為本案第 2 層審核人，請確認合約條款並做出決策。</p>
+        <div class="ard-action-buttons" id="ard-action-buttons" role="group" aria-label="審核動作">
+          <button class="ard-action-btn danger"    type="button" data-action-key="return"   aria-label="退回">退回</button>
+          <button class="ard-action-btn secondary" type="button" data-action-key="delegate" aria-label="轉派">轉派</button>
+          <button class="ard-action-btn primary"   type="button" data-action-key="approve"  aria-label="核准">核准</button>
+        </div>
+        <div class="ard-comment-section">
+          <label class="ard-comment-label" for="ard-comment-area">審核意見（選填）</label>
+          <textarea class="ard-comment-area" id="ard-comment-area" name="ard-comment-area"
+                    placeholder="填寫審核意見…" rows="4" aria-label="填寫審核意見"></textarea>
+        </div>
+      </div>
+      <div class="ard-panel ard-route-panel" role="region" aria-label="路由說明">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+          <span>路由說明</span>
+        </div>
+        <p class="ard-route-text" id="ard-route-text">本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。</p>
+        <div class="ard-route-flow" id="ard-route-flow" role="list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</template>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     TESTER HARNESS + WIDGET SCRIPT
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  SCENARIO DATA PRESETS
+//  All list properties use { items: [...] } wrapper — mirrors the BAW BO shape
+//  so the widget's normList() processes them identically to live BAW binding.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var PRESETS = {
+
+  // ── Layer 2 in progress (default, matches reference image) ─────────────────
+  layer2: {
+    contractTitle: "2026 年度軟體維護服務合約",
+    progress: {
+      currentStageIndex: 1,
+      ctaLabel: "已完成 → 外部簽署 →",
+      ctaAction: "proceed_to_external_signing",
+      stages: { items: [
+        { label: "起草送件", status: "completed", index: 0 },
+        { label: "簽核路由", status: "current",   index: 1 },
+        { label: "外部查署", status: "pending",   index: 2 },
+        { label: "完成詳情", status: "pending",   index: 3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（3 層）",
+      routeType: "串簽",
+      totalLayers: 3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"approved", layer:1, canUrge:false },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"current",  layer:2, canUrge:true  },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"pending",  layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "串簽 Sequential",
+      submittedAt: "2026-07-14 09:32",
+      estimatedCompletion: "2026-07-16",
+      aiScore: 82, aiMaxScore: 100,
+      aiSuggestionLabel: "建議修改", aiSuggestionAction: "view_ai_report"
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-14 09:32", actor:"陳大明", action:"送審", detail:"陳大明送審，附 AI 報告",              isHighlighted:false },
+      { timestamp:"07-14 11:05", actor:"王志明", action:"核准", detail:"王志明核准 — 「條款無誤，同意送上級」", isHighlighted:true  },
+      { timestamp:"07-14 11:06", actor:"系統",   action:"通知", detail:"系統通知李雅婷待審",                  isHighlighted:false }
+    ]}},
+    approverAction: {
+      title: "待我審核",
+      contextMessage: "您目前為本案第 2 層審核人，請確認合約條款並做出決策。",
+      comment: "", decision: "",
+      actions: { items: [
+        { label:"退回", actionKey:"return",   style:"danger",    enabled:true },
+        { label:"轉派", actionKey:"delegate", style:"secondary", enabled:true },
+        { label:"核准", actionKey:"approve",  style:"primary",   enabled:true }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"completed" },
+        { label:"上一階\n核准",   sublabel:"", status:"current"   },
+        { label:"最終核准\n執行", sublabel:"", status:"pending"   },
+        { label:"外部\n簽署",    sublabel:"", status:"pending"   }
+      ]}
+    }
+  },
+
+  // ── Layer 1 waiting (fresh submission) ─────────────────────────────────────
+  layer1: {
+    contractTitle: "2026 Q3 IT 設備採購合約",
+    progress: {
+      currentStageIndex: 1,
+      ctaLabel: "簽核進行中…",
+      ctaAction: "view_status",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"current",   index:1 },
+        { label:"外部查署", status:"pending",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（3 層）",
+      routeType: "串簽",
+      totalLayers: 3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"current",  layer:1, canUrge:true  },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"pending",  layer:2, canUrge:false },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"pending",  layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "串簽 Sequential",
+      submittedAt: "2026-07-15 10:00",
+      estimatedCompletion: "2026-07-17",
+      aiScore: 91, aiMaxScore: 100,
+      aiSuggestionLabel: "查看報告", aiSuggestionAction: "view_ai_report"
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-15 10:00", actor:"陳大明", action:"送審", detail:"陳大明送審，附 AI 報告（91 分）", isHighlighted:false },
+      { timestamp:"07-15 10:01", actor:"系統",   action:"通知", detail:"系統通知王志明待審",              isHighlighted:false }
+    ]}},
+    approverAction: {
+      title: "等待第 1 層審核",
+      contextMessage: "本案目前等待直屬主管王志明審核，請稍候。",
+      comment: "", decision: "",
+      actions: { items: [
+        { label:"退回", actionKey:"return",   style:"danger",    enabled:false },
+        { label:"轉派", actionKey:"delegate", style:"secondary", enabled:false },
+        { label:"核准", actionKey:"approve",  style:"primary",   enabled:false }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "本案金額 NT$780,000 未超過百萬，依規則觸發 3 層串簽，所有層級核准後移交外部簽署。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"current"   },
+        { label:"上一階\n核准",   sublabel:"", status:"pending"   },
+        { label:"最終核准\n執行", sublabel:"", status:"pending"   },
+        { label:"外部\n簽署",    sublabel:"", status:"pending"   }
+      ]}
+    }
+  },
+
+  // ── All approved ────────────────────────────────────────────────────────────
+  approved: {
+    contractTitle: "2025 年度資安服務合約（已完成）",
+    progress: {
+      currentStageIndex: 2,
+      ctaLabel: "前往外部簽署 →",
+      ctaAction: "go_external_signing",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"completed", index:1 },
+        { label:"外部查署", status:"current",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（3 層）— 全部核准",
+      routeType: "串簽",
+      totalLayers: 3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"approved", layer:1, canUrge:false },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"approved", layer:2, canUrge:false },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"approved", layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "串簽 Sequential",
+      submittedAt: "2026-07-10 08:00",
+      estimatedCompletion: "2026-07-12",
+      aiScore: 95, aiMaxScore: 100,
+      aiSuggestionLabel: "", aiSuggestionAction: ""
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-10 08:00", actor:"陳大明", action:"送審", detail:"陳大明送審",                         isHighlighted:false },
+      { timestamp:"07-10 10:15", actor:"王志明", action:"核准", detail:"王志明核准 — 「條款清晰，同意」",      isHighlighted:true  },
+      { timestamp:"07-11 09:30", actor:"李雅婷", action:"核准", detail:"李雅婷核准 — 「金額合理，同意送上級」", isHighlighted:true  },
+      { timestamp:"07-12 14:00", actor:"張文豪", action:"核准", detail:"張文豪最終核准，移交外部簽署",          isHighlighted:true  }
+    ]}},
+    approverAction: {
+      title: "簽核完成",
+      contextMessage: "所有層級均已核准，合約已自動移交外部簽署（DocuSign）。",
+      comment: "", decision: "approved",
+      actions: { items: [
+        { label:"查看合約", actionKey:"view_contract", style:"primary",   enabled:true },
+        { label:"下載 PDF", actionKey:"download_pdf",  style:"secondary", enabled:true }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "3 層串簽已全部完成。系統已自動移交外部簽署（DocuSign）進行最終確認。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"completed" },
+        { label:"上一階\n核准",   sublabel:"", status:"completed" },
+        { label:"最終核准\n執行", sublabel:"", status:"completed" },
+        { label:"外部\n簽署",    sublabel:"", status:"current"   }
+      ]}
+    }
+  },
+
+  // ── Rejected ────────────────────────────────────────────────────────────────
+  rejected: {
+    contractTitle: "2026 年度廣告行銷合約（退回重審）",
+    progress: {
+      currentStageIndex: 1,
+      ctaLabel: "重新修改送審",
+      ctaAction: "resubmit",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"current",   index:1 },
+        { label:"外部查署", status:"pending",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（3 層）— 退回",
+      routeType: "串簽",
+      totalLayers: 3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"rejected", layer:1, canUrge:false },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"pending",  layer:2, canUrge:false },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"pending",  layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "串簽 Sequential",
+      submittedAt: "2026-07-13 14:00",
+      estimatedCompletion: "—",
+      aiScore: 55, aiMaxScore: 100,
+      aiSuggestionLabel: "查看退回原因", aiSuggestionAction: "view_rejection_reason"
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-13 14:00", actor:"陳大明", action:"送審", detail:"陳大明送審",                                    isHighlighted:false },
+      { timestamp:"07-13 16:42", actor:"王志明", action:"退回", detail:"王志明退回 — 「合約金額超出預算，請重新確認報價」", isHighlighted:true  },
+      { timestamp:"07-13 16:42", actor:"系統",   action:"通知", detail:"系統通知陳大明：合約已退回，請修正後重新送審",      isHighlighted:false }
+    ]}},
+    approverAction: {
+      title: "合約已退回",
+      contextMessage: "王志明（第 1 層）已退回此合約，原因：合約金額超出預算，請重新確認報價後再次送審。",
+      comment: "", decision: "rejected",
+      actions: { items: [
+        { label:"修改合約", actionKey:"edit_contract", style:"primary", enabled:true  },
+        { label:"聯絡審核人", actionKey:"contact_approver", style:"secondary", enabled:true }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "本案因第 1 層審核人退回而暫停。請依退回意見修改合約後重新送審。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"current"   },
+        { label:"上一階\n核准",   sublabel:"", status:"pending"   },
+        { label:"最終核准\n執行", sublabel:"", status:"pending"   },
+        { label:"外部\n簽署",    sublabel:"", status:"pending"   }
+      ]}
+    }
+  },
+
+  // ── External signing in progress ───────────────────────────────────────────
+  external: {
+    contractTitle: "2026 年雲端服務訂閱合約（DocuSign 進行中）",
+    progress: {
+      currentStageIndex: 2,
+      ctaLabel: "查看 DocuSign 狀態",
+      ctaAction: "view_docusign",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"completed", index:1 },
+        { label:"外部查署", status:"current",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（2 層）— 已完成",
+      routeType: "並簽",
+      totalLayers: 2,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"部門主管",   department:"財務部門", status:"approved", layer:1, canUrge:false },
+        { name:"林美華", avatarInitial:"林", role:"法務主管",   department:"法律部門", status:"approved", layer:2, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "並簽 Parallel",
+      submittedAt: "2026-07-08 09:00",
+      estimatedCompletion: "2026-07-18",
+      aiScore: 88, aiMaxScore: 100,
+      aiSuggestionLabel: "", aiSuggestionAction: ""
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-08 09:00", actor:"陳大明", action:"送審", detail:"送審，AI 評分 88 分",          isHighlighted:false },
+      { timestamp:"07-09 10:30", actor:"王志明", action:"核准", detail:"財務主管核准",                  isHighlighted:true  },
+      { timestamp:"07-09 14:00", actor:"林美華", action:"核准", detail:"法務主管核准",                  isHighlighted:true  },
+      { timestamp:"07-09 14:01", actor:"系統",   action:"發送", detail:"合約已寄送至供應商 DocuSign",   isHighlighted:false }
+    ]}},
+    approverAction: {
+      title: "外部簽署進行中",
+      contextMessage: "合約已送出等待廠商於 DocuSign 完成簽署，預計 2026-07-18 前完成。",
+      comment: "", decision: "pending_external",
+      actions: { items: [
+        { label:"查看狀態", actionKey:"view_docusign", style:"primary",   enabled:true  },
+        { label:"催辦廠商", actionKey:"urge_vendor",   style:"secondary", enabled:true  },
+        { label:"撤回合約", actionKey:"revoke",         style:"danger",    enabled:false }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "2 層並簽已完成。合約目前等待供應商在 DocuSign 系統中完成電子簽署。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"財務主管\n核准", sublabel:"", status:"completed" },
+        { label:"法務主管\n核准", sublabel:"", status:"completed" },
+        { label:"最終核准\n執行", sublabel:"", status:"completed" },
+        { label:"外部\n簽署",    sublabel:"", status:"current"   }
+      ]}
+    }
+  },
+
+  // ── All buttons disabled (observer / read-only view) ──────────────────────
+  disabled: {
+    contractTitle: "2026 年度人力派遣合約（唯讀）",
+    progress: {
+      currentStageIndex: 1,
+      ctaLabel: "簽核進行中",
+      ctaAction: "",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"current",   index:1 },
+        { label:"外部查署", status:"pending",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title: "串簽流程（3 層）",
+      routeType: "串簽",
+      totalLayers: 3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"approved", layer:1, canUrge:false },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"current",  layer:2, canUrge:false },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"pending",  layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType: "串簽 Sequential",
+      submittedAt: "2026-07-14 09:32",
+      estimatedCompletion: "2026-07-16",
+      aiScore: 75, aiMaxScore: 100,
+      aiSuggestionLabel: "建議修改", aiSuggestionAction: "view_ai_report"
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-14 09:32", actor:"陳大明", action:"送審", detail:"陳大明送審",   isHighlighted:false },
+      { timestamp:"07-14 11:05", actor:"王志明", action:"核准", detail:"王志明核准",   isHighlighted:true  }
+    ]}},
+    approverAction: {
+      title: "唯讀模式",
+      contextMessage: "您無此合約的審核權限，僅可查看目前審核狀態。",
+      comment: "", decision: "",
+      actions: { items: [
+        { label:"退回", actionKey:"return",   style:"danger",    enabled:false },
+        { label:"轉派", actionKey:"delegate", style:"secondary", enabled:false },
+        { label:"核准", actionKey:"approve",  style:"primary",   enabled:false }
+      ]}
+    },
+    routeExplanation: {
+      explanationText: "本案正在進行 3 層串簽審核，您以觀察員身份查看流程狀態。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"completed" },
+        { label:"上一階\n核准",   sublabel:"", status:"current"   },
+        { label:"最終核准\n執行", sublabel:"", status:"pending"   },
+        { label:"外部\n簽署",    sublabel:"", status:"pending"   }
+      ]}
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BAW CONTEXT MOCK
+//  Exposes context.binding.connect() + context.trigger() to the widget script.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var _bindingCallbacks = [];
+var _currentData = null;
+var _eventCount = 0;
+
+var MOCK_CONTEXT = {
+  element: null,   // set to #widget-container after DOM injection
+  binding: {
+    connect: function(cb) {
+      _bindingCallbacks.push(cb);
+      // Immediately call with current data if available
+      if (_currentData !== null) { cb(_currentData); }
+    },
+    get: function(prop) {
+      if (prop === "value") { return _currentData; }
+      return null;
+    }
+  },
+  trigger: function(eventName, payload) {
+    logEvent(eventName, payload);
+  }
+};
+
+// Push new binding data to all registered listeners
+function pushData(data) {
+  _currentData = data;
+  for (var i = 0; i < _bindingCallbacks.length; i++) {
+    try { _bindingCallbacks[i](data); } catch(e) { console.error(e); }
+  }
+  // Update status chip
+  var chip = document.getElementById('binding-status-chip');
+  if (chip) {
+    chip.className = 'chip live';
+    chip.textContent = '● LIVE';
+    clearTimeout(chip._staleTimer);
+    chip._staleTimer = setTimeout(function() {
+      chip.className = 'chip stale';
+      chip.textContent = '● PUSHED';
+    }, 3000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  WIDGET BOOTSTRAP
+//  Injects Layout.html into #widget-container, then runs the widget JS
+//  with `this` pointing to a mock widget instance.
+// ═══════════════════════════════════════════════════════════════════════════
+
+function bootWidget() {
+  var container = document.getElementById('widget-container');
+  var tmpl = document.getElementById('widget-layout-template');
+
+  // Clear and inject static markup
+  container.innerHTML = '';
+  var clone = document.importNode(tmpl.content, true);
+  container.appendChild(clone);
+
+  // Reset binding callbacks (widget will re-register on each boot)
+  _bindingCallbacks = [];
+
+  // Set context element to the .ard-root inside container
+  MOCK_CONTEXT.element = container;
+
+  // Create mock widget instance (mirrors BAW's `this` inside widget JS)
+  var mockWidget = {
+    context: MOCK_CONTEXT,
+    getData: function() { return _currentData; }
+  };
+
+  // Execute the widget's inlineJavascript.js body with `this` = mockWidget
+  try {
+    WIDGET_SCRIPT.call(mockWidget);
+  } catch(e) {
+    container.innerHTML = '<p style="padding:20px;color:#da1e28;font-family:monospace;font-size:13px;">Widget script error: ' + e.message + '</p>';
+    console.error('Widget boot error:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  WIDGET SCRIPT
+//  This is the verbatim body of inlineJavascript.js wrapped in a function
+//  so we can call it with a custom `this` (mockWidget).
+// ═══════════════════════════════════════════════════════════════════════════
+
+function WIDGET_SCRIPT() {
+  var me = this;
+
+  if (!this.context || !this.context.element || !this.context.element.querySelector) { return; }
+  var root = this.context.element.querySelector(".ard-root");
+  if (!root) { return; }
+
+  var stagesEl      = root.querySelector("#ard-stages");
+  var ctaBtn        = root.querySelector("#ard-cta-btn");
+  var contractEl    = root.querySelector("#ard-contract-title");
+  var chainTitleEl  = root.querySelector("#ard-chain-title");
+  var chainListEl   = root.querySelector("#ard-chain-list");
+  var routeTypeEl   = root.querySelector("#ard-route-type");
+  var submittedAtEl = root.querySelector("#ard-submitted-at");
+  var estComplEl    = root.querySelector("#ard-est-completion");
+  var aiScoreEl     = root.querySelector("#ard-ai-score");
+  var aiLinkEl      = root.querySelector("#ard-ai-link");
+  var auditListEl   = root.querySelector("#ard-audit-list");
+  var actionTitleEl = root.querySelector("#ard-action-title");
+  var contextMsgEl  = root.querySelector("#ard-context-msg");
+  var actionBtnsEl  = root.querySelector("#ard-action-buttons");
+  var commentArea   = root.querySelector("#ard-comment-area");
+  var routeTextEl   = root.querySelector("#ard-route-text");
+  var routeFlowEl   = root.querySelector("#ard-route-flow");
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function toStr(v) {
+    if (v === null || v === undefined) { return ""; }
+    if (typeof v === "string")  { return v; }
+    if (typeof v === "number" || typeof v === "boolean") { return String(v); }
+    return "";
+  }
+  function toNum(v) {
+    if (typeof v === "number") { return v; }
+    var n = parseInt(String(v), 10);
+    return isNaN(n) ? 0 : n;
+  }
+  function toBool(v) {
+    if (typeof v === "boolean") { return v; }
+    if (v === "true" || v === 1 || v === "1") { return true; }
+    return false;
+  }
+  function normList(raw, detectKeys) {
+    if (!raw) { return []; }
+    if (Array.isArray(raw)) { return raw; }
+    if (raw.items && Array.isArray(raw.items)) { return raw.items; }
+    for (var ki = 0; ki < detectKeys.length; ki++) {
+      if (raw[detectKeys[ki]] !== undefined) { return [raw]; }
+    }
+    return [];
+  }
+
+  // ── Fallback data ──────────────────────────────────────────────────────────
+  var FALLBACK = {
+    contractTitle: "2026 年度軟體維護服務合約",
+    progress: {
+      currentStageIndex: 1, ctaLabel: "已完成 → 外部簽署 →", ctaAction: "proceed_to_external_signing",
+      stages: { items: [
+        { label:"起草送件", status:"completed", index:0 },
+        { label:"簽核路由", status:"current",   index:1 },
+        { label:"外部查署", status:"pending",   index:2 },
+        { label:"完成詳情", status:"pending",   index:3 }
+      ]}
+    },
+    approvalChain: {
+      title:"串簽流程（3 層）", routeType:"串簽", totalLayers:3,
+      approvers: { items: [
+        { name:"王志明", avatarInitial:"王", role:"直屬主管",   department:"採購部門", status:"approved", layer:1, canUrge:false },
+        { name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監", status:"current",  layer:2, canUrge:true  },
+        { name:"張文豪", avatarInitial:"張", role:"最終核准",   department:"副總經理", status:"pending",  layer:3, canUrge:false }
+      ]}
+    },
+    processStatus: {
+      routeType:"串簽 Sequential", submittedAt:"2026-07-14 09:32", estimatedCompletion:"2026-07-16",
+      aiScore:82, aiMaxScore:100, aiSuggestionLabel:"建議修改", aiSuggestionAction:"view_ai_report"
+    },
+    auditLog: { events: { items: [
+      { timestamp:"07-14 09:32", actor:"陳大明", action:"送審", detail:"陳大明送審，附 AI 報告",              isHighlighted:false },
+      { timestamp:"07-14 11:05", actor:"王志明", action:"核准", detail:"王志明核准 — 「條款無誤，同意送上級」", isHighlighted:true  },
+      { timestamp:"07-14 11:05", actor:"系統",   action:"通知", detail:"系統通知李雅婷待審",                  isHighlighted:false }
+    ]}},
+    approverAction: {
+      title:"待我審核", contextMessage:"您目前為本案第 2 層審核人，請確認合約條款並做出決策。",
+      comment:"", decision:"",
+      actions: { items: [
+        { label:"退回", actionKey:"return",   style:"danger",    enabled:true },
+        { label:"轉派", actionKey:"delegate", style:"secondary", enabled:true },
+        { label:"核准", actionKey:"approve",  style:"primary",   enabled:true }
+      ]}
+    },
+    routeExplanation: {
+      explanationText:"本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。",
+      steps: { items: [
+        { label:"申請人\n送審",   sublabel:"", status:"completed" },
+        { label:"直屬主管\n核准", sublabel:"", status:"completed" },
+        { label:"上一階\n核准",   sublabel:"", status:"current"   },
+        { label:"最終核准\n執行", sublabel:"", status:"pending"   },
+        { label:"外部\n簽署",    sublabel:"", status:"pending"   }
+      ]}
+    }
+  };
+
+  // ── Phase 1: wire static elements ─────────────────────────────────────────
+  if (ctaBtn) {
+    ctaBtn.addEventListener("click", function () {
+      me.context.trigger("ctaClicked", ctaBtn.getAttribute("data-cta-action") || FALLBACK.progress.ctaAction);
+    });
+  }
+  if (aiLinkEl) {
+    aiLinkEl.addEventListener("click", function (e) {
+      e.preventDefault();
+      me.context.trigger("ctaClicked", aiLinkEl.getAttribute("data-ai-action") || FALLBACK.processStatus.aiSuggestionAction);
+    });
+  }
+  if (commentArea) {
+    commentArea.addEventListener("input", function () {
+      me.context.trigger("commentChanged", commentArea.value);
+    });
+  }
+  if (actionBtnsEl) {
+    actionBtnsEl.addEventListener("click", function (e) {
+      var btn = e.target.closest(".ard-action-btn");
+      if (!btn || btn.disabled) { return; }
+      me.context.trigger("actionClicked", btn.getAttribute("data-action-key") || "");
+    });
+  }
+  if (chainListEl) {
+    chainListEl.addEventListener("click", function (e) {
+      var btn = e.target.closest(".ard-urge-btn");
+      if (!btn) { return; }
+      me.context.trigger("urgeClicked", toNum(btn.getAttribute("data-approver-index")));
+    });
+  }
+  if (routeFlowEl) {
+    routeFlowEl.addEventListener("click", function (e) {
+      var box = e.target.closest(".ard-route-step-box");
+      if (!box) { return; }
+      me.context.trigger("stepClicked", toNum(box.getAttribute("data-step-index")));
+    });
+  }
+
+  // ── Phase 2: section renderers ─────────────────────────────────────────────
+  function renderProgress(d) {
+    var stages = normList(d.stages, ["label","status"]);
+    var currentIdx = toNum(d.currentStageIndex);
+    var ctaLabel   = toStr(d.ctaLabel);
+    var ctaAction  = toStr(d.ctaAction);
+    if (stages.length === 0) { stages = normList(FALLBACK.progress.stages, ["label","status"]); currentIdx = FALLBACK.progress.currentStageIndex; }
+    if (!ctaLabel)  { ctaLabel  = FALLBACK.progress.ctaLabel;  }
+    if (!ctaAction) { ctaAction = FALLBACK.progress.ctaAction; }
+    stagesEl.innerHTML = "";
+    for (var i = 0; i < stages.length; i++) {
+      if (i > 0) {
+        var conn = document.createElement("div");
+        var prevSt = toStr(stages[i-1].status) || (i-1 < currentIdx ? "completed" : "pending");
+        conn.className = "ard-connector" + (prevSt === "completed" ? " completed" : "");
+        stagesEl.appendChild(conn);
+      }
+      var st = toStr(stages[i].status) || (i < currentIdx ? "completed" : (i === currentIdx ? "current" : "pending"));
+      var stDiv = document.createElement("div"); stDiv.className = "ard-stage";
+      var circle = document.createElement("div"); circle.className = "ard-circle " + st;
+      if (st === "completed") {
+        circle.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/></svg>';
+      } else {
+        circle.textContent = String(i+1);
+        if (st === "current") { circle.setAttribute("aria-current","step"); }
+      }
+      stDiv.appendChild(circle);
+      var lbl = document.createElement("div"); lbl.className = "ard-stage-label" + (st === "current" ? " current" : "");
+      lbl.textContent = toStr(stages[i].label) || ("步驟 "+(i+1));
+      stDiv.appendChild(lbl);
+      stagesEl.appendChild(stDiv);
+    }
+    if (ctaBtn) { ctaBtn.textContent = ctaLabel; ctaBtn.setAttribute("data-cta-action", ctaAction); ctaBtn.style.display = ""; }
+  }
+
+  function renderChain(d) {
+    if (chainTitleEl) { chainTitleEl.textContent = toStr(d.title) || FALLBACK.approvalChain.title; }
+    var approvers = normList(d.approvers, ["name","status"]);
+    if (approvers.length === 0) { approvers = normList(FALLBACK.approvalChain.approvers, ["name","status"]); }
+    var statusLabels = { approved:"已核准", current:"審核中", pending:"待簽", rejected:"已退回" };
+    chainListEl.innerHTML = "";
+    for (var i = 0; i < approvers.length; i++) {
+      (function(ap, idx) {
+        var st = toStr(ap.status || "pending").toLowerCase();
+        var row = document.createElement("div"); row.className = "ard-approver-row";
+        row.setAttribute("data-approver-index", idx); row.setAttribute("data-status", st);
+        var avatar = document.createElement("div"); avatar.className = "ard-avatar " + st;
+        avatar.setAttribute("aria-hidden","true");
+        avatar.textContent = toStr(ap.avatarInitial) || toStr(ap.name).charAt(0) || "?";
+        row.appendChild(avatar);
+        var info = document.createElement("div"); info.className = "ard-approver-info";
+        var nameEl = document.createElement("div"); nameEl.className = "ard-approver-name"; nameEl.textContent = toStr(ap.name);
+        var metaEl = document.createElement("div"); metaEl.className = "ard-approver-meta";
+        metaEl.textContent = [toStr(ap.role), toStr(ap.department)].filter(Boolean).join("・");
+        info.appendChild(nameEl); info.appendChild(metaEl); row.appendChild(info);
+        var actDiv = document.createElement("div"); actDiv.className = "ard-approver-actions";
+        if (toBool(ap.canUrge)) {
+          var urge = document.createElement("button"); urge.className = "ard-urge-btn"; urge.type = "button";
+          urge.setAttribute("data-approver-index", idx);
+          urge.setAttribute("aria-label","催辦 "+toStr(ap.name));
+          urge.textContent = "催辦";
+          urge.addEventListener("click", (function(i2){ return function(){ me.context.trigger("urgeClicked", i2); }; })(idx));
+          actDiv.appendChild(urge);
+        }
+        var badge = document.createElement("span"); badge.className = "ard-status-badge " + st;
+        badge.textContent = statusLabels[st] || st;
+        actDiv.appendChild(badge); row.appendChild(actDiv); chainListEl.appendChild(row);
+      })(approvers[i], i);
+    }
+  }
+
+  function renderStatus(d) {
+    if (routeTypeEl)   { routeTypeEl.textContent   = toStr(d.routeType)           || FALLBACK.processStatus.routeType; }
+    if (submittedAtEl) { submittedAtEl.textContent = toStr(d.submittedAt)          || FALLBACK.processStatus.submittedAt; }
+    if (estComplEl)    { estComplEl.textContent    = toStr(d.estimatedCompletion)  || FALLBACK.processStatus.estimatedCompletion; }
+    var score    = toNum(d.aiScore)    || FALLBACK.processStatus.aiScore;
+    var maxScore = toNum(d.aiMaxScore) || FALLBACK.processStatus.aiMaxScore;
+    var aiLabel  = toStr(d.aiSuggestionLabel)  || FALLBACK.processStatus.aiSuggestionLabel;
+    var aiAction = toStr(d.aiSuggestionAction) || FALLBACK.processStatus.aiSuggestionAction;
+    if (aiScoreEl) { aiScoreEl.textContent = score + " / " + maxScore; }
+    if (aiLinkEl) { aiLinkEl.textContent = aiLabel; aiLinkEl.setAttribute("data-ai-action", aiAction); aiLinkEl.style.display = aiLabel ? "" : "none"; }
+  }
+
+  function renderAudit(d) {
+    var events = normList(d.events, ["timestamp","detail"]);
+    if (events.length === 0) { events = normList(FALLBACK.auditLog.events, ["timestamp","detail"]); }
+    auditListEl.innerHTML = "";
+    for (var i = 0; i < events.length; i++) {
+      (function(evt) {
+        var highlighted = toBool(evt.isHighlighted);
+        var actionLC    = toStr(evt.action).toLowerCase();
+        var evtDiv = document.createElement("div"); evtDiv.className = "ard-audit-event";
+        var dot = document.createElement("div");
+        var dotCls = "ard-audit-dot";
+        if (highlighted)                                          { dotCls += " highlighted"; }
+        else if (actionLC === "核准" || actionLC === "approved") { dotCls += " approved"; }
+        else if (actionLC === "退回" || actionLC === "rejected") { dotCls += " rejected"; }
+        dot.className = dotCls; evtDiv.appendChild(dot);
+        var body = document.createElement("div"); body.className = "ard-audit-body";
+        var ts = document.createElement("div"); ts.className = "ard-audit-ts" + (highlighted?" highlighted":""); ts.textContent = toStr(evt.timestamp);
+        var detail = document.createElement("div"); detail.className = "ard-audit-detail" + (highlighted?" highlighted":""); detail.textContent = toStr(evt.detail);
+        body.appendChild(ts); body.appendChild(detail); evtDiv.appendChild(body); auditListEl.appendChild(evtDiv);
+      })(events[i]);
+    }
+  }
+
+  function renderActionPanel(d) {
+    if (actionTitleEl) { actionTitleEl.textContent = toStr(d.title) || FALLBACK.approverAction.title; }
+    if (contextMsgEl)  { contextMsgEl.textContent  = toStr(d.contextMessage) || FALLBACK.approverAction.contextMessage; }
+    if (commentArea)   { commentArea.value = toStr(d.comment); }
+    var actions = normList(d.actions, ["label","actionKey"]);
+    if (actions.length === 0) { actions = normList(FALLBACK.approverAction.actions, ["label","actionKey"]); }
+    actionBtnsEl.innerHTML = "";
+    for (var i = 0; i < actions.length; i++) {
+      (function(act) {
+        var btn = document.createElement("button"); btn.type = "button";
+        btn.className = "ard-action-btn " + toStr(act.style || "secondary").toLowerCase();
+        btn.textContent = toStr(act.label);
+        btn.disabled = (act.enabled === false || act.enabled === "false");
+        btn.setAttribute("data-action-key", toStr(act.actionKey));
+        btn.setAttribute("aria-label", toStr(act.label));
+        btn.addEventListener("click", (function(key){ return function(){ me.context.trigger("actionClicked", key); }; })(toStr(act.actionKey)));
+        actionBtnsEl.appendChild(btn);
+      })(actions[i]);
+    }
+  }
+
+  function renderRouteExplanation(d) {
+    if (routeTextEl) { routeTextEl.textContent = toStr(d.explanationText) || FALLBACK.routeExplanation.explanationText; }
+    var steps = normList(d.steps, ["label","status"]);
+    if (steps.length === 0) { steps = normList(FALLBACK.routeExplanation.steps, ["label","status"]); }
+    var statusText = { completed:"已完成", current:"進行中", pending:"待辦" };
+    routeFlowEl.innerHTML = "";
+    for (var i = 0; i < steps.length; i++) {
+      (function(step, idx) {
+        if (idx > 0) {
+          var arrowWrap = document.createElement("div"); arrowWrap.className = "ard-route-step"; arrowWrap.setAttribute("role","presentation");
+          var arrow = document.createElement("div");
+          var prevSt = toStr(steps[idx-1].status || "pending").toLowerCase();
+          arrow.className = "ard-route-arrow" + (prevSt === "completed" ? " completed" : "");
+          arrow.setAttribute("aria-hidden","true"); arrow.textContent = "→";
+          arrowWrap.appendChild(arrow); routeFlowEl.appendChild(arrowWrap);
+        }
+        var st  = toStr(step.status || "pending").toLowerCase();
+        var lbl = toStr(step.label) || ("步驟 "+(idx+1));
+        var stepWrap = document.createElement("div"); stepWrap.className = "ard-route-step"; stepWrap.setAttribute("role","listitem");
+        var box = document.createElement("button"); box.type = "button";
+        box.className = "ard-route-step-box " + st; box.textContent = lbl;
+        box.setAttribute("data-step-index", idx);
+        box.setAttribute("aria-label","步驟 "+(idx+1)+"："+lbl.replace(/\n/g,"")+"（"+(statusText[st]||st)+"）");
+        if (st === "current") { box.setAttribute("aria-current","step"); }
+        box.addEventListener("click", (function(i2){ return function(){ me.context.trigger("stepClicked", i2); }; })(idx));
+        stepWrap.appendChild(box); routeFlowEl.appendChild(stepWrap);
+      })(steps[i], i);
+    }
+  }
+
+  function render(data) {
+    try {
+      var d = data || {};
+      if (contractEl) { contractEl.textContent = toStr(d.contractTitle) || FALLBACK.contractTitle; }
+      renderProgress(d.progress         || FALLBACK.progress);
+      renderChain(d.approvalChain       || FALLBACK.approvalChain);
+      renderStatus(d.processStatus      || FALLBACK.processStatus);
+      renderAudit(d.auditLog            || FALLBACK.auditLog);
+      renderActionPanel(d.approverAction || FALLBACK.approverAction);
+      renderRouteExplanation(d.routeExplanation || FALLBACK.routeExplanation);
+    } catch(e) {
+      root.innerHTML = "<p style='padding:16px;color:#da1e28;font-family:monospace;font-size:12px;'>ApprovalReviewDashboard error: "+e.message+"</p>";
+    }
+  }
+
+  // ── BAW binding wiring ─────────────────────────────────────────────────────
+  var bound = false;
+  if (this.context && this.context.binding && typeof this.context.binding.connect === "function") {
+    this.context.binding.connect(function(val) { bound = true; render(val); });
+  }
+  if (!bound) {
+    var d0 = this.getData ? this.getData() : null;
+    if (d0) { render(d0); bound = true; }
+  }
+  if (!bound) {
+    setTimeout(function() {
+      try {
+        var bv = me.context.binding.get("value");
+        if (bv) { render(bv); bound = true; }
+      } catch(e) {}
+    }, 300);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  EVENT LOG
+// ═══════════════════════════════════════════════════════════════════════════
+
+function logEvent(name, payload) {
+  _eventCount++;
+  var logEl = document.getElementById('event-log');
+  var emptyEl = document.getElementById('event-empty');
+  if (emptyEl) { emptyEl.style.display = 'none'; }
+
+  var now = new Date();
+  var ts = now.toTimeString().slice(0,8) + '.' + String(now.getMilliseconds()).padStart(3,'0');
+
+  var entry = document.createElement('div');
+  entry.className = 'event-entry ' + name;
+
+  var tsEl = document.createElement('span');   tsEl.className = 'event-ts'; tsEl.textContent = ts;
+  var nameEl = document.createElement('span'); nameEl.className = 'event-name'; nameEl.textContent = name;
+  var payEl = document.createElement('span');  payEl.className = 'event-payload';
+
+  var payStr;
+  if (typeof payload === 'string')       { payStr = '"' + payload + '"'; }
+  else if (typeof payload === 'number')  { payStr = String(payload); }
+  else if (payload === null || payload === undefined) { payStr = 'null'; }
+  else { try { payStr = JSON.stringify(payload); } catch(e) { payStr = String(payload); } }
+  payEl.textContent = '→ ' + payStr;
+
+  entry.appendChild(tsEl); entry.appendChild(nameEl); entry.appendChild(payEl);
+
+  // Insert at top (newest first)
+  if (logEl.firstChild && logEl.firstChild !== emptyEl) {
+    logEl.insertBefore(entry, logEl.firstChild);
+  } else {
+    logEl.appendChild(entry);
+  }
+
+  // Update counter
+  var countEl = document.getElementById('event-count');
+  if (countEl) { countEl.textContent = '(' + _eventCount + ')'; }
+}
+
+function clearLog() {
+  _eventCount = 0;
+  var logEl = document.getElementById('event-log');
+  logEl.innerHTML = '<div class="event-empty" id="event-empty">No events yet — interact with the widget →</div>';
+  var countEl = document.getElementById('event-count');
+  if (countEl) { countEl.textContent = ''; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  BINDING EDITOR CONTROLS
+// ═══════════════════════════════════════════════════════════════════════════
+
+var _currentPreset = 'layer2';
+
+function loadPreset(name) {
+  _currentPreset = name;
+  var data = PRESETS[name];
+  if (!data) { return; }
+
+  // Update editor
+  var editor = document.getElementById('binding-editor');
+  editor.value = JSON.stringify(data, null, 2);
+  setEditorStatus('ready', '');
+
+  // Update preset button states
+  var btns = document.querySelectorAll('.preset-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.remove('active');
+  }
+  var activeBtn = document.getElementById('preset-' + name);
+  if (activeBtn) { activeBtn.classList.add('active'); }
+
+  // Push to widget
+  pushData(data);
+}
+
+function pushBinding() {
+  var editor = document.getElementById('binding-editor');
+  var raw = editor.value.trim();
+  try {
+    var data = JSON.parse(raw);
+    pushData(data);
+    setEditorStatus('ok', '✓ Pushed');
+    setTimeout(function(){ setEditorStatus('ready',''); }, 2000);
+  } catch(e) {
+    setEditorStatus('error', '✗ Invalid JSON: ' + e.message.split('\n')[0]);
+  }
+}
+
+function formatEditor() {
+  var editor = document.getElementById('binding-editor');
+  try {
+    var data = JSON.parse(editor.value);
+    editor.value = JSON.stringify(data, null, 2);
+    setEditorStatus('ok', '✓ Formatted');
+    setTimeout(function(){ setEditorStatus('ready',''); }, 1500);
+  } catch(e) {
+    setEditorStatus('error', '✗ ' + e.message.split('\n')[0]);
+  }
+}
+
+function resetEditor() {
+  loadPreset(_currentPreset);
+  setEditorStatus('ok', '↺ Reset');
+  setTimeout(function(){ setEditorStatus('ready',''); }, 1500);
+}
+
+function setEditorStatus(cls, msg) {
+  var el = document.getElementById('editor-status');
+  if (!el) { return; }
+  el.className = 'editor-status' + (cls !== 'ready' ? ' ' + cls : '');
+  el.textContent = msg || 'ready';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CANVAS WIDTH CONTROLS
+// ═══════════════════════════════════════════════════════════════════════════
+
+function setWidth(val) {
+  var container = document.getElementById('widget-container');
+  if (container) { container.style.width = val; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  KEYBOARD SHORTCUT: Ctrl+Enter → Push Binding
+// ═══════════════════════════════════════════════════════════════════════════
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    var editor = document.getElementById('binding-editor');
+    if (document.activeElement === editor) {
+      e.preventDefault();
+      pushBinding();
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  INIT — boot widget then push default preset
+// ═══════════════════════════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', function() {
+  bootWidget();
+  loadPreset('layer2');
+});
+</script>
+</body>
+</html>

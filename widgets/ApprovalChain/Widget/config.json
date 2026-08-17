@@ -1,0 +1,25 @@
+{
+  "name": "ApprovalChain",
+  "description": "Multi-layer approval chain widget showing approvers grouped by routing layer in IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "ApprovalChainData",
+    "isList": false,
+    "type": "ApprovalChain"
+  },
+  "configOptions": [
+    {
+      "name": "approverClicked",
+      "type": "Event",
+      "label": "Approver Clicked",
+      "description": "Fired when an approver card is clicked; carries the approver name",
+      "parameterName": "approverName"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ApprovalChain",
+      "file": "ApprovalChain.json"
+    }
+  ],
+  "changeFunction": false
+}

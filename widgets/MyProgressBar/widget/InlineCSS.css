@@ -1,0 +1,144 @@
+/* MyProgressBar Widget Styles - Carbon Design System */
+/* Scoped under .myprogressbar_maincontentbox to avoid class collisions */
+
+.myprogressbar_maincontentbox {
+	width: 100%;
+	min-height: 110px;
+	padding: 1rem;
+	font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Container ────────────────────────────────────────── */
+.myprogressbar_maincontentbox .myprogressbar-container {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+/* ── Percentage display ───────────────────────────────── */
+.myprogressbar_maincontentbox .myprogressbar-percentage {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.myprogressbar_maincontentbox .mypb-percentage-value {
+	font-size: 32px;
+	font-weight: 600;
+	color: #da1e28; /* default: low / red */
+	transition: color 0.3s ease;
+}
+
+.myprogressbar_maincontentbox .mypb-percentage-value.state-low      { color: #da1e28; }
+.myprogressbar_maincontentbox .mypb-percentage-value.state-moderate { color: #f1c21b; }
+.myprogressbar_maincontentbox .mypb-percentage-value.state-high     { color: #24a148; }
+
+/* ── Track ────────────────────────────────────────────── */
+.myprogressbar_maincontentbox .myprogressbar-track {
+	width: 100%;
+	height: 8px;
+	background-color: #e0e0e0; /* Gray 20 */
+	border-radius: 4px;
+	overflow: hidden;
+	position: relative;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Fill ─────────────────────────────────────────────── */
+.myprogressbar_maincontentbox .myprogressbar-fill {
+	height: 100%;
+	width: 0%;
+	background-color: #da1e28; /* default: low / red */
+	border-radius: 4px;
+	transition: width 0.5s ease-in-out, background-color 0.3s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+/* Color state modifiers */
+.myprogressbar_maincontentbox .myprogressbar-fill.state-low      { background-color: #da1e28; }
+.myprogressbar_maincontentbox .myprogressbar-fill.state-moderate { background-color: #f1c21b; }
+.myprogressbar_maincontentbox .myprogressbar-fill.state-high     { background-color: #24a148; }
+
+/* Shimmer animation on fill */
+.myprogressbar_maincontentbox .myprogressbar-fill::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+	animation: mypb-shimmer 2s infinite;
+}
+
+@keyframes mypb-shimmer {
+	0%   { left: -100%; }
+	100% { left:  100%; }
+}
+
+/* ── Status message ───────────────────────────────────── */
+.myprogressbar_maincontentbox .myprogressbar-status {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.myprogressbar_maincontentbox .mypb-status-message {
+	font-size: 14px;
+	font-weight: 400;
+	color: #525252; /* Gray 70 */
+	text-align: center;
+	padding: 0.375rem 0.875rem;
+	border-radius: 4px;
+	background-color: #f4f4f4; /* Gray 10 */
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.myprogressbar_maincontentbox .mypb-status-message.state-not-started {
+	background-color: #f4f4f4;
+	color: #525252;
+}
+
+.myprogressbar_maincontentbox .mypb-status-message.state-in-progress {
+	background-color: #e5f6ff;
+	color: #0043ce;
+	animation: mypb-pulse 2s ease-in-out infinite;
+}
+
+.myprogressbar_maincontentbox .mypb-status-message.state-complete {
+	background-color: #defbe6;
+	color: #0e6027;
+}
+
+@keyframes mypb-pulse {
+	0%, 100% { opacity: 1;   }
+	50%       { opacity: 0.7; }
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 672px) {
+	.myprogressbar_maincontentbox {
+		padding: 0.75rem;
+		min-height: 90px;
+	}
+	.myprogressbar_maincontentbox .myprogressbar-container { gap: 0.5rem; }
+	.myprogressbar_maincontentbox .mypb-percentage-value   { font-size: 24px; }
+	.myprogressbar_maincontentbox .mypb-status-message     { font-size: 12px; }
+	.myprogressbar_maincontentbox .myprogressbar-track     { height: 6px; }
+}
+
+/* ── Accessibility ────────────────────────────────────── */
+@media (prefers-contrast: high) {
+	.myprogressbar_maincontentbox .myprogressbar-track { border: 1px solid #000; }
+	.myprogressbar_maincontentbox .myprogressbar-fill  { border: 1px solid #000; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.myprogressbar_maincontentbox .myprogressbar-fill             { transition: none; }
+	.myprogressbar_maincontentbox .myprogressbar-fill::after      { animation: none; }
+	.myprogressbar_maincontentbox .mypb-status-message.state-in-progress { animation: none; }
+}
+
+/* Made with Bob */

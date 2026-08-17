@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!--
+  ApprovalReviewDashboard — High-Fidelity HTML Preview
+  Pixel-accurate reproduction of UMC/UI.jpeg
+  Purpose: design sign-off before building the BAW Coach Tester
+-->
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>eContract — 簽核 (Preview)</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+  font-size: 14px; color: #161616; background: #f0f4f8;
+  min-height: 100vh; -webkit-font-smoothing: antialiased;
+}
+
+/* ── App shell ──────────────────────────────────────────────────────────────── */
+.app-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ── Top nav ────────────────────────────────────────────────────────────────── */
+.top-nav {
+  display: flex; align-items: center; height: 48px;
+  background: #fff; border-bottom: 1px solid #e0e0e0;
+  padding: 0 24px; gap: 0; flex-shrink: 0; position: relative; z-index: 10;
+}
+.brand {
+  font-size: 20px; font-weight: 800; color: #161616;
+  letter-spacing: -0.8px; margin-right: 32px; white-space: nowrap;
+  font-style: italic;
+}
+.brand .contract { color: #0f62fe; }
+.nav-tabs { display: flex; height: 100%; align-items: stretch; gap: 0; flex: 1; }
+.nav-tab {
+  display: flex; align-items: center; padding: 0 22px;
+  font-size: 14px; color: #525252; cursor: pointer;
+  border-bottom: 3px solid transparent; white-space: nowrap;
+  transition: color 0.15s; user-select: none;
+}
+.nav-tab:hover { color: #161616; }
+.nav-tab.active {
+  color: #161616; font-weight: 600;
+  border-bottom-color: #0f62fe;
+  background: #f0f4ff;
+}
+.nav-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
+.nav-bell {
+  font-size: 18px; color: #525252; cursor: pointer;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.15s;
+}
+.nav-bell:hover { background: #f4f4f4; }
+.nav-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #6929c4, #a56eff);
+  color: #fff; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+
+/* ── App body ───────────────────────────────────────────────────────────────── */
+.app-body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Left sidebar ───────────────────────────────────────────────────────────── */
+.sidebar {
+  width: 196px; flex-shrink: 0; background: #fff;
+  border-right: 1px solid #e0e0e0; padding: 16px 0;
+  overflow-y: auto; display: flex; flex-direction: column; gap: 2px;
+}
+.sidebar-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: #8d8d8d;
+  padding: 14px 20px 6px; margin-top: 4px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px; font-size: 13.5px; color: #525252;
+  cursor: pointer; border-left: 3px solid transparent;
+  transition: background 0.12s, color 0.12s;
+}
+.sidebar-item:hover { background: #f0f4f8; color: #161616; }
+.sidebar-item.active {
+  background: #e8f0fe; color: #0043ce; font-weight: 600;
+  border-left-color: #0f62fe;
+}
+.sidebar-item .icon { font-size: 15px; flex-shrink: 0; width: 18px; text-align: center; }
+.sidebar-item .label { flex: 1; }
+.sidebar-badge {
+  background: #0f62fe; color: #fff;
+  font-size: 11px; font-weight: 700;
+  border-radius: 10px; padding: 1px 7px;
+  min-width: 20px; text-align: center; line-height: 18px;
+}
+.sidebar-item.active .sidebar-badge { background: #0043ce; }
+
+/* ── Main content ───────────────────────────────────────────────────────────── */
+.main-content {
+  flex: 1; min-width: 0; overflow-y: auto;
+  padding: 22px 28px; background: #f0f4f8;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROGRESS BAR SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.progress-section {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  margin-bottom: 4px;
+}
+.progress-left { flex: 1; min-width: 0; }
+.progress-title {
+  font-size: 22px; font-weight: 800; color: #161616;
+  margin-bottom: 18px; letter-spacing: -0.4px;
+}
+
+/* Stage rail */
+.stages-rail {
+  display: flex; align-items: flex-start; gap: 0;
+}
+.stage-wrap { display: flex; flex-direction: column; align-items: center; min-width: 90px; }
+.stage-circle {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+.stage-circle.done  { background: #198038; color: #fff; }
+.stage-circle.done svg { width: 18px; height: 18px; }
+.stage-circle.active {
+  background: #0f62fe; color: #fff;
+  box-shadow: 0 0 0 4px rgba(15,98,254,0.18);
+}
+.stage-circle.wait  { background: #fff; color: #8d8d8d; border: 2px solid #c6c6c6; }
+.stage-label {
+  font-size: 12px; color: #6f6f6f; margin-top: 7px;
+  text-align: center; white-space: nowrap;
+}
+.stage-label.active { color: #0f62fe; font-weight: 700; }
+
+/* Connector line between circles */
+.stage-connector {
+  flex: 1; height: 2px; margin-top: 19px; min-width: 32px;
+  background: #c6c6c6; align-self: flex-start;
+}
+.stage-connector.done { background: #198038; }
+
+/* CTA button */
+.cta-btn {
+  background: #1a4d80; color: #fff; border: none;
+  border-radius: 6px; padding: 11px 22px;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(10,40,80,0.18);
+  transition: background 0.15s;
+  margin-top: 2px;
+}
+.cta-btn:hover { background: #0f62fe; }
+
+/* Contract subtitle */
+.contract-title {
+  font-size: 13.5px; color: #6f6f6f;
+  margin: 8px 0 18px; padding-left: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TWO-COLUMN MAIN LAYOUT
+   ═══════════════════════════════════════════════════════════════ */
+.main-cols { display: flex; gap: 18px; align-items: flex-start; }
+.col-left  { flex: 60; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.col-right { flex: 40; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Generic white panel ──────────────────────────────────────────────────── */
+.panel {
+  background: #fff; border-radius: 10px;
+  border: 1px solid #e0e0e0; overflow: hidden;
+}
+.panel-hdr {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 18px 10px;
+  font-size: 14.5px; font-weight: 700; color: #161616;
+  border-bottom: 1px solid #f0f0f0;
+}
+.panel-hdr-icon { font-size: 15px; }
+
+/* ── Approval Chain ───────────────────────────────────────────────────────── */
+.chain-list { padding: 4px 0; }
+.approver-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 18px; border-bottom: 1px solid #f4f4f4;
+}
+.approver-row:last-child { border-bottom: none; }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.avatar.done    { background: #4cae6e; }   /* soft green — matches image */
+.avatar.active  { background: #6b8fbf; }   /* muted steel blue — matches image */
+.avatar.wait    { background: #b0b8c4; }   /* grey */
+.avatar.reject  { background: #da1e28; }
+.approver-info { flex: 1; min-width: 0; }
+.approver-name { font-size: 14px; font-weight: 600; color: #161616; }
+.approver-meta { font-size: 12px; color: #6f6f6f; margin-top: 2px; }
+.approver-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.urge-btn {
+  border: 1.5px solid #c8a04a; background: #fff; color: #8a6a1a;
+  border-radius: 20px; padding: 5px 18px;
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+  transition: background 0.15s;
+}
+.urge-btn:hover { background: #fdf5e0; }
+.badge {
+  border-radius: 20px; padding: 5px 16px;
+  font-size: 13px; font-weight: 500; white-space: nowrap;
+}
+.badge.approved { background: #e8f5ed; color: #198038; border: 1px solid #a7f0ba; }
+.badge.active   { background: #fff9e6; color: #8a5700; border: 1px solid #f0d060; }
+.badge.wait     { background: #f4f4f4; color: #6f6f6f; border: 1px solid #e0e0e0; }
+.badge.rejected { background: #fff1f1; color: #da1e28; border: 1px solid #ffb3b8; }
+
+/* ── Process Status ───────────────────────────────────────────────────────── */
+.status-grid { padding: 12px 18px; }
+.status-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid #f4f4f4; font-size: 14px;
+}
+.status-row:last-child { border-bottom: none; }
+.status-lbl { color: #525252; }
+.status-val { color: #161616; font-weight: 500; text-align: right; }
+.status-val.ai {
+  color: #0f62fe; font-weight: 700;
+  display: flex; align-items: center; gap: 6px; justify-content: flex-end;
+}
+.ai-suggest-link {
+  color: #0f62fe; font-weight: 700; font-size: 13px;
+  text-decoration: none; cursor: pointer;
+}
+.ai-suggest-link:hover { text-decoration: underline; }
+
+/* ── Audit Timeline ───────────────────────────────────────────────────────── */
+.audit-list { padding: 8px 18px 14px; }
+.audit-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #f4f4f4;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: #c6c6c6; flex-shrink: 0; margin-top: 5px;
+}
+.audit-dot.hl   { background: #0f62fe; }
+.audit-dot.ok   { background: #198038; }
+.audit-dot.warn { background: #f0c040; }
+.audit-body { flex: 1; min-width: 0; }
+.audit-ts { font-size: 12px; color: #8d8d8d; font-weight: 500; margin-bottom: 2px; }
+.audit-ts.hl { color: #c28a00; font-weight: 700; }
+.audit-detail { font-size: 13px; color: #161616; word-break: break-word; }
+.audit-detail.hl { color: #c28a00; font-weight: 600; }
+
+/* ═══════════════════════════════════════════════════════════════
+   RIGHT COLUMN
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Action Panel (amber/cream border) ───────────────────────────────────── */
+.action-panel {
+  background: #fffbf0; border: 1.5px solid #dfc870;
+  border-radius: 10px; overflow: hidden;
+}
+.action-hdr {
+  display: flex; align-items: center; gap: 8px;
+  background: #fffbf0; border-bottom: 1px solid #eedda0;
+  padding: 13px 18px 10px;
+  font-size: 14.5px; font-weight: 700; color: #161616;
+}
+.action-ctx {
+  font-size: 13px; color: #525252;
+  padding: 12px 18px 8px; line-height: 1.65; margin: 0;
+}
+.action-btns { display: flex; gap: 10px; padding: 8px 18px 12px; }
+.action-btn {
+  flex: 1; padding: 12px 8px; border: none; border-radius: 6px;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  color: #fff; cursor: pointer; transition: opacity 0.15s;
+}
+.action-btn:hover { opacity: 0.88; }
+.action-btn.danger    { background: #8b2020; }
+.action-btn.secondary { background: #5c6470; }
+.action-btn.primary   { background: #1a4d80; }
+.comment-section { padding: 4px 18px 16px; }
+.comment-label { display: block; font-size: 12.5px; color: #525252; margin-bottom: 6px; font-weight: 500; }
+.comment-area {
+  width: 100%; border: 1px solid #d0d0d0; border-radius: 6px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  color: #161616; background: #fff; resize: vertical;
+  min-height: 88px; line-height: 1.5; outline: none;
+  transition: border-color 0.15s;
+}
+.comment-area::placeholder { color: #b0b0b0; }
+.comment-area:focus { border-color: #0f62fe; box-shadow: 0 0 0 2px rgba(15,98,254,0.14); }
+
+/* ── Route Explanation ────────────────────────────────────────────────────── */
+.route-text {
+  font-size: 13px; color: #525252; padding: 12px 18px 10px;
+  margin: 0; line-height: 1.7;
+}
+.route-flow {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 0; padding: 6px 16px 18px; overflow-x: auto;
+}
+.route-box {
+  border-radius: 8px; border: 1.5px solid #c6c6c6;
+  padding: 9px 13px; font-size: 12px; font-weight: 700;
+  text-align: center; min-width: 62px; line-height: 1.45;
+  white-space: pre-line; cursor: default;
+}
+.route-box.done    { background: #e8f5ed; border-color: #a7f0ba; color: #198038; }
+.route-box.current { background: #d4e5f0; border-color: #9ec8e0; color: #1a4d7a; }
+.route-box.pending { background: #f4f4f4; border-color: #c6c6c6; color: #525252; }
+.route-arrow { font-size: 16px; color: #b0b0b0; margin: 0 5px; line-height: 1; flex-shrink: 0; }
+.route-arrow.done { color: #198038; }
+
+/* ── Preview watermark banner ─────────────────────────────────────────────── */
+.preview-banner {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(15,98,254,0.9); color: #fff;
+  text-align: center; font-size: 12px; font-weight: 600;
+  padding: 6px; letter-spacing: 0.5px; z-index: 999;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Top nav ──────────────────────────────────────────────────────────── -->
+  <nav class="top-nav">
+    <div class="brand">e<span class="contract">Contr</span>act</div>
+    <div class="nav-tabs">
+      <div class="nav-tab">起草</div>
+      <div class="nav-tab active">簽核</div>
+      <div class="nav-tab">外部簽署</div>
+      <div class="nav-tab">合約列表</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-bell">🔔</div>
+      <div class="nav-avatar">陳</div>
+    </div>
+  </nav>
+
+  <!-- ── App body ─────────────────────────────────────────────────────────── -->
+  <div class="app-body">
+
+    <!-- ── Left sidebar ───────────────────────────────────────────────────── -->
+    <aside class="sidebar">
+      <div class="sidebar-group-label">我的工作</div>
+      <div class="sidebar-item">
+        <span class="icon">＋</span>
+        <span class="label">新增合約</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">📄</span>
+        <span class="label">我的合約</span>
+        <span class="sidebar-badge">3</span>
+      </div>
+      <div class="sidebar-item active">
+        <span class="icon">✓</span>
+        <span class="label">待我審核</span>
+        <span class="sidebar-badge">2</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">✍</span>
+        <span class="label">待簽署</span>
+      </div>
+      <div class="sidebar-group-label">系統</div>
+      <div class="sidebar-item">
+        <span class="icon">□</span>
+        <span class="label">合約範本</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">■</span>
+        <span class="label">儀表板</span>
+      </div>
+      <div class="sidebar-item">
+        <span class="icon">⚙</span>
+        <span class="label">設定</span>
+      </div>
+    </aside>
+
+    <!-- ── Main content ────────────────────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- Progress bar row -->
+      <div class="progress-section">
+        <div class="progress-left">
+          <div class="progress-title">簽核進度</div>
+
+          <!-- Stage rail -->
+          <div class="stages-rail">
+
+            <!-- Stage 1: 起草送件 — completed (✓) -->
+            <div class="stage-wrap">
+              <div class="stage-circle done">
+                <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M7 14L3 10l1.4-1.4L7 11.2l8.6-8.6L17 4z"/>
+                </svg>
+              </div>
+              <div class="stage-label">起草送件</div>
+            </div>
+
+            <div class="stage-connector done"></div>
+
+            <!-- Stage 2: 簽核路由 — active (3) -->
+            <div class="stage-wrap">
+              <div class="stage-circle active" aria-current="step">3</div>
+              <div class="stage-label active">簽核路由</div>
+            </div>
+
+            <div class="stage-connector"></div>
+
+            <!-- Stage 3: 外部查署 — waiting (4) -->
+            <div class="stage-wrap">
+              <div class="stage-circle wait">4</div>
+              <div class="stage-label">外部查署</div>
+            </div>
+
+            <div class="stage-connector"></div>
+
+            <!-- Stage 4: 完成詳情 — waiting (5) -->
+            <div class="stage-wrap">
+              <div class="stage-circle wait">5</div>
+              <div class="stage-label">完成詳情</div>
+            </div>
+
+          </div><!-- /stages-rail -->
+        </div><!-- /progress-left -->
+
+        <!-- CTA button — top right -->
+        <button class="cta-btn" type="button">已完成 → 外部簽署 →</button>
+      </div><!-- /progress-section -->
+
+      <!-- Contract subtitle -->
+      <div class="contract-title">2026 年度軟體維護服務合約</div>
+
+      <!-- Two-column body -->
+      <div class="main-cols">
+
+        <!-- ─── LEFT COLUMN ──────────────────────────────────────────────── -->
+        <div class="col-left">
+
+          <!-- Approval Chain -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-hdr-icon">🐎</span>
+              <span>串簽流程（3 層）</span>
+            </div>
+            <div class="chain-list">
+
+              <!-- Row 1: 王志明 — 已核准 -->
+              <div class="approver-row">
+                <div class="avatar done">王</div>
+                <div class="approver-info">
+                  <div class="approver-name">王志明</div>
+                  <div class="approver-meta">直屬主管・採購部門</div>
+                </div>
+                <div class="approver-actions">
+                  <div class="badge approved">已核准</div>
+                </div>
+              </div>
+
+              <!-- Row 2: 李雅婷 — 催辦 + 審核中 -->
+              <div class="approver-row">
+                <div class="avatar active">李</div>
+                <div class="approver-info">
+                  <div class="approver-name">李雅婷</div>
+                  <div class="approver-meta">上一層主管・採購總監</div>
+                </div>
+                <div class="approver-actions">
+                  <button class="urge-btn" type="button">催辦</button>
+                  <div class="badge active">審核中</div>
+                </div>
+              </div>
+
+              <!-- Row 3: 張文豪 — 待簽 -->
+              <div class="approver-row">
+                <div class="avatar wait">張</div>
+                <div class="approver-info">
+                  <div class="approver-name">張文豪</div>
+                  <div class="approver-meta">最終核准・副總經理</div>
+                </div>
+                <div class="approver-actions">
+                  <div class="badge wait">待簽</div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /approval chain -->
+
+          <!-- Process Status -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-hdr-icon">⠿</span>
+              <span>流程狀態</span>
+            </div>
+            <div class="status-grid">
+              <div class="status-row">
+                <span class="status-lbl">路由類型</span>
+                <span class="status-val">串簽 Sequential</span>
+              </div>
+              <div class="status-row">
+                <span class="status-lbl">送審時間</span>
+                <span class="status-val">2026-07-14 09:32</span>
+              </div>
+              <div class="status-row">
+                <span class="status-lbl">預計完成</span>
+                <span class="status-val">2026-07-16</span>
+              </div>
+              <div class="status-row">
+                <span class="status-lbl">AI 審查結果</span>
+                <span class="status-val ai">
+                  82 / 100
+                  <a href="#" class="ai-suggest-link" tabindex="-1">建議修改</a>
+                </span>
+              </div>
+            </div>
+          </div><!-- /process status -->
+
+          <!-- Audit Timeline -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-hdr-icon">↺</span>
+              <span>審核歷程</span>
+            </div>
+            <div class="audit-list">
+
+              <div class="audit-row">
+                <div class="audit-dot"></div>
+                <div class="audit-body">
+                  <div class="audit-ts">07-14 09:32</div>
+                  <div class="audit-detail">陳大明送審，附 AI 報告</div>
+                </div>
+              </div>
+
+              <div class="audit-row">
+                <div class="audit-dot hl"></div>
+                <div class="audit-body">
+                  <div class="audit-ts hl">07-14 11:05</div>
+                  <div class="audit-detail hl">王志明核准 — 「條款無誤，同意送上級」</div>
+                </div>
+              </div>
+
+              <div class="audit-row">
+                <div class="audit-dot"></div>
+                <div class="audit-body">
+                  <div class="audit-ts">07-14 11:05</div>
+                  <div class="audit-detail">系統通知李雅婷待審</div>
+                </div>
+              </div>
+
+            </div>
+          </div><!-- /audit timeline -->
+
+        </div><!-- /col-left -->
+
+        <!-- ─── RIGHT COLUMN ─────────────────────────────────────────────── -->
+        <div class="col-right">
+
+          <!-- Action Panel -->
+          <div class="action-panel">
+            <div class="action-hdr">
+              <span class="panel-hdr-icon">🕐</span>
+              <span>待我審核</span>
+            </div>
+            <p class="action-ctx">您目前為本案第 2 層審核人，請確認合約條款並做出決策。</p>
+            <div class="action-btns">
+              <button class="action-btn danger"    type="button">退回</button>
+              <button class="action-btn secondary" type="button">轉派</button>
+              <button class="action-btn primary"   type="button">核准</button>
+            </div>
+            <div class="comment-section">
+              <label class="comment-label">審核意見（選填）</label>
+              <textarea class="comment-area" placeholder="填寫審核意見…" rows="4"></textarea>
+            </div>
+          </div><!-- /action panel -->
+
+          <!-- Route Explanation -->
+          <div class="panel">
+            <div class="panel-hdr">
+              <span class="panel-hdr-icon">⠿</span>
+              <span>路由說明</span>
+            </div>
+            <p class="route-text">
+              本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。
+            </p>
+            <div class="route-flow">
+              <div class="route-box done">申請人&#10;送審</div>
+              <div class="route-arrow done">→</div>
+              <div class="route-box done">直屬主管&#10;核准</div>
+              <div class="route-arrow done">→</div>
+              <div class="route-box current">上一階&#10;核准</div>
+              <div class="route-arrow">→</div>
+              <div class="route-box pending">最終核准&#10;執行</div>
+              <div class="route-arrow">→</div>
+              <div class="route-box pending">外部&#10;簽署</div>
+            </div>
+          </div><!-- /route explanation -->
+
+        </div><!-- /col-right -->
+
+      </div><!-- /main-cols -->
+    </main>
+  </div><!-- /app-body -->
+</div><!-- /app-shell -->
+
+<!-- Preview watermark -->
+<div class="preview-banner">
+  📐 HTML PREVIEW — Design sign-off before BAW Coach Tester build · ApprovalReviewDashboard · eContract 簽核
+</div>
+
+</body>
+</html>

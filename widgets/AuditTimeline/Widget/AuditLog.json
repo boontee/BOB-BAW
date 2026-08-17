@@ -1,0 +1,50 @@
+{
+  "type": "AuditLog",
+  "description": "Business object for the audit timeline — contains an ordered list of audit events",
+  "properties": [
+    {
+      "name": "events",
+      "type": "AuditEvent",
+      "isList": true,
+      "description": "Ordered list of audit events (newest last)"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "AuditEvent",
+      "description": "A single entry in the approval audit trail",
+      "properties": [
+        {
+          "name": "timestamp",
+          "type": "String",
+          "description": "Event timestamp string (formatted for display)"
+        },
+        {
+          "name": "actor",
+          "type": "String",
+          "description": "Name of the person who performed the action"
+        },
+        {
+          "name": "action",
+          "type": "String",
+          "description": "Short action label, e.g. 'Approved', 'Submitted', 'Returned'"
+        },
+        {
+          "name": "detail",
+          "type": "String",
+          "description": "Additional detail or comment attached to this event"
+        },
+        {
+          "name": "isHighlighted",
+          "type": "Boolean",
+          "description": "If true, render this event with a highlighted/accent style"
+        },
+        {
+          "name": "attachmentRef",
+          "type": "String",
+          "description": "Optional reference ID or URL for an attachment associated with this event"
+        }
+      ]
+    }
+  ]
+}

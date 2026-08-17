@@ -1,0 +1,36 @@
+{
+  "type": "RoutingRule",
+  "description": "Business object for the routing explanation card — shows triggered rule, threshold, and next action",
+  "properties": [
+    {
+      "name": "title",
+      "type": "String",
+      "description": "Header title for the routing explanation card"
+    },
+    {
+      "name": "explanation",
+      "type": "String",
+      "description": "Free-text explanation of why this routing rule was triggered"
+    },
+    {
+      "name": "ruleId",
+      "type": "String",
+      "description": "Identifier of the triggered routing rule"
+    },
+    {
+      "name": "triggeredByAmount",
+      "type": "String",
+      "description": "Amount or value that triggered the rule (formatted string)"
+    },
+    {
+      "name": "threshold",
+      "type": "String",
+      "description": "Threshold value that the triggeredByAmount exceeded (formatted string)"
+    },
+    {
+      "name": "nextAction",
+      "type": "String",
+      "description": "Key of the recommended next action emitted when link is clicked"
+    }
+  ]
+}

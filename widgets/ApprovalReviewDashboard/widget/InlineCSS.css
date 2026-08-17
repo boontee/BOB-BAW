@@ -1,0 +1,543 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ApprovalReviewDashboard — InlineCSS
+   Matches eContract 簽核 review screen exactly
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root container ───────────────────────────────────────────────────────── */
+.ard-root {
+    font-family: "IBM Plex Sans", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f4f6f9;
+    min-height: 100%;
+    padding: 20px 24px;
+    box-sizing: border-box;
+    color: #161616;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ── Progress row (full width) ────────────────────────────────────────────── */
+.ard-progress-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+.ard-progress-left {
+    flex: 1;
+}
+.ard-progress-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #161616;
+    margin-bottom: 12px;
+    letter-spacing: -0.3px;
+}
+
+/* ── Stages bar ───────────────────────────────────────────────────────────── */
+.ard-stages-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.ard-stages {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+}
+.ard-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 72px;
+}
+.ard-stage-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.ard-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+    transition: background 0.2s;
+}
+.ard-circle.completed {
+    background: #198038;
+    color: #fff;
+    border-color: #198038;
+}
+.ard-circle.current {
+    background: #0f62fe;
+    color: #fff;
+    border-color: #0f62fe;
+}
+.ard-circle.pending {
+    background: #fff;
+    color: #8d8d8d;
+    border: 2px solid #c6c6c6;
+}
+.ard-stage-label {
+    font-size: 12px;
+    color: #6f6f6f;
+    text-align: center;
+    white-space: nowrap;
+}
+.ard-stage-label.current {
+    color: #0f62fe;
+    font-weight: 600;
+}
+.ard-connector {
+    flex: 1;
+    height: 2px;
+    background: #c6c6c6;
+    min-width: 24px;
+    margin-bottom: 22px;
+    align-self: flex-start;
+    margin-top: 19px;
+}
+.ard-connector.completed {
+    background: #198038;
+}
+
+/* ── CTA Button ───────────────────────────────────────────────────────────── */
+.ard-cta-btn {
+    background: #0f4880;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+.ard-cta-btn:hover {
+    background: #0353e9;
+}
+
+/* ── Contract title ───────────────────────────────────────────────────────── */
+.ard-contract-title {
+    font-size: 14px;
+    color: #525252;
+    margin: 6px 0 18px;
+}
+
+/* ── Main two-column layout ───────────────────────────────────────────────── */
+.ard-main {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.ard-left {
+    flex: 6;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.ard-right {
+    flex: 4;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Generic panel ─────────────────────────────────────────────────────────  */
+.ard-panel {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+}
+.ard-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #161616;
+    border-bottom: 1px solid #f0f0f0;
+}
+.ard-panel-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* ── Approval Chain ──────────────────────────────────────────────────────── */
+.ard-chain-list {
+    padding: 8px 0;
+}
+.ard-approver-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f4f4f4;
+    gap: 14px;
+}
+.ard-approver-row:last-child {
+    border-bottom: none;
+}
+.ard-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+}
+.ard-avatar.completed  { background: #198038; }
+.ard-avatar.current    { background: #0f62fe; }
+.ard-avatar.pending    { background: #a8a8a8; }
+.ard-avatar.rejected   { background: #da1e28; }
+
+.ard-approver-info {
+    flex: 1;
+    min-width: 0;
+}
+.ard-approver-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #161616;
+}
+.ard-approver-meta {
+    font-size: 12px;
+    color: #6f6f6f;
+    margin-top: 2px;
+}
+.ard-approver-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.ard-urge-btn {
+    border: 1.5px solid #c8a04a;
+    background: #fff;
+    color: #8a6a1a;
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ard-urge-btn:hover {
+    background: #fdf5e0;
+}
+.ard-status-badge {
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.ard-status-badge.approved  { background: #defbe6; color: #198038; border: 1px solid #a7f0ba; }
+.ard-status-badge.current   { background: #fff3cd; color: #8a5700; border: 1px solid #f0c040; }
+.ard-status-badge.pending   { background: #f4f4f4; color: #6f6f6f; border: 1px solid #e0e0e0; }
+.ard-status-badge.rejected  { background: #fff1f1; color: #da1e28; border: 1px solid #ffb3b8; }
+
+/* ── Process Status ───────────────────────────────────────────────────────── */
+.ard-status-grid {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.ard-status-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f4f4f4;
+    font-size: 14px;
+}
+.ard-status-row:last-child {
+    border-bottom: none;
+}
+.ard-status-label {
+    color: #525252;
+}
+.ard-status-value {
+    color: #161616;
+    font-weight: 500;
+    text-align: right;
+}
+.ard-status-value.ai-score,
+.ard-ai-score-val {
+    color: #0f62fe;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+}
+.ard-ai-link,
+.ard-ai-suggestion-link {
+    color: #0f62fe;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+}
+.ard-ai-link:hover,
+.ard-ai-suggestion-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Audit Timeline ───────────────────────────────────────────────────────── */
+.ard-audit-panel { }
+.ard-audit-list {
+    padding: 8px 18px 14px;
+}
+.ard-audit-event {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f4f4f4;
+}
+.ard-audit-event:last-child {
+    border-bottom: none;
+}
+.ard-audit-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #c6c6c6;
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+.ard-audit-dot.highlighted { background: #0f62fe; }
+.ard-audit-dot.approved    { background: #198038; }
+.ard-audit-dot.rejected    { background: #da1e28; }
+
+.ard-audit-body {
+    flex: 1;
+    min-width: 0;
+}
+.ard-audit-ts {
+    font-size: 12px;
+    color: #6f6f6f;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+.ard-audit-detail {
+    font-size: 13px;
+    color: #161616;
+    word-break: break-word;
+}
+.ard-audit-detail.highlighted {
+    color: #c28a00;
+    font-weight: 600;
+}
+
+/* ── Action Panel (right top) ─────────────────────────────────────────────── */
+.ard-action-panel {
+    background: #fffbf0;
+    border: 1.5px solid #e8d48a;
+    border-radius: 10px;
+    padding: 0 0 16px;
+    overflow: hidden;
+}
+.ard-action-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fffbf0;
+    border-bottom: 1px solid #f0e0a0;
+    padding: 14px 18px 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #161616;
+}
+.ard-context-msg {
+    font-size: 13px;
+    color: #525252;
+    padding: 12px 18px 4px;
+    margin: 0;
+    line-height: 1.6;
+}
+.ard-action-buttons {
+    display: flex;
+    gap: 10px;
+    padding: 10px 18px;
+}
+.ard-action-btn {
+    flex: 1;
+    padding: 11px 8px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s;
+    color: #fff;
+}
+.ard-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.ard-action-btn:hover:not(:disabled) {
+    opacity: 0.88;
+}
+.ard-action-btn.danger    { background: #8b2020; }
+.ard-action-btn.secondary { background: #6f6f6f; }
+.ard-action-btn.primary   { background: #0f4880; }
+
+.ard-comment-section {
+    padding: 6px 18px 0;
+}
+.ard-comment-label {
+    display: block;
+    font-size: 12px;
+    color: #525252;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+.ard-comment-area {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d0d0d0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #161616;
+    background: #fff;
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.ard-comment-area::placeholder {
+    color: #a8a8a8;
+}
+.ard-comment-area:focus {
+    border-color: #0f62fe;
+    box-shadow: 0 0 0 2px rgba(15,98,254,0.15);
+}
+
+/* ── Route Explanation (right bottom) ────────────────────────────────────── */
+.ard-route-panel {
+    background: #fff;
+}
+.ard-route-text {
+    font-size: 13px;
+    color: #525252;
+    padding: 12px 18px 10px;
+    margin: 0;
+    line-height: 1.7;
+}
+
+/* Route flow diagram ─────────────────────────────────────────────────────── */
+.ard-route-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 6px 18px 18px;
+    overflow-x: auto;
+}
+.ard-route-step {
+    display: flex;
+    align-items: center;
+}
+/* Route step boxes are <button> elements — reset browser button styles */
+button.ard-route-step-box {
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: inherit;
+    outline: none;
+}
+button.ard-route-step-box:focus-visible {
+    box-shadow: 0 0 0 2px #0f62fe;
+}
+.ard-route-step-box {
+    border-radius: 8px;
+    border: 1.5px solid #c6c6c6;
+    background: #f4f4f4;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 58px;
+    line-height: 1.4;
+    color: #525252;
+    white-space: pre-line;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+.ard-route-step-box:hover {
+    filter: brightness(0.96);
+}
+.ard-route-step-box.completed {
+    background: #defbe6;
+    border-color: #a7f0ba;
+    color: #198038;
+}
+.ard-route-step-box.current {
+    background: #d4e5f0;
+    border-color: #9ec8e0;
+    color: #1a4d7a;
+}
+.ard-route-step-box.pending {
+    background: #f4f4f4;
+    border-color: #c6c6c6;
+    color: #525252;
+}
+.ard-route-arrow {
+    font-size: 16px;
+    color: #a8a8a8;
+    margin: 0 4px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+.ard-route-arrow.completed {
+    color: #198038;
+}
+
+/* ── Focus styles for all interactive elements ────────────────────────────── */
+.ard-cta-btn:focus-visible,
+.ard-action-btn:focus-visible,
+.ard-urge-btn:focus-visible,
+.ard-ai-link:focus-visible {
+    outline: 2px solid #0f62fe;
+    outline-offset: 2px;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .ard-main {
+        flex-direction: column;
+    }
+    .ard-left, .ard-right {
+        flex: none;
+        width: 100%;
+    }
+    .ard-cta-btn {
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+}

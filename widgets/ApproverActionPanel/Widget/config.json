@@ -1,0 +1,39 @@
+{
+  "name": "ApproverActionPanel",
+  "description": "Approval action panel widget for approvers to submit decisions with comments in IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "ApproverActionData",
+    "isList": false,
+    "type": "ApproverAction"
+  },
+  "configOptions": [
+    {
+      "name": "readOnly",
+      "type": "Boolean",
+      "label": "Read Only",
+      "description": "Disable action buttons and comment input (view mode)",
+      "default": false
+    },
+    {
+      "name": "showContext",
+      "type": "Boolean",
+      "label": "Show Context Message",
+      "description": "Display the contextMessage field above the comment area",
+      "default": true
+    },
+    {
+      "name": "actionClicked",
+      "type": "Event",
+      "label": "Action Clicked",
+      "description": "Fired when an action button is clicked; carries actionKey of the chosen action",
+      "parameterName": "actionKey"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ApproverAction",
+      "file": "ApproverAction.json"
+    }
+  ],
+  "changeFunction": true
+}

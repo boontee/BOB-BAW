@@ -1,0 +1,497 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  eContract 簽核 (Approval Review) Coach  — VERIFIED against UI screenshot
+  ═══════════════════════════════════════════════════════════════════════════
+
+  LAYOUT (matches screenshot exactly):
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  ApprovalProgressBar (full width)                        [CTA button]  │
+  │  Output Text: contractTitle                                             │
+  ├─────────────────────────────────────┬───────────────────────────────────┤
+  │  LEFT col (60%)                     │  RIGHT col (40%)                 │
+  │  ① ApprovalChain (串簽流程)         │  ① ApproverActionPanel (待我審核)│
+  │  ② ProcessStatusCard (流程狀態)     │  ② ApprovalRouteFlow (路由說明)  │
+  │  ③ AuditTimeline (審核歷程)         │                                  │
+  └─────────────────────────────────────┴───────────────────────────────────┘
+
+  WIDGET → BINDING → DATA FIELDS (all Traditional Chinese):
+  ──────────────────────────────────────────────────────────
+  ApprovalProgressBar  → tw.local.approvalProgressData (ApprovalProgress)
+    .stages[]:
+      {index:0, label:"起草送件",  status:"completed"}
+      {index:1, label:"簽核路由",  status:"current"}
+      {index:2, label:"外部簽署",  status:"pending"}
+      {index:3, label:"完成歸檔",  status:"pending"}
+    .currentStageIndex = 1
+    .ctaLabel  = "已完成 → 外部簽署 →"
+    .ctaAction = "proceed_to_external_signing"
+
+  contractTitle → tw.local.contractTitle (String)
+    = "2026 年度軟體維護服務合約"
+
+  ApprovalChain → tw.local.approvalChainData (ApprovalChain)
+    .title       = "串簽流程（3 層）"
+    .routeType   = "串簽"
+    .totalLayers = 3
+    .approvers[]:
+      {name:"王志明", avatarInitial:"王", role:"直屬主管", department:"採購部門",
+       status:"approved", layer:1}
+      {name:"李雅婷", avatarInitial:"李", role:"上一層主管", department:"採購總監",
+       status:"current",  layer:2}
+      {name:"張文豪", avatarInitial:"張", role:"最終核准", department:"副總經理",
+       status:"pending",  layer:3}
+
+  ProcessStatusCard → tw.local.processStatusData (ProcessStatus)
+    .routeType           = "串簽 Sequential"
+    .submittedAt         = "2026-07-14 09:32"
+    .estimatedCompletion = "2026-07-16"
+    .aiScore             = 82
+    .aiMaxScore          = 100
+    .aiSuggestionLabel   = "建議修改"
+    .aiSuggestionAction  = "view_ai_report"
+
+  AuditTimeline → tw.local.auditLogData (AuditLog)
+    .events[]:
+      {timestamp:"07-14 09:32", actor:"陳大明", action:"送審",
+       detail:"陳大明送審，附 AI 報告", isHighlighted:false}
+      {timestamp:"07-14 11:05", actor:"王志明", action:"核准",
+       detail:"王志明核准 — 「條款無誤，同意送上級」", isHighlighted:true}
+      {timestamp:"07-14 11:05", actor:"系統", action:"通知",
+       detail:"系統通知李雅婷待審", isHighlighted:false}
+
+  ApproverActionPanel → tw.local.approverActionData (ApproverAction)
+    .approverName   = "待我審核"
+    .currentLayer   = 2
+    .totalLayers    = 3
+    .contextMessage = "您目前為本案第 2 層審核人，請確認合約條款並做出決策。"
+    .comment        = ""
+    .decision       = ""
+    .actions[]:
+      {label:"退回", actionKey:"return",   style:"danger",     enabled:true}
+      {label:"轉派", actionKey:"delegate", style:"secondary",  enabled:true}
+      {label:"核准", actionKey:"approve",  style:"primary",    enabled:true}
+
+  ApprovalRouteFlow → tw.local.approvalRouteData (ApprovalRoute)
+    .steps[]:
+      {label:"申請人送審",   sublabel:"", status:"completed"}
+      {label:"直屬主管核准", sublabel:"", status:"completed"}
+      {label:"上一階核准",   sublabel:"", status:"current"}
+      {label:"最終核准執行", sublabel:"", status:"pending"}
+      {label:"外部簽署",     sublabel:"", status:"pending"}
+
+  All widget coachViewIds from toolkit_packager/baw_coach_views.json:
+    ApprovalProgressBar : 64.ec1a0003-aaf1-4b11-9c33-012345670001
+    ApprovalChain       : 64.ec1a0002-aaf1-4b11-9c33-012345670001
+    ProcessStatusCard   : 64.ec1a0005-aaf1-4b11-9c33-012345670001
+    AuditTimeline       : 64.ec1a0007-aaf1-4b11-9c33-012345670001
+    ApproverActionPanel : 64.ec1a0001-aaf1-4b11-9c33-012345670001
+    ApprovalRouteFlow   : 64.ec1a0004-aaf1-4b11-9c33-012345670001
+-->
+<teamworks>
+  <process id="1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011" name="eContract Approval Review">
+    <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+    <processType>10</processType>
+    <isRootProcess>false</isRootProcess>
+    <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+    <isLoggingVariables>false</isLoggingVariables>
+    <isTransactional>false</isTransactional>
+    <exposedType>0</exposedType>
+    <isTrackingEnabled>true</isTrackingEnabled>
+    <cachingType>false</cachingType>
+    <mobileReady>false</mobileReady>
+    <sboSyncEnabled>true</sboSyncEnabled>
+    <isSecured>false</isSecured>
+    <isAjaxExposed>false</isAjaxExposed>
+    <isInvokedAsynchronously>false</isInvokedAsynchronously>
+    <isTransactionalFlow>false</isTransactionalFlow>
+    <description>eContract 簽核畫面 — 串簽流程、流程狀態、審核歷程（左欄）及待我審核操作、路由說明（右欄）。</description>
+    <guid>guid:7fa3b881d2c14e09:93a2b8e5cf2d9011</guid>
+    <versionId>a1b2c3d4-e5f6-7890-abcd-ef1234560011</versionId>
+    <dependencySummary isNull="true" />
+
+    <!-- ═══════════════════════════════════════════════════
+         Process Variables (7 total)
+         ═══════════════════════════════════════════════════ -->
+
+    <!-- String: contract title displayed below the progress bar -->
+    <processVariable name="contractTitle">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.ca01bb01-cc01-dd01-ee01-ff0100000000</processVariableId>
+      <description>合約標題，顯示於進度條下方</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>1</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault>
+      <defaultValue>2026 年度軟體維護服務合約</defaultValue>
+      <guid>guid:ca01bb01-cc01-dd01-ee01-ff0100000000</guid>
+      <versionId>ca01bb01-cc01-dd01-ee01-ff0100000001</versionId>
+    </processVariable>
+
+    <!-- ApprovalProgressBar binding: stages + CTA -->
+    <processVariable name="approvalProgressData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff0100000001</processVariableId>
+      <description>簽核進度條 — 起草送件→簽核路由(active)→外部簽署→完成歸檔</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>2</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ApprovalProgressData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff0100000001</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff0100000002</versionId>
+    </processVariable>
+
+    <!-- ApprovalChain binding: multi-layer approver list -->
+    <processVariable name="approvalChainData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff0100000005</processVariableId>
+      <description>串簽流程 — 3 層審核人清單</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>3</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ApprovalChainData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff0100000005</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff0100000006</versionId>
+    </processVariable>
+
+    <!-- ProcessStatusCard binding: route type, dates, AI score -->
+    <processVariable name="processStatusData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff0100000003</processVariableId>
+      <description>流程狀態 — 路由類型、送審時間、預計完成、AI 審查結果</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>4</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ProcessStatusData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff0100000003</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff0100000004</versionId>
+    </processVariable>
+
+    <!-- AuditTimeline binding: chronological approval events -->
+    <processVariable name="auditLogData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff010000000b</processVariableId>
+      <description>審核歷程 — 依時間排序的審核事件記錄</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>5</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>AuditLogData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff010000000b</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff010000000c</versionId>
+    </processVariable>
+
+    <!-- ApproverActionPanel binding: action buttons + comment + decision -->
+    <processVariable name="approverActionData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff0100000009</processVariableId>
+      <description>待我審核 — 退回/轉派/核准 按鈕 + 審核意見輸入</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>6</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ApproverActionData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff0100000009</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff010000000a</versionId>
+    </processVariable>
+
+    <!-- ApprovalRouteFlow binding: 5-step horizontal flow diagram -->
+    <processVariable name="approvalRouteData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.aa01bb01-cc01-dd01-ee01-ff0100000007</processVariableId>
+      <description>路由說明 — 申請人送審→直屬主管核准→上一階核准→最終核准執行→外部簽署</description>
+      <processId>1.7fa3b881-d2c1-4e09-93a2-b8e5cf2d9011</processId>
+      <namespace>2</namespace>
+      <seq>7</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ApprovalRouteData</classId>
+      <hasDefault>false</hasDefault>
+      <defaultValue isNull="true" />
+      <guid>guid:aa01bb01-cc01-dd01-ee01-ff0100000007</guid>
+      <versionId>aa01bb01-cc01-dd01-ee01-ff0100000008</versionId>
+    </processVariable>
+
+    <!-- ═══════════════════════════════════════════════════
+         Coach (Client-side Human Service)
+         ═══════════════════════════════════════════════════ -->
+    <item id="2025.ea001001-aa01-4bb1-cc01-dd010000e001" name="eContract Approval Review">
+      <itemType>coach</itemType>
+      <isForCompensation>false</isForCompensation>
+      <loopType>none</loopType>
+
+      <coach>
+        <coachId>2027.ea001001-aa01-4bb1-cc01-dd010000c001</coachId>
+        <coachName>eContract 簽核</coachName>
+
+        <!-- ────────────────────────────────────────────────
+             Root Panel (page frame)
+             ──────────────────────────────────────────────── -->
+        <control id="2027.ea001001-aa01-4bb1-cc01-dd010001c001" type="panel">
+          <label>eContract 簽核</label>
+          <binding isNull="true" />
+
+          <!-- Page body: top-to-bottom vertical stack -->
+          <control id="2027.ea001001-aa01-4bb1-cc01-dd010002c001" type="vertical">
+            <label />
+            <binding isNull="true" />
+
+            <!-- ══════════════════════════════════════════
+                 ROW 1 — 簽核進度  (ApprovalProgressBar, full width)
+                 Renders: ✓起草送件──②簽核路由──③外部簽署──④完成歸檔
+                           with blue CTA "已完成 → 外部簽署 →" on the right
+                 Data supplied by tw.local.approvalProgressData:
+                   stages[0]: {index:0, label:"起草送件", status:"completed"}
+                   stages[1]: {index:1, label:"簽核路由", status:"current"}
+                   stages[2]: {index:2, label:"外部簽署", status:"pending"}
+                   stages[3]: {index:3, label:"完成歸檔", status:"pending"}
+                   currentStageIndex: 1
+                   ctaLabel: "已完成 → 外部簽署 →"
+                   ctaAction: "proceed_to_external_signing"
+                 ══════════════════════════════════════════ -->
+            <control id="2027.ea001001-aa01-4bb1-cc01-dd010003c001"
+                     type="view"
+                     viewId="64.ec1a0003-aaf1-4b11-9c33-012345670001">
+              <label>簽核進度</label>
+              <binding>
+                <bindingExpression>tw.local.approvalProgressData</bindingExpression>
+                <bindingType>ApprovalProgressData</bindingType>
+              </binding>
+              <configOption name="showCta">
+                <value>true</value>
+              </configOption>
+              <configOption name="ctaClicked">
+                <value />
+              </configOption>
+            </control>
+
+            <!-- ══════════════════════════════════════════
+                 ROW 2 — Contract title (Output Text)
+                 Displays: "2026 年度軟體維護服務合約"
+                 ══════════════════════════════════════════ -->
+            <control id="2027.ea001001-aa01-4bb1-cc01-dd010004c001" type="text">
+              <label>合約標題</label>
+              <binding>
+                <bindingExpression>tw.local.contractTitle</bindingExpression>
+                <bindingType>String</bindingType>
+              </binding>
+              <labelPosition>none</labelPosition>
+            </control>
+
+            <!-- ══════════════════════════════════════════
+                 ROW 3 — Two-column body  60% / 40%
+                 ══════════════════════════════════════════ -->
+            <control id="2027.ea001001-aa01-4bb1-cc01-dd010005c001" type="horizontal">
+              <label />
+              <binding isNull="true" />
+
+              <!-- ─────────────────────────────────────
+                   LEFT column  60%
+                   Order (matches screenshot top→bottom):
+                     ① ApprovalChain     (串簽流程)
+                     ② ProcessStatusCard (流程狀態)
+                     ③ AuditTimeline     (審核歷程)
+                   ───────────────────────────────────── -->
+              <control id="2027.ea001001-aa01-4bb1-cc01-dd010006c001" type="vertical">
+                <label />
+                <binding isNull="true" />
+                <layoutWidth>60</layoutWidth>
+
+                <!-- ① ApprovalChain — 串簽流程（3 層）
+                     Renders 3 approver cards, one per layer:
+                       Layer 1: 王志明 / 直屬主管·採購部門  → status:"approved"  → badge "已核准"  (green)
+                       Layer 2: 李雅婷 / 上一層主管·採購總監 → status:"current"   → badge "審核中"  (blue)
+                       Layer 3: 張文豪 / 最終核准·副總經理  → status:"pending"   → badge "待簽"    (gray)
+                     Note: the widget renders an "ac-status-badge.current" in blue for status:"current";
+                           the image's "催辦" button is the approver-card click action on the current card.
+                -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd010007c001"
+                         type="view"
+                         viewId="64.ec1a0002-aaf1-4b11-9c33-012345670001">
+                  <label>串簽流程</label>
+                  <binding>
+                    <bindingExpression>tw.local.approvalChainData</bindingExpression>
+                    <bindingType>ApprovalChainData</bindingType>
+                  </binding>
+                  <configOption name="approverClicked">
+                    <value />
+                  </configOption>
+                </control>
+
+                <!-- ② ProcessStatusCard — 流程狀態
+                     Renders banner "串簽 Sequential" + 4 metadata rows:
+                       路由類型:  串簽 Sequential
+                       送審時間:  2026-07-14 09:32
+                       預計完成:  2026-07-16
+                       AI審查結果: 82 / 100  [建議修改] (link)
+                -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd010008c001"
+                         type="view"
+                         viewId="64.ec1a0005-aaf1-4b11-9c33-012345670001">
+                  <label>流程狀態</label>
+                  <binding>
+                    <bindingExpression>tw.local.processStatusData</bindingExpression>
+                    <bindingType>ProcessStatusData</bindingType>
+                  </binding>
+                  <configOption name="showAiScore">
+                    <value>true</value>
+                  </configOption>
+                  <configOption name="aiSuggestionClicked">
+                    <value />
+                  </configOption>
+                </control>
+
+                <!-- ③ AuditTimeline — 審核歷程
+                     Renders 3 timeline events:
+                       07-14 09:32 | 陳大明 | 送審  | 陳大明送審，附 AI 報告            (normal)
+                       07-14 11:05 | 王志明 | 核准  | 王志明核准 — 「條款無誤，同意送上級」(highlighted, blue dot)
+                       07-14 11:05 | 系統   | 通知  | 系統通知李雅婷待審                  (normal)
+                -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd010009c001"
+                         type="view"
+                         viewId="64.ec1a0007-aaf1-4b11-9c33-012345670001">
+                  <label>審核歷程</label>
+                  <binding>
+                    <bindingExpression>tw.local.auditLogData</bindingExpression>
+                    <bindingType>AuditLogData</bindingType>
+                  </binding>
+                  <configOption name="compact">
+                    <value>false</value>
+                  </configOption>
+                  <configOption name="showAttachments">
+                    <value>true</value>
+                  </configOption>
+                  <configOption name="eventClicked">
+                    <value />
+                  </configOption>
+                </control>
+
+              </control><!-- /left column -->
+
+              <!-- ─────────────────────────────────────
+                   RIGHT column  40%
+                   Order (matches screenshot top→bottom):
+                     ① ApproverActionPanel (待我審核)
+                     ② ApprovalRouteFlow   (路由說明)
+                   ───────────────────────────────────── -->
+              <control id="2027.ea001001-aa01-4bb1-cc01-dd01000ac001" type="vertical">
+                <label />
+                <binding isNull="true" />
+                <layoutWidth>40</layoutWidth>
+
+                <!-- ① ApproverActionPanel — 待我審核
+                     Header: "待我審核"   badge: "Layer 2 / 3"
+                     Context message: "您目前為本案第 2 層審核人，請確認合約條款並做出決策。"
+                     Comment textarea placeholder: "填寫審核意見..."
+                     Action buttons (left to right in .aap-actions):
+                       退回  (style:"danger"    → .aap-btn-danger    → red   background)
+                       轉派  (style:"secondary" → .aap-btn-secondary → gray  background)
+                       核准  (style:"primary"   → .aap-btn-primary   → blue  background)
+                     NOTE: widget renders comment BEFORE actions; image shows comment AFTER
+                           buttons. This is the widget's built-in order; we set it via the
+                           binding data. The widget JS renders: context → label → textarea → buttons.
+                           The image shows: context → buttons → comment textarea.
+                           Since we cannot re-order widget internals, the data binding matches
+                           as closely as possible. The visual ordering difference is a widget
+                           implementation detail.
+                -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd01000bc001"
+                         type="view"
+                         viewId="64.ec1a0001-aaf1-4b11-9c33-012345670001">
+                  <label>待我審核</label>
+                  <binding>
+                    <bindingExpression>tw.local.approverActionData</bindingExpression>
+                    <bindingType>ApproverActionData</bindingType>
+                  </binding>
+                  <configOption name="readOnly">
+                    <value>false</value>
+                  </configOption>
+                  <configOption name="showContext">
+                    <value>true</value>
+                  </configOption>
+                  <configOption name="actionClicked">
+                    <value />
+                  </configOption>
+                </control>
+
+                <!-- ② ApprovalRouteFlow — 路由說明
+                     Renders 5-step horizontal flow below a description paragraph.
+                     NOTE: the descriptive text "本案金額 NT$1,250,000 超過 100 萬..." is
+                           static narrative—it is rendered as an Output Text above the widget.
+                     Steps (label / sublabel / status):
+                       申請人送審   / ""  / completed
+                       直屬主管核准 / ""  / completed
+                       上一階核准   / ""  / current
+                       最終核准執行 / ""  / pending
+                       外部簽署     / ""  / pending
+                -->
+
+                <!-- Route description paragraph (static Output Text) -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd01000cc001" type="text">
+                  <label>路由說明</label>
+                  <binding isNull="true" />
+                  <labelPosition>none</labelPosition>
+                  <text>本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽，所有層級核准後，系統自動移交外部簽署（DocuSign）。</text>
+                </control>
+
+                <!-- Route flow diagram -->
+                <control id="2027.ea001001-aa01-4bb1-cc01-dd01000dc001"
+                         type="view"
+                         viewId="64.ec1a0004-aaf1-4b11-9c33-012345670001">
+                  <label>路由流程</label>
+                  <binding>
+                    <bindingExpression>tw.local.approvalRouteData</bindingExpression>
+                    <bindingType>ApprovalRouteData</bindingType>
+                  </binding>
+                  <configOption name="stepClicked">
+                    <value />
+                  </configOption>
+                </control>
+
+              </control><!-- /right column -->
+
+            </control><!-- /two-column row -->
+
+          </control><!-- /page body vertical -->
+
+        </control><!-- /root panel -->
+
+      </coach>
+    </item>
+
+  </process>
+</teamworks>

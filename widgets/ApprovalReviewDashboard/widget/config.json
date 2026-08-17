@@ -1,0 +1,53 @@
+{
+  "name": "ApprovalReviewDashboard",
+  "description": "Full eContract 簽核 approval review dashboard — progress bar, approval chain, process status, audit timeline, approver action panel, and route flow in a single unified widget",
+  "bindingType": {
+    "name": "dashboardData",
+    "isList": false,
+    "type": "ApprovalReviewDashboard"
+  },
+  "configOptions": [
+    {
+      "name": "ctaClicked",
+      "type": "Event",
+      "label": "CTA Clicked",
+      "description": "Fired when the top-right CTA button is clicked; carries ctaAction value",
+      "parameterName": "ctaAction"
+    },
+    {
+      "name": "actionClicked",
+      "type": "Event",
+      "label": "Action Button Clicked",
+      "description": "Fired when an approver action button (核准/退回/轉派) is clicked; carries actionKey value",
+      "parameterName": "actionKey"
+    },
+    {
+      "name": "urgeClicked",
+      "type": "Event",
+      "label": "Urge Button Clicked",
+      "description": "Fired when the 催辦 urge button is clicked on an approver row; carries approver layer index",
+      "parameterName": "approverIndex"
+    },
+    {
+      "name": "commentChanged",
+      "type": "Event",
+      "label": "Comment Changed",
+      "description": "Fired when the approver comment textarea changes; carries current comment text",
+      "parameterName": "comment"
+    },
+    {
+      "name": "stepClicked",
+      "type": "Event",
+      "label": "Route Step Clicked",
+      "description": "Fired when a route flow step box is clicked in the route explanation diagram; carries 0-based step index",
+      "parameterName": "stepIndex"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ApprovalReviewDashboard",
+      "file": "ApprovalReviewDashboard.json"
+    }
+  ],
+  "changeFunction": true
+}

@@ -1,0 +1,25 @@
+{
+  "name": "ApprovalRouteFlow",
+  "description": "Horizontal flow diagram showing approval routing steps with status indicators for IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "ApprovalRouteData",
+    "isList": false,
+    "type": "ApprovalRoute"
+  },
+  "configOptions": [
+    {
+      "name": "stepClicked",
+      "type": "Event",
+      "label": "Step Clicked",
+      "description": "Fired when a route step node is clicked; carries step index",
+      "parameterName": "stepIndex"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ApprovalRoute",
+      "file": "ApprovalRoute.json"
+    }
+  ],
+  "changeFunction": true
+}

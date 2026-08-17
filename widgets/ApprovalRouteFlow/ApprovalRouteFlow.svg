@@ -1,0 +1,27 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" fill="#ffffff"/>
+  <!-- Horizontal line -->
+  <line x1="10" y1="55" x2="110" y2="55" stroke="#8d8d8d" stroke-width="2"/>
+  <!-- Step 1: completed -->
+  <circle cx="20" cy="55" r="12" fill="#d4edda" stroke="#198038" stroke-width="2"/>
+  <path d="M16 55l3 3 6-6" stroke="#198038" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="20" y="76" font-family="IBM Plex Sans, Arial" font-size="7" fill="#525252" text-anchor="middle">Submit</text>
+  <!-- Arrow -->
+  <polygon points="38,52 44,55 38,58" fill="#198038"/>
+  <!-- Step 2: completed -->
+  <circle cx="52" cy="55" r="12" fill="#d4edda" stroke="#198038" stroke-width="2"/>
+  <path d="M48 55l3 3 6-6" stroke="#198038" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <text x="52" y="76" font-family="IBM Plex Sans, Arial" font-size="7" fill="#525252" text-anchor="middle">L1</text>
+  <!-- Arrow -->
+  <polygon points="70,52 76,55 70,58" fill="#8d8d8d"/>
+  <!-- Step 3: current -->
+  <circle cx="84" cy="55" r="12" fill="#d0e2ff" stroke="#0043ce" stroke-width="2"/>
+  <text x="84" y="59" font-family="IBM Plex Sans, Arial" font-size="9" font-weight="700" fill="#0043ce" text-anchor="middle">3</text>
+  <text x="84" y="76" font-family="IBM Plex Sans, Arial" font-size="7" fill="#0043ce" font-weight="600" text-anchor="middle">L2</text>
+  <!-- Arrow -->
+  <polygon points="102,52 108,55 102,58" fill="#8d8d8d"/>
+  <!-- Step 4: pending -->
+  <circle cx="115" cy="55" r="8" fill="#f4f4f4" stroke="#8d8d8d" stroke-width="1.5"/>
+  <text x="115" y="59" font-family="IBM Plex Sans, Arial" font-size="8" fill="#8d8d8d" text-anchor="middle">4</text>
+</svg>
+<!-- Made with Bob -->

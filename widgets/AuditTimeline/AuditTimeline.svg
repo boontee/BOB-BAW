@@ -1,0 +1,28 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" fill="#ffffff"/>
+  <!-- Card -->
+  <rect x="10" y="10" width="100" height="100" rx="4" fill="#ffffff" stroke="#e0e0e0" stroke-width="1.5"/>
+  <!-- Header -->
+  <rect x="10" y="10" width="100" height="20" rx="4" fill="#f4f4f4" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="18" y="24" font-family="IBM Plex Sans, Arial" font-size="9" font-weight="600" fill="#161616">Audit Trail (3)</text>
+  <!-- Vertical line -->
+  <line x1="30" y1="34" x2="30" y2="106" stroke="#e0e0e0" stroke-width="2"/>
+  <!-- Event 1 -->
+  <circle cx="30" cy="42" r="5" fill="#8d8d8d" stroke="#ffffff" stroke-width="2"/>
+  <text x="40" y="39" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#161616">John Requester</text>
+  <rect x="40" y="41" width="28" height="8" rx="4" fill="#d0e2ff"/>
+  <text x="54" y="47" font-family="IBM Plex Sans, Arial" font-size="6" fill="#0043ce" text-anchor="middle">Submitted</text>
+  <text x="86" y="47" font-family="IBM Plex Sans, Arial" font-size="6" fill="#8d8d8d">Aug 15</text>
+  <!-- Event 2 highlighted -->
+  <circle cx="30" cy="68" r="5" fill="#198038" stroke="#ffffff" stroke-width="2"/>
+  <rect x="36" y="58" width="68" height="18" rx="2" fill="#edf4ff"/>
+  <text x="40" y="66" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#161616">Alice Chen</text>
+  <rect x="40" y="68" width="26" height="8" rx="4" fill="#d4edda"/>
+  <text x="53" y="74" font-family="IBM Plex Sans, Arial" font-size="6" fill="#198038" text-anchor="middle">Approved</text>
+  <!-- Event 3 -->
+  <circle cx="30" cy="94" r="5" fill="#8d8d8d" stroke="#ffffff" stroke-width="2"/>
+  <text x="40" y="91" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#161616">Bob Nguyen</text>
+  <rect x="40" y="93" width="26" height="8" rx="4" fill="#fff3cd"/>
+  <text x="53" y="99" font-family="IBM Plex Sans, Arial" font-size="6" fill="#7d4e00" text-anchor="middle">Returned</text>
+</svg>
+<!-- Made with Bob -->

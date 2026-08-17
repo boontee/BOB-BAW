@@ -1,0 +1,25 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" fill="#ffffff"/>
+  <!-- Card -->
+  <rect x="10" y="12" width="100" height="88" rx="4" fill="#ffffff" stroke="#8d8d8d" stroke-width="1.5"/>
+  <!-- Header -->
+  <rect x="10" y="12" width="100" height="22" rx="4" fill="#f4f4f4" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="20" y="27" font-family="IBM Plex Sans, Arial" font-size="9" font-weight="600" fill="#161616">Approver Action</text>
+  <rect x="78" y="17" width="26" height="12" rx="6" fill="#e0e0e0"/>
+  <text x="91" y="26" font-family="IBM Plex Sans, Arial" font-size="7" fill="#525252" text-anchor="middle">2/3</text>
+  <!-- Context banner -->
+  <rect x="16" y="40" width="88" height="14" rx="2" fill="#e5f0ff"/>
+  <rect x="16" y="40" width="3" height="14" rx="1" fill="#0043ce"/>
+  <text x="23" y="50" font-family="IBM Plex Sans, Arial" font-size="7" fill="#525252">Exceeds threshold...</text>
+  <!-- Comment area -->
+  <rect x="16" y="60" width="88" height="20" rx="2" fill="#ffffff" stroke="#8d8d8d" stroke-width="1"/>
+  <text x="20" y="73" font-family="IBM Plex Sans, Arial" font-size="7" fill="#a8a8a8">Enter your review comment…</text>
+  <!-- Buttons -->
+  <rect x="16" y="86" width="34" height="10" rx="2" fill="#0043ce"/>
+  <text x="33" y="93" font-family="IBM Plex Sans, Arial" font-size="7" fill="#ffffff" text-anchor="middle">Approve</text>
+  <rect x="54" y="86" width="24" height="10" rx="2" fill="#da1e28"/>
+  <text x="66" y="93" font-family="IBM Plex Sans, Arial" font-size="7" fill="#ffffff" text-anchor="middle">Reject</text>
+  <rect x="82" y="86" width="22" height="10" rx="2" fill="#f4f4f4" stroke="#e0e0e0" stroke-width="1"/>
+  <text x="93" y="93" font-family="IBM Plex Sans, Arial" font-size="7" fill="#525252" text-anchor="middle">Return</text>
+</svg>
+<!-- Made with Bob -->

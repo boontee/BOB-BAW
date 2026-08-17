@@ -1,0 +1,39 @@
+{
+  "name": "AuditTimeline",
+  "description": "Audit trail timeline showing approval events with actor, action, timestamps, and attachment refs for IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "AuditLogData",
+    "isList": false,
+    "type": "AuditLog"
+  },
+  "configOptions": [
+    {
+      "name": "compact",
+      "type": "Boolean",
+      "label": "Compact Mode",
+      "description": "Use compact spacing for audit events",
+      "default": false
+    },
+    {
+      "name": "showAttachments",
+      "type": "Boolean",
+      "label": "Show Attachment Links",
+      "description": "Display attachment reference links on events that have them",
+      "default": true
+    },
+    {
+      "name": "eventClicked",
+      "type": "Event",
+      "label": "Event Clicked",
+      "description": "Fired when an audit event row is clicked; carries event index",
+      "parameterName": "eventIndex"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "AuditLog",
+      "file": "AuditLog.json"
+    }
+  ],
+  "changeFunction": true
+}

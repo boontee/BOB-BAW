@@ -1,0 +1,142 @@
+/* ApproverActionPanel Widget - Carbon Design System */
+
+.approverActionContainer {
+    width: 100%;
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.aap-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.aap-header {
+    background: #f4f4f4;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.aap-header-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #161616;
+}
+
+.aap-layer-badge {
+    font-size: 12px;
+    color: #525252;
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.aap-body {
+    padding: 16px;
+}
+
+.aap-context {
+    font-size: 13px;
+    color: #525252;
+    background: #e5f0ff;
+    border-left: 3px solid #0043ce;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border-radius: 0 4px 4px 0;
+}
+
+.aap-comment-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #525252;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.aap-comment-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    color: #161616;
+    background: #ffffff;
+    border: 1px solid #8d8d8d;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.aap-comment-textarea:focus {
+    outline: none;
+    border-color: #0043ce;
+    box-shadow: 0 0 0 2px rgba(0, 67, 206, 0.2);
+}
+
+.aap-comment-textarea:disabled {
+    background: #f4f4f4;
+    color: #a8a8a8;
+    cursor: not-allowed;
+}
+
+.aap-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.aap-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: 'IBM Plex Sans', Arial, sans-serif;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
+    letter-spacing: 0.3px;
+}
+
+.aap-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.aap-btn-primary {
+    background: #0043ce;
+    color: #ffffff;
+}
+
+.aap-btn-primary:not(:disabled):hover {
+    background: #0035a3;
+}
+
+.aap-btn-danger {
+    background: #da1e28;
+    color: #ffffff;
+}
+
+.aap-btn-danger:not(:disabled):hover {
+    background: #b81822;
+}
+
+.aap-btn-secondary {
+    background: #f4f4f4;
+    color: #161616;
+    border: 1px solid #e0e0e0;
+}
+
+.aap-btn-secondary:not(:disabled):hover {
+    background: #e0e0e0;
+}
+
+/* Made with Bob */

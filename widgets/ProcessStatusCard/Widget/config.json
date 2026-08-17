@@ -1,0 +1,32 @@
+{
+  "name": "ProcessStatusCard",
+  "description": "Process metadata card showing routing type, dates, and AI risk score for IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "ProcessStatusData",
+    "isList": false,
+    "type": "ProcessStatus"
+  },
+  "configOptions": [
+    {
+      "name": "showAiScore",
+      "type": "Boolean",
+      "label": "Show AI Score",
+      "description": "Display the AI risk score section",
+      "default": true
+    },
+    {
+      "name": "aiSuggestionClicked",
+      "type": "Event",
+      "label": "AI Suggestion Clicked",
+      "description": "Fired when the AI suggestion action link is clicked; carries aiSuggestionAction value",
+      "parameterName": "aiSuggestionAction"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ProcessStatus",
+      "file": "ProcessStatus.json"
+    }
+  ],
+  "changeFunction": true
+}

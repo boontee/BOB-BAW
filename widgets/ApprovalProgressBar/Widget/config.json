@@ -1,0 +1,32 @@
+{
+  "name": "ApprovalProgressBar",
+  "description": "Horizontal multi-stage approval progress bar with CTA button for IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "ApprovalProgressData",
+    "isList": false,
+    "type": "ApprovalProgress"
+  },
+  "configOptions": [
+    {
+      "name": "showCta",
+      "type": "Boolean",
+      "label": "Show CTA Button",
+      "description": "Display the call-to-action button defined in the binding data",
+      "default": true
+    },
+    {
+      "name": "ctaClicked",
+      "type": "Event",
+      "label": "CTA Clicked",
+      "description": "Fired when the CTA button is clicked; carries ctaAction value",
+      "parameterName": "ctaAction"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "ApprovalProgress",
+      "file": "ApprovalProgress.json"
+    }
+  ],
+  "changeFunction": true
+}

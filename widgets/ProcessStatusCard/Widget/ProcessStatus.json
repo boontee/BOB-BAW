@@ -1,0 +1,41 @@
+{
+  "type": "ProcessStatus",
+  "description": "Business object for the process metadata status card with routing info, dates, and AI risk score",
+  "properties": [
+    {
+      "name": "routeType",
+      "type": "String",
+      "description": "Routing type label shown at the top, e.g. 'Sequential Approval'"
+    },
+    {
+      "name": "submittedAt",
+      "type": "String",
+      "description": "Submission date/time string (formatted for display)"
+    },
+    {
+      "name": "estimatedCompletion",
+      "type": "String",
+      "description": "Estimated completion date/time string (formatted for display)"
+    },
+    {
+      "name": "aiScore",
+      "type": "Integer",
+      "description": "AI-computed risk score value"
+    },
+    {
+      "name": "aiMaxScore",
+      "type": "Integer",
+      "description": "Maximum possible AI score for the gauge (e.g. 100)"
+    },
+    {
+      "name": "aiSuggestionLabel",
+      "type": "String",
+      "description": "Short label describing the AI suggestion action"
+    },
+    {
+      "name": "aiSuggestionAction",
+      "type": "String",
+      "description": "Action key emitted when the AI suggestion link is clicked"
+    }
+  ]
+}

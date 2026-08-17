@@ -1,0 +1,119 @@
+/* RoutingExplanation Widget - Carbon Design System */
+
+.routingExplanationContainer {
+    width: 100%;
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.re-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.re-header {
+    background: #f4f4f4;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.re-header-icon {
+    color: #f1c21b;
+    flex-shrink: 0;
+}
+
+.re-header-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #161616;
+}
+
+.re-rule-id {
+    margin-left: auto;
+    font-size: 11px;
+    color: #525252;
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.re-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.re-explanation {
+    font-size: 13px;
+    color: #161616;
+    line-height: 1.6;
+}
+
+.re-thresholds {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.re-threshold-item {
+    flex: 1;
+    min-width: 120px;
+    background: #f4f4f4;
+    border-radius: 4px;
+    padding: 10px 12px;
+}
+
+.re-threshold-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #525252;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.re-threshold-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #161616;
+}
+
+.re-threshold-value.triggered {
+    color: #da1e28;
+}
+
+.re-next-action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.re-next-label {
+    font-size: 12px;
+    color: #525252;
+    font-weight: 600;
+}
+
+.re-next-link {
+    font-size: 13px;
+    color: #0043ce;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+.re-next-link:hover {
+    color: #0035a3;
+}
+
+/* Made with Bob */

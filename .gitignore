@@ -1,0 +1,24 @@
+MJ_UI_extracted
+**/.DS_Store
+.DS_Store
+Breadcrumb/.DS_Store
+DateOutput/.DS_Store
+FileNetImport/.DS_Store
+output/
+.env
+.bob/mcp.json
+sample/
+.bob/oldmcp.txt
+widget_input
+business-objects/
+business-processes/
+business-processes-old/
+business-blueprints/
+business-process/*
+templates/Localisation
+widgets/Carousel
+widgets/MultiDocumentUpload
+# Large binary template files (>5 MB — excluded to stay under GitHub limits)
+templates/BaseTWX/
+templates/OLD/
+social-widgets-preview/*.twx

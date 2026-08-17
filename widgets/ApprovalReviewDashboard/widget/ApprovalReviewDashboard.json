@@ -1,0 +1,143 @@
+{
+  "type": "ApprovalReviewDashboard",
+  "description": "Unified business object for the full eContract approval review dashboard — aggregates progress bar, approval chain, process status, audit timeline, approver action panel, and route flow",
+  "properties": [
+    {
+      "name": "contractTitle",
+      "type": "String",
+      "description": "Contract title shown below the progress bar, e.g. '2026 年度軟體維護服務合約'"
+    },
+    {
+      "name": "progress",
+      "type": "DashboardProgress",
+      "description": "Approval progress bar data — stages and CTA button"
+    },
+    {
+      "name": "approvalChain",
+      "type": "DashboardApprovalChain",
+      "description": "Serial approval chain with approver rows"
+    },
+    {
+      "name": "processStatus",
+      "type": "DashboardProcessStatus",
+      "description": "Route metadata — type, dates, AI score"
+    },
+    {
+      "name": "auditLog",
+      "type": "DashboardAuditLog",
+      "description": "Chronological audit trail events"
+    },
+    {
+      "name": "approverAction",
+      "type": "DashboardApproverAction",
+      "description": "Right-panel approver action — buttons and comment"
+    },
+    {
+      "name": "routeExplanation",
+      "type": "DashboardRouteExplanation",
+      "description": "Route explanation text and flow diagram steps"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "DashboardProgress",
+      "properties": [
+        { "name": "currentStageIndex", "type": "Integer", "description": "0-based index of the active stage" },
+        { "name": "ctaLabel",          "type": "String",  "description": "CTA button label" },
+        { "name": "ctaAction",         "type": "String",  "description": "CTA action key fired on click" },
+        { "name": "stages",            "type": "DashboardStage", "isList": true, "description": "Ordered list of pipeline stages" }
+      ]
+    },
+    {
+      "type": "DashboardStage",
+      "properties": [
+        { "name": "label",  "type": "String",  "description": "Stage display label" },
+        { "name": "status", "type": "String",  "description": "'completed' | 'current' | 'pending'" },
+        { "name": "index",  "type": "Integer", "description": "0-based stage index" }
+      ]
+    },
+    {
+      "type": "DashboardApprovalChain",
+      "properties": [
+        { "name": "title",       "type": "String",           "description": "Panel header, e.g. '串簽流程（3 層）'" },
+        { "name": "routeType",   "type": "String",           "description": "Route type label, e.g. '串簽'" },
+        { "name": "totalLayers", "type": "Integer",          "description": "Total approval layers" },
+        { "name": "approvers",   "type": "DashboardApprover", "isList": true, "description": "List of approvers" }
+      ]
+    },
+    {
+      "type": "DashboardApprover",
+      "properties": [
+        { "name": "name",          "type": "String",  "description": "Approver display name" },
+        { "name": "avatarInitial", "type": "String",  "description": "Avatar initial character(s)" },
+        { "name": "role",          "type": "String",  "description": "Approver role" },
+        { "name": "department",    "type": "String",  "description": "Approver department" },
+        { "name": "status",        "type": "String",  "description": "'pending' | 'approved' | 'rejected' | 'current'" },
+        { "name": "layer",         "type": "Integer", "description": "1-based layer number" },
+        { "name": "canUrge",       "type": "Boolean", "description": "Show '催辦' urge button for this approver" }
+      ]
+    },
+    {
+      "type": "DashboardProcessStatus",
+      "properties": [
+        { "name": "routeType",           "type": "String",  "description": "Route type display string" },
+        { "name": "submittedAt",         "type": "String",  "description": "Submission datetime string" },
+        { "name": "estimatedCompletion", "type": "String",  "description": "Expected completion date string" },
+        { "name": "aiScore",             "type": "Integer", "description": "AI review score (0-100)" },
+        { "name": "aiMaxScore",          "type": "Integer", "description": "AI score denominator (default 100)" },
+        { "name": "aiSuggestionLabel",   "type": "String",  "description": "AI suggestion action label" },
+        { "name": "aiSuggestionAction",  "type": "String",  "description": "AI suggestion action key" }
+      ]
+    },
+    {
+      "type": "DashboardAuditLog",
+      "properties": [
+        { "name": "events", "type": "DashboardAuditEvent", "isList": true, "description": "Chronological audit events" }
+      ]
+    },
+    {
+      "type": "DashboardAuditEvent",
+      "properties": [
+        { "name": "timestamp",     "type": "String",  "description": "Display timestamp, e.g. '07-14 09:32'" },
+        { "name": "actor",         "type": "String",  "description": "Person or system that performed the action" },
+        { "name": "action",        "type": "String",  "description": "Action label, e.g. '送審', '核准'" },
+        { "name": "detail",        "type": "String",  "description": "Full description of the event" },
+        { "name": "isHighlighted", "type": "Boolean", "description": "Highlight this event row" }
+      ]
+    },
+    {
+      "type": "DashboardApproverAction",
+      "properties": [
+        { "name": "title",          "type": "String",              "description": "Panel header, e.g. '待我審核'" },
+        { "name": "contextMessage", "type": "String",              "description": "Context instruction text" },
+        { "name": "comment",        "type": "String",              "description": "Approver comment (writable)" },
+        { "name": "decision",       "type": "String",              "description": "Decision value set by approver (writable)" },
+        { "name": "actions",        "type": "DashboardActionButton", "isList": true, "description": "Action buttons" }
+      ]
+    },
+    {
+      "type": "DashboardActionButton",
+      "properties": [
+        { "name": "label",     "type": "String",  "description": "Button label" },
+        { "name": "actionKey", "type": "String",  "description": "Action identifier" },
+        { "name": "style",     "type": "String",  "description": "'primary' | 'danger' | 'secondary'" },
+        { "name": "enabled",   "type": "Boolean", "description": "Whether the button is clickable" }
+      ]
+    },
+    {
+      "type": "DashboardRouteExplanation",
+      "properties": [
+        { "name": "explanationText", "type": "String",             "description": "Narrative explanation paragraph" },
+        { "name": "steps",           "type": "DashboardRouteStep", "isList": true, "description": "Route flow diagram steps" }
+      ]
+    },
+    {
+      "type": "DashboardRouteStep",
+      "properties": [
+        { "name": "label",    "type": "String", "description": "Step box main label (may contain newline for two lines)" },
+        { "name": "sublabel", "type": "String", "description": "Optional second line in step box" },
+        { "name": "status",   "type": "String", "description": "'completed' | 'current' | 'pending'" }
+      ]
+    }
+  ]
+}

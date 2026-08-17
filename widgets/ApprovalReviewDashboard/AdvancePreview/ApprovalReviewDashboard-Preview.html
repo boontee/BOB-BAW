@@ -1,0 +1,96 @@
+<!--
+ #BEGIN COPYRIGHT
+ Licensed Materials - Property of IBM
+ 5725-C95
+ (C) Copyright IBM Corporation 2026. All Rights Reserved.
+ #END COPYRIGHT
+-->
+<style>
+/* ── ApprovalReviewDashboard preview styles ─────────────────────────────── */
+.ard-p-root { font-family: 'IBM Plex Sans', 'Noto Sans TC', Arial, sans-serif; background: #f0f4f8; padding: 12px; border-radius: 6px; }
+
+/* Progress bar */
+.ard-p-prog-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ard-p-prog-title { font-size: 15px; font-weight: 700; color: #161616; margin-bottom: 6px; }
+.ard-p-stages { display: flex; align-items: center; flex: 1; }
+.ard-p-stage { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.ard-p-circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.ard-p-circle.completed { background: #198038; color: #fff; }
+.ard-p-circle.current   { background: #0f62fe; color: #fff; }
+.ard-p-circle.pending   { background: #fff; color: #8d8d8d; border: 2px solid #c6c6c6; }
+.ard-p-lbl { font-size: 10px; color: #6f6f6f; white-space: nowrap; }
+.ard-p-lbl.current { color: #0f62fe; font-weight: 600; }
+.ard-p-conn { flex: 1; height: 2px; background: #c6c6c6; min-width: 16px; margin-bottom: 14px; }
+.ard-p-conn.done { background: #198038; }
+.ard-p-cta { background: #0f4880; color: #fff; border: none; border-radius: 4px; padding: 6px 12px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+
+/* Contract title */
+.ard-p-contract { font-size: 12px; color: #525252; margin-bottom: 8px; }
+
+/* Two-column layout */
+.ard-p-main { display: flex; gap: 10px; }
+.ard-p-left { flex: 6; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.ard-p-right { flex: 4; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+/* Panels */
+.ard-p-panel { background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; }
+.ard-p-panel-hdr { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #161616; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+
+/* Approval chain rows */
+.ard-p-ap-row { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f4f4f4; gap: 8px; }
+.ard-p-ap-row:last-child { border-bottom: none; }
+.ard-p-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.ard-p-avatar.approved { background: #4caf6e; }
+.ard-p-avatar.current  { background: #5b7fa6; }
+.ard-p-avatar.pending  { background: #a8a8a8; }
+.ard-p-ap-info { flex: 1; }
+.ard-p-ap-name { font-size: 12px; font-weight: 600; color: #161616; }
+.ard-p-ap-meta { font-size: 10px; color: #6f6f6f; }
+.ard-p-badge { border-radius: 12px; padding: 2px 10px; font-size: 10px; font-weight: 600; }
+.ard-p-badge.approved { background: #defbe6; color: #198038; border: 1px solid #a7f0ba; }
+.ard-p-badge.current  { background: #fff3cd; color: #8a5700; border: 1px solid #f0c040; }
+.ard-p-badge.pending  { background: #f4f4f4; color: #6f6f6f; border: 1px solid #e0e0e0; }
+.ard-p-urge { border: 1px solid #c8a04a; background: #fff; color: #8a6a1a; border-radius: 10px; padding: 2px 8px; font-size: 10px; cursor: pointer; margin-right: 4px; }
+
+/* Status grid */
+.ard-p-stat-row { display: flex; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid #f4f4f4; font-size: 11px; }
+.ard-p-stat-row:last-child { border-bottom: none; }
+.ard-p-stat-lbl { color: #525252; }
+.ard-p-stat-val { color: #161616; font-weight: 500; }
+.ard-p-stat-val.ai { color: #0f62fe; font-weight: 700; }
+
+/* Audit */
+.ard-p-audit-item { display: flex; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #f4f4f4; font-size: 11px; }
+.ard-p-audit-item:last-child { border-bottom: none; }
+.ard-p-audit-dot { width: 8px; height: 8px; border-radius: 50%; background: #c6c6c6; flex-shrink: 0; margin-top: 3px; }
+.ard-p-audit-dot.hi { background: #0f62fe; }
+.ard-p-audit-ts { color: #6f6f6f; min-width: 68px; }
+.ard-p-audit-detail { color: #161616; }
+.ard-p-audit-detail.hi { color: #c28a00; font-weight: 600; }
+
+/* Action panel */
+.ard-p-action-panel { background: #fffbf0; border: 1.5px solid #e8d48a; border-radius: 6px; overflow: hidden; }
+.ard-p-action-hdr { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #161616; border-bottom: 1px solid #f0e0a0; }
+.ard-p-ctx { font-size: 11px; color: #525252; padding: 8px 12px 4px; line-height: 1.5; }
+.ard-p-btns { display: flex; gap: 6px; padding: 6px 12px 8px; }
+.ard-p-btn { flex: 1; padding: 7px 4px; border: none; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; cursor: pointer; }
+.ard-p-btn.danger    { background: #8b2020; }
+.ard-p-btn.secondary { background: #6f6f6f; }
+.ard-p-btn.primary   { background: #0f4880; }
+.ard-p-comment-lbl { display: block; font-size: 10px; color: #525252; padding: 0 12px 4px; font-weight: 500; }
+.ard-p-textarea { width: calc(100% - 24px); margin: 0 12px 12px; display: block; border: 1px solid #d0d0d0; border-radius: 4px; padding: 6px 8px; font-size: 11px; font-family: inherit; min-height: 50px; resize: vertical; box-sizing: border-box; }
+
+/* Route flow */
+.ard-p-route-txt { font-size: 10px; color: #525252; padding: 6px 12px; line-height: 1.5; }
+.ard-p-route-flow { display: flex; align-items: center; flex-wrap: nowrap; padding: 4px 12px 12px; gap: 2px; overflow-x: auto; }
+.ard-p-route-box { border-radius: 5px; border: 1.5px solid; padding: 5px 7px; font-size: 9px; font-weight: 600; text-align: center; white-space: pre-line; line-height: 1.3; }
+.ard-p-route-box.completed { background: #defbe6; border-color: #a7f0ba; color: #198038; }
+.ard-p-route-box.current   { background: #d4e5f0; border-color: #9ec8e0; color: #1a4d7a; }
+.ard-p-route-box.pending   { background: #f4f4f4; border-color: #c6c6c6; color: #525252; }
+.ard-p-route-arrow { font-size: 11px; color: #a8a8a8; padding: 0 2px; flex-shrink: 0; }
+.ard-p-route-arrow.done { color: #198038; }
+</style>
+<div class="SPARKPanel panel">
+  <div class="widget-heading"><span class="widget-title">Approval Review Dashboard Preview</span></div>
+  <div class="widget-body"></div>
+</div>

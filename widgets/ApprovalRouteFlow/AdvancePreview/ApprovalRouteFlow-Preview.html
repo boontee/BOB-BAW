@@ -1,0 +1,25 @@
+<!--
+ #BEGIN COPYRIGHT
+ Licensed Materials - Property of IBM
+ 5725-C95
+ (C) Copyright IBM Corporation 2026. All Rights Reserved.
+ #END COPYRIGHT
+-->
+<style>
+.arf-wrapper { font-family: 'IBM Plex Sans', Arial, sans-serif; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 20px 16px; overflow-x: auto; }
+.arf-flow { display: flex; align-items: center; min-width: max-content; }
+.arf-node { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+.arf-circle { width: 48px; height: 48px; border-radius: 50%; border: 2px solid #8d8d8d; background: #f4f4f4; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #525252; }
+.arf-circle.completed { background: #d4edda; border-color: #198038; color: #198038; }
+.arf-circle.current { background: #d0e2ff; border-color: #0043ce; color: #0043ce; box-shadow: 0 0 0 3px rgba(0,67,206,.2); }
+.arf-node-label { font-size: 12px; font-weight: 600; color: #161616; text-align: center; max-width: 72px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arf-node-sublabel { font-size: 11px; color: #525252; text-align: center; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.arf-arrow { width: 36px; height: 2px; background: #8d8d8d; position: relative; flex-shrink: 0; margin-bottom: 26px; }
+.arf-arrow::after { content:''; position: absolute; right: -1px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid #8d8d8d; }
+.arf-arrow.completed { background: #198038; }
+.arf-arrow.completed::after { border-left-color: #198038; }
+</style>
+<div class="SPARKPanel panel">
+  <div class="widget-heading"><span class="widget-title">Approval Route Flow Preview</span></div>
+  <div class="widget-body"></div>
+</div>

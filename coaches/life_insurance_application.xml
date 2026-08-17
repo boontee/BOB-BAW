@@ -1,0 +1,567 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Life Insurance Application Coach
+  ===================================
+  Layout:
+    [Breadcrumb]                         ← navigation context (custom)
+    Panel: Application Progress
+      [Stepper]                          ← step-by-step indicator (custom)
+      [MyProgressBar]                    ← integer progress bar (custom)
+    Panel: Applicant Information
+      [Text: Full Name]                  ← standard
+      [Text: Email]                      ← standard
+      [Text: Phone]                      ← standard
+      [Date Picker: Date of Birth]       ← standard
+    Panel: Coverage Details
+      [Single Select: Coverage Type]     ← standard
+      [Decimal: Coverage Amount]         ← standard
+      [Single Select: Payment Frequency] ← standard
+      [Checkbox: Smoker]                 ← standard
+    Panel: Actions
+      [Button: Save Draft]               ← standard
+      [Button: Continue]                 ← standard
+
+  Process Variables:
+    breadcrumbData   — BreadcrumbItem[]  → tw.local.breadcrumbData
+    stepperData      — StepItem[]        → tw.local.stepperData
+    applicationProgress — Integer        → tw.local.applicationProgress
+    applicantName    — String            → tw.local.applicantName
+    applicantEmail   — String            → tw.local.applicantEmail
+    applicantPhone   — String            → tw.local.applicantPhone
+    dateOfBirth      — Date              → tw.local.dateOfBirth
+    coverageType     — String            → tw.local.coverageType
+    coverageAmount   — Decimal           → tw.local.coverageAmount
+    paymentFrequency — String            → tw.local.paymentFrequency
+    isSmoker         — Boolean           → tw.local.isSmoker
+
+  Sample Data (set in Coach On Load script):
+    breadcrumbData   = [{label:"Home",status:"completed"},
+                        {label:"Life Insurance",status:"completed"},
+                        {label:"New Application",status:"working"}]
+    stepperData      = [{label:"Personal Info",status:"current"},
+                        {label:"Coverage",status:"pending"},
+                        {label:"Medical History",status:"pending"},
+                        {label:"Review & Submit",status:"pending"}]
+    applicationProgress = 25
+    applicantName    = "John Smith"
+    applicantEmail   = "john.smith@example.com"
+    applicantPhone   = "+1 (555) 234-5678"
+    dateOfBirth      = 1985-06-15
+    coverageType     = "Term Life"
+    coverageAmount   = 500000.00
+    paymentFrequency = "Monthly"
+    isSmoker         = false
+
+  Made with Bob
+-->
+<teamworks>
+  <process id="1.3524bf7a-e194-4651-b5bd-123c1968e5a7" name="Life Insurance Application">
+    <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+    <processType>10</processType>
+    <isRootProcess>false</isRootProcess>
+    <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+    <isLoggingVariables>false</isLoggingVariables>
+    <isTransactional>false</isTransactional>
+    <exposedType>0</exposedType>
+    <isTrackingEnabled>true</isTrackingEnabled>
+    <cachingType>false</cachingType>
+    <mobileReady>false</mobileReady>
+    <sboSyncEnabled>true</sboSyncEnabled>
+    <isSecured>false</isSecured>
+    <isAjaxExposed>false</isAjaxExposed>
+    <isInvokedAsynchronously>false</isInvokedAsynchronously>
+    <isTransactionalFlow>false</isTransactionalFlow>
+    <description>Life insurance new application coach with progress tracking — Breadcrumb, Stepper, MyProgressBar and standard form widgets</description>
+    <guid>guid:2291195bf68f4076:17fd2535:0c3954f954e:-6b95</guid>
+    <versionId>e5c7bba9-f3e4-41e2-9d46-cf1f497c0c28</versionId>
+    <dependencySummary isNull="true" />
+
+    <!-- ═══ Process Variables ═══════════════════════════════════════════════ -->
+
+    <!-- Navigation: BreadcrumbItem list -->
+    <processVariable name="breadcrumbData">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.be43a025-645f-4f9b-9c4f-5017c34c78e0</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>1</seq>
+      <isArrayOf>true</isArrayOf><isTransient>false</isTransient>
+      <classId>BreadcrumbData</classId>
+      <hasDefault>false</hasDefault><defaultValue isNull="true" />
+      <guid>guid:33bed855-d169-d411-0c04-e4cf145393e5</guid>
+      <versionId>6dfd47e7-0cb0-4654-91c9-9a561723e90b</versionId>
+    </processVariable>
+
+    <!-- Progress steps: StepItem list -->
+    <processVariable name="stepperData">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.cb49ddbe-be24-4bc8-a56e-ef8be34bf236</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>2</seq>
+      <isArrayOf>true</isArrayOf><isTransient>false</isTransient>
+      <classId>StepperData</classId>
+      <hasDefault>false</hasDefault><defaultValue isNull="true" />
+      <guid>guid:a68e6ace-6aa1-987d-991b-8c70da21a756</guid>
+      <versionId>7b238bbc-8f93-4f05-ad5d-0299bebc0038</versionId>
+    </processVariable>
+
+    <!-- MyProgressBar: plain Integer (0-100) -->
+    <processVariable name="applicationProgress">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.bb84cc9a-4a09-4c0c-b66f-2a7e6e4a50f6</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>3</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>Integer</classId>
+      <hasDefault>true</hasDefault><defaultValue>25</defaultValue>
+      <guid>guid:9f22b3f6-2e4a-00db-4bdb-c540b92bd37b</guid>
+      <versionId>ec71a496-0a89-4949-a5fd-51634faf132f</versionId>
+    </processVariable>
+
+    <!-- Applicant Information -->
+    <processVariable name="applicantName">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000001-0001-0001-0001-000000000001</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>4</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault><defaultValue>John Smith</defaultValue>
+      <guid>guid:a1000001-0001-0001-0001-000000000001</guid>
+      <versionId>b1000001-0001-0001-0001-000000000001</versionId>
+    </processVariable>
+
+    <processVariable name="applicantEmail">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000002-0001-0001-0001-000000000002</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>5</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault><defaultValue>john.smith@example.com</defaultValue>
+      <guid>guid:a1000002-0001-0001-0001-000000000002</guid>
+      <versionId>b1000002-0001-0001-0001-000000000002</versionId>
+    </processVariable>
+
+    <processVariable name="applicantPhone">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000003-0001-0001-0001-000000000003</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>6</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault><defaultValue>+1 (555) 234-5678</defaultValue>
+      <guid>guid:a1000003-0001-0001-0001-000000000003</guid>
+      <versionId>b1000003-0001-0001-0001-000000000003</versionId>
+    </processVariable>
+
+    <processVariable name="dateOfBirth">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000004-0001-0001-0001-000000000004</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>7</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>Date</classId>
+      <hasDefault>false</hasDefault><defaultValue isNull="true" />
+      <guid>guid:a1000004-0001-0001-0001-000000000004</guid>
+      <versionId>b1000004-0001-0001-0001-000000000004</versionId>
+    </processVariable>
+
+    <!-- Coverage Details -->
+    <processVariable name="coverageType">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000005-0001-0001-0001-000000000005</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>8</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault><defaultValue>Term Life</defaultValue>
+      <guid>guid:a1000005-0001-0001-0001-000000000005</guid>
+      <versionId>b1000005-0001-0001-0001-000000000005</versionId>
+    </processVariable>
+
+    <processVariable name="coverageAmount">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000006-0001-0001-0001-000000000006</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>9</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>Decimal</classId>
+      <hasDefault>true</hasDefault><defaultValue>500000</defaultValue>
+      <guid>guid:a1000006-0001-0001-0001-000000000006</guid>
+      <versionId>b1000006-0001-0001-0001-000000000006</versionId>
+    </processVariable>
+
+    <processVariable name="paymentFrequency">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000007-0001-0001-0001-000000000007</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>10</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>String</classId>
+      <hasDefault>true</hasDefault><defaultValue>Monthly</defaultValue>
+      <guid>guid:a1000007-0001-0001-0001-000000000007</guid>
+      <versionId>b1000007-0001-0001-0001-000000000007</versionId>
+    </processVariable>
+
+    <processVariable name="isSmoker">
+      <lastModified isNull="true" /><lastModifiedBy isNull="true" /><tenantId isNull="true" />
+      <processVariableId>2056.a1000008-0001-0001-0001-000000000008</processVariableId>
+      <description isNull="true" />
+      <processId>1.3524bf7a-e194-4651-b5bd-123c1968e5a7</processId>
+      <namespace>2</namespace><seq>11</seq>
+      <isArrayOf>false</isArrayOf><isTransient>false</isTransient>
+      <classId>Boolean</classId>
+      <hasDefault>true</hasDefault><defaultValue>false</defaultValue>
+      <guid>guid:a1000008-0001-0001-0001-000000000008</guid>
+      <versionId>b1000008-0001-0001-0001-000000000008</versionId>
+    </processVariable>
+
+    <!-- ═══ Items ════════════════════════════════════════════════════════════ -->
+    <item>
+      <processItemId>2025.56115892-0e5d-43cf-9d8f-ae29724929b3</processItemId>
+      <name>Life Insurance Application</name>
+      <tWComponentName>CoachFlowWrapper</tWComponentName>
+      <tWComponentId>FormTask_56115892-0e5d-43cf-9d8f-ae29724929b3</tWComponentId>
+      <isLogEnabled>false</isLogEnabled>
+      <isTraceEnabled>false</isTraceEnabled>
+      <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+      <saveExecutionContext>true</saveExecutionContext>
+      <layoutData x="0" y="0">
+        <errorLink>
+          <controlPoints />
+          <showEndState>false</showEndState>
+          <showName>false</showName>
+        </errorLink>
+      </layoutData>
+      <TWComponent />
+    </item>
+
+    <item>
+      <processItemId>2025.adf7a844-ff61-448b-9583-cdf26a1acfe1</processItemId>
+      <name>Exit</name>
+      <tWComponentName>ExitPoint</tWComponentName>
+      <tWComponentId>3008.1110c1a4-8e12-4691-bb98-514b5fd2e60e</tWComponentId>
+      <isLogEnabled>false</isLogEnabled>
+      <isTraceEnabled>false</isTraceEnabled>
+      <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+      <saveExecutionContext>true</saveExecutionContext>
+      <layoutData x="0" y="0">
+        <errorLink>
+          <controlPoints />
+          <showEndState>false</showEndState>
+          <showName>false</showName>
+        </errorLink>
+      </layoutData>
+      <TWComponent>
+        <exitPointId>3008.1110c1a4-8e12-4691-bb98-514b5fd2e60e</exitPointId>
+        <haltProcess>false</haltProcess>
+        <guid>guid:5e3a23e7-6967-839b-4478-2ee813906262</guid>
+        <versionId>f874e1f0-2283-4cd4-ba33-7e0c4bf69392</versionId>
+      </TWComponent>
+    </item>
+
+    <link name="to Exit">
+      <fromProcessItemId>2025.56115892-0e5d-43cf-9d8f-ae29724929b3</fromProcessItemId>
+      <toProcessItemId>2025.adf7a844-ff61-448b-9583-cdf26a1acfe1</toProcessItemId>
+      <endStateId>Out</endStateId>
+      <layoutData>
+        <controlPoints />
+        <showEndState>false</showEndState>
+        <showName>false</showName>
+      </layoutData>
+    </link>
+
+    <!-- ═══ BPMN Definitions ═════════════════════════════════════════════════ -->
+    <definitions
+      xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+      xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+      xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      targetNamespace="http://www.ibm.com/bpm"
+      typeLanguage="http://www.w3.org/2001/XMLSchema"
+      expressionLanguage="http://www.w3.org/1999/XPath">
+
+      <process id="1.3524bf7a-e194-4651-b5bd-123c1968e5a7" isExecutable="true" />
+
+      <startEvent id="StartEvent_b5fbb6ff-fe2e-49ba-8b9e-c85cfa086a6a" name="Start">
+        <outgoing />
+      </startEvent>
+
+      <userTask id="FormTask_56115892-0e5d-43cf-9d8f-ae29724929b3"
+                name="Life Insurance Application" implementation="coach">
+        <incoming />
+        <outgoing />
+        <coachRef>65.56115892-0e5d-43cf-9d8f-ae29724929b3</coachRef>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             COACH DEFINITION
+             On Load script (paste into Behavior → On Load in Process Designer):
+
+             tw.local.breadcrumbData = [
+               {label:"Home",           status:"completed"},
+               {label:"Life Insurance", status:"completed"},
+               {label:"New Application",status:"working"}
+             ];
+             tw.local.stepperData = [
+               {label:"Personal Info",    description:"Your basic details",    status:"current"},
+               {label:"Coverage",         description:"Choose your plan",       status:"pending"},
+               {label:"Medical History",  description:"Health questionnaire",   status:"pending"},
+               {label:"Review & Submit",  description:"Final review",           status:"pending"}
+             ];
+             tw.local.applicationProgress = 25;
+        ══════════════════════════════════════════════════════════════════ -->
+        <coach id="65.56115892-0e5d-43cf-9d8f-ae29724929b3"
+               name="Life Insurance Application">
+          <coachId>65.56115892-0e5d-43cf-9d8f-ae29724929b3</coachId>
+          <isResponsive>true</isResponsive>
+          <showBoundary>true</showBoundary>
+          <layout type="vertical" />
+
+          <!-- ── Row 0: Breadcrumb navigation ───────────────────────────── -->
+          <item id="breadcrumbRow" type="verticalLayout">
+            <contribution>
+              <!-- CUSTOM: Breadcrumb — coachViewRef: 64.85fc6053-ab02-4cbe-b327-e895ba2b4e0e -->
+              <item id="breadcrumbWidget" type="coachView">
+                <coachViewRef>64.85fc6053-ab02-4cbe-b327-e895ba2b4e0e</coachViewRef>
+                <binding>tw.local.breadcrumbData</binding>
+                <config>
+                  <option name="label">Navigation</option>
+                  <option name="visible">true</option>
+                  <option name="enabled">true</option>
+                  <option name="showNumbering">false</option>
+                </config>
+              </item>
+            </contribution>
+          </item>
+
+          <!-- ── Panel 1: Application Progress ─────────────────────────── -->
+          <item id="progressPanel" type="panel">
+            <config>
+              <option name="label">Application Progress</option>
+            </config>
+            <contribution>
+              <!-- CUSTOM: Stepper — coachViewRef: 64.f1a8d46e-c4a2-4a93-ad08-5037f9683fe5 -->
+              <item id="stepperWidget" type="coachView">
+                <coachViewRef>64.f1a8d46e-c4a2-4a93-ad08-5037f9683fe5</coachViewRef>
+                <binding>tw.local.stepperData</binding>
+                <config>
+                  <option name="label">Steps</option>
+                  <option name="visible">true</option>
+                  <option name="enabled">true</option>
+                  <option name="showNumbers">true</option>
+                  <option name="showIcons">true</option>
+                  <option name="clickable">false</option>
+                  <option name="currentStep">0</option>
+                </config>
+              </item>
+              <!-- CUSTOM: MyProgressBar — coachViewRef: 64.663babeb-d6bd-41ea-95a3-f204b56b98cc -->
+              <item id="progressBarWidget" type="coachView">
+                <coachViewRef>64.663babeb-d6bd-41ea-95a3-f204b56b98cc</coachViewRef>
+                <binding>tw.local.applicationProgress</binding>
+                <config>
+                  <option name="label">Overall Progress</option>
+                  <option name="visible">true</option>
+                  <option name="enabled">true</option>
+                  <option name="showPercentage">true</option>
+                  <option name="showStatus">true</option>
+                  <option name="animated">true</option>
+                </config>
+              </item>
+            </contribution>
+          </item>
+
+          <!-- ── Panel 2: Applicant Information ────────────────────────── -->
+          <item id="applicantPanel" type="panel">
+            <config>
+              <option name="label">Applicant Information</option>
+            </config>
+            <contribution>
+              <!-- Row: Full Name + Email -->
+              <item id="nameEmailRow" type="horizontalLayout">
+                <contribution>
+                  <!-- STANDARD: Text — id: 64.5663dd71-ff18-4d33-bea0-468d0b869816 -->
+                  <item id="fullNameField" type="coachView">
+                    <coachViewRef>64.5663dd71-ff18-4d33-bea0-468d0b869816</coachViewRef>
+                    <binding>tw.local.applicantName</binding>
+                    <config>
+                      <option name="label">Full Name</option>
+                      <option name="placeholder">Enter full legal name</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                  <!-- STANDARD: Text — email -->
+                  <item id="emailField" type="coachView">
+                    <coachViewRef>64.5663dd71-ff18-4d33-bea0-468d0b869816</coachViewRef>
+                    <binding>tw.local.applicantEmail</binding>
+                    <config>
+                      <option name="label">Email Address</option>
+                      <option name="placeholder">email@example.com</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                </contribution>
+              </item>
+              <!-- Row: Phone + Date of Birth -->
+              <item id="phoneDobRow" type="horizontalLayout">
+                <contribution>
+                  <!-- STANDARD: Text — phone -->
+                  <item id="phoneField" type="coachView">
+                    <coachViewRef>64.5663dd71-ff18-4d33-bea0-468d0b869816</coachViewRef>
+                    <binding>tw.local.applicantPhone</binding>
+                    <config>
+                      <option name="label">Phone Number</option>
+                      <option name="placeholder">+1 (555) 000-0000</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                  <!-- STANDARD: Date Picker — id: 64.aeae8953-9e72-411e-b35a-93c7ab827c5c -->
+                  <item id="dobField" type="coachView">
+                    <coachViewRef>64.aeae8953-9e72-411e-b35a-93c7ab827c5c</coachViewRef>
+                    <binding>tw.local.dateOfBirth</binding>
+                    <config>
+                      <option name="label">Date of Birth</option>
+                      <option name="format">MM/DD/YYYY</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                </contribution>
+              </item>
+            </contribution>
+          </item>
+
+          <!-- ── Panel 3: Coverage Details ──────────────────────────────── -->
+          <item id="coveragePanel" type="panel">
+            <config>
+              <option name="label">Coverage Details</option>
+            </config>
+            <contribution>
+              <!-- Row: Coverage Type + Coverage Amount -->
+              <item id="coverageRow1" type="horizontalLayout">
+                <contribution>
+                  <!-- STANDARD: Single Select — id: 64.f8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5e7 -->
+                  <item id="coverageTypeField" type="coachView">
+                    <coachViewRef>64.f8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5e7</coachViewRef>
+                    <binding>tw.local.coverageType</binding>
+                    <config>
+                      <option name="label">Coverage Type</option>
+                      <option name="options">Term Life,Whole Life,Universal Life,Variable Life</option>
+                      <option name="placeholder">Select coverage type</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                  <!-- STANDARD: Decimal — id: 64.e0ede0f2-f3af-408c-af7b-e7a58eb5e2b4 -->
+                  <item id="coverageAmountField" type="coachView">
+                    <coachViewRef>64.e0ede0f2-f3af-408c-af7b-e7a58eb5e2b4</coachViewRef>
+                    <binding>tw.local.coverageAmount</binding>
+                    <config>
+                      <option name="label">Coverage Amount ($)</option>
+                      <option name="min">10000</option>
+                      <option name="max">10000000</option>
+                      <option name="step">10000</option>
+                      <option name="precision">0</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                </contribution>
+              </item>
+              <!-- Row: Payment Frequency + Smoker -->
+              <item id="coverageRow2" type="horizontalLayout">
+                <contribution>
+                  <!-- STANDARD: Single Select — payment frequency -->
+                  <item id="paymentFrequencyField" type="coachView">
+                    <coachViewRef>64.f8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5e7</coachViewRef>
+                    <binding>tw.local.paymentFrequency</binding>
+                    <config>
+                      <option name="label">Payment Frequency</option>
+                      <option name="options">Monthly,Quarterly,Semi-Annual,Annual</option>
+                      <option name="placeholder">Select frequency</option>
+                      <option name="required">true</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                  <!-- STANDARD: Checkbox — id: 64.fffd1628-baee-44e8-b7ca-5ae48644b0be -->
+                  <item id="smokerField" type="coachView">
+                    <coachViewRef>64.fffd1628-baee-44e8-b7ca-5ae48644b0be</coachViewRef>
+                    <binding>tw.local.isSmoker</binding>
+                    <config>
+                      <option name="label">I am a smoker or tobacco user</option>
+                      <option name="visible">true</option>
+                      <option name="enabled">true</option>
+                    </config>
+                  </item>
+                </contribution>
+              </item>
+            </contribution>
+          </item>
+
+          <!-- ── Panel 4: Actions ────────────────────────────────────────── -->
+          <item id="actionsPanel" type="horizontalLayout">
+            <contribution>
+              <!-- STANDARD: Button (Save Draft) — id: 64.7133c7d4-1a54-45c8-89cd-a8e8fa4a8e36 -->
+              <item id="saveDraftButton" type="coachView">
+                <coachViewRef>64.7133c7d4-1a54-45c8-89cd-a8e8fa4a8e36</coachViewRef>
+                <config>
+                  <option name="label">Save Draft</option>
+                  <option name="action">save</option>
+                  <option name="style">secondary</option>
+                  <option name="visible">true</option>
+                  <option name="enabled">true</option>
+                </config>
+              </item>
+              <!-- STANDARD: Button (Continue) -->
+              <item id="continueButton" type="coachView">
+                <coachViewRef>64.7133c7d4-1a54-45c8-89cd-a8e8fa4a8e36</coachViewRef>
+                <config>
+                  <option name="label">Continue</option>
+                  <option name="action">submit</option>
+                  <option name="style">primary</option>
+                  <option name="visible">true</option>
+                  <option name="enabled">true</option>
+                </config>
+              </item>
+            </contribution>
+          </item>
+
+        </coach>
+      </userTask>
+
+      <endEvent id="EndEvent_adf7a844-ff61-448b-9583-cdf26a1acfe1" name="Exit">
+        <incoming />
+      </endEvent>
+
+      <sequenceFlow
+        id="flow_Start_to_FormTask"
+        sourceRef="StartEvent_b5fbb6ff-fe2e-49ba-8b9e-c85cfa086a6a"
+        targetRef="FormTask_56115892-0e5d-43cf-9d8f-ae29724929b3" />
+      <sequenceFlow
+        id="flow_FormTask_to_End"
+        sourceRef="FormTask_56115892-0e5d-43cf-9d8f-ae29724929b3"
+        targetRef="EndEvent_adf7a844-ff61-448b-9583-cdf26a1acfe1" />
+
+    </definitions>
+  </process>
+</teamworks>

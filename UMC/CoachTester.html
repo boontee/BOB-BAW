@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<!--
+  ApprovalReviewDashboard — BAW Coach Tester
+  Reproduces a real IBM BAW Coach environment:
+  • Full eContract app shell (top-nav, sidebar, breadcrumb, coach chrome)
+  • Widget mounted in the coach body with live BAW context mock
+  • context.binding.connect() reactive data feed
+  • context.trigger() → event toast + event log panel
+  • Scenario switcher (6 presets) + live JSON editor + Ctrl+Enter push
+-->
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Coach Tester — ApprovalReviewDashboard</title>
+<style>
+/* ── Reset ──────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+  font-size:14px;color:#161616;background:#f0f4f8;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ════════════════════════════════════════════════════════════════════════
+   APP SHELL  (mirrors ApprovalReviewDashboard-preview.html exactly)
+   ════════════════════════════════════════════════════════════════════════ */
+.app-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* Top nav */
+.top-nav{display:flex;align-items:center;height:48px;background:#fff;
+  border-bottom:1px solid #e0e0e0;padding:0 24px;flex-shrink:0;z-index:20;position:relative}
+.brand{font-size:20px;font-weight:800;color:#161616;letter-spacing:-.8px;
+  margin-right:32px;white-space:nowrap;font-style:italic}
+.brand .c{color:#0f62fe}
+.nav-tabs{display:flex;height:100%;align-items:stretch;flex:1}
+.nav-tab{display:flex;align-items:center;padding:0 22px;font-size:14px;color:#525252;
+  cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;user-select:none;
+  transition:color .15s}
+.nav-tab:hover{color:#161616}
+.nav-tab.active{color:#161616;font-weight:600;border-bottom-color:#0f62fe;background:#f0f4ff}
+.nav-right{display:flex;align-items:center;gap:16px;margin-left:auto}
+.nav-bell{font-size:18px;color:#525252;cursor:pointer;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .15s}
+.nav-bell:hover{background:#f4f4f4}
+.nav-avatar{width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,#6929c4,#a56eff);
+  color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;flex-shrink:0}
+
+/* App body */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:196px;flex-shrink:0;background:#fff;border-right:1px solid #e0e0e0;
+  padding:16px 0;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sg-label{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:#8d8d8d;padding:14px 20px 6px}
+.si{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13.5px;
+  color:#525252;cursor:pointer;border-left:3px solid transparent;transition:background .12s,color .12s}
+.si:hover{background:#f0f4f8;color:#161616}
+.si.active{background:#e8f0fe;color:#0043ce;font-weight:600;border-left-color:#0f62fe}
+.si .ico{font-size:15px;flex-shrink:0;width:18px;text-align:center}
+.si .lbl{flex:1}
+.sbadge{background:#0f62fe;color:#fff;font-size:11px;font-weight:700;
+  border-radius:10px;padding:1px 7px;min-width:20px;text-align:center;line-height:18px}
+.si.active .sbadge{background:#0043ce}
+
+/* ════════════════════════════════════════════════════════════════════════
+   COACH CHROME  (process task header + breadcrumb)
+   ════════════════════════════════════════════════════════════════════════ */
+.coach-wrap{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+
+.coach-taskbar{display:flex;align-items:center;gap:12px;background:#fff;
+  border-bottom:1px solid #e0e0e0;padding:0 24px;height:44px;flex-shrink:0}
+.coach-taskbar .process-name{font-size:13px;color:#525252}
+.coach-taskbar .task-name{font-size:14px;font-weight:700;color:#161616}
+.coach-taskbar .task-sep{color:#c6c6c6;font-size:16px}
+.coach-taskbar .spacer{flex:1}
+.coach-taskbar .ct-badge{
+  font-size:11px;font-weight:700;background:#e8f0fe;color:#0043ce;
+  border-radius:4px;padding:2px 8px;letter-spacing:.5px}
+
+.coach-breadcrumb{display:flex;align-items:center;gap:6px;padding:8px 24px;
+  background:#f8f9fc;border-bottom:1px solid #e8e8e8;font-size:12px;
+  color:#525252;flex-shrink:0}
+.coach-breadcrumb a{color:#0f62fe;text-decoration:none;cursor:pointer}
+.coach-breadcrumb a:hover{text-decoration:underline}
+.coach-breadcrumb .sep{color:#c6c6c6}
+.coach-breadcrumb .current{color:#161616;font-weight:600}
+
+/* Coach body scroll area */
+.coach-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+
+/* ════════════════════════════════════════════════════════════════════════
+   TESTER PANEL  (bottom drawer — event log + data editor)
+   ════════════════════════════════════════════════════════════════════════ */
+.tester-drawer{
+  height:280px;flex-shrink:0;display:flex;
+  border-top:2px solid #0f62fe;background:#fff;
+  overflow:hidden}
+
+/* Drawer left: scenario + editor */
+.drawer-left{width:420px;flex-shrink:0;display:flex;flex-direction:column;
+  border-right:1px solid #e0e0e0;overflow:hidden}
+.drawer-section-title{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:#525252;padding:8px 12px 6px;background:#f4f4f4;
+  border-bottom:1px solid #e0e0e0;flex-shrink:0}
+.preset-row{display:flex;gap:6px;padding:8px 10px;flex-wrap:wrap;flex-shrink:0;
+  border-bottom:1px solid #e0e0e0}
+.pb{padding:5px 10px;border:1.5px solid #e0e0e0;border-radius:5px;background:#fff;
+  font-size:11.5px;font-weight:600;font-family:inherit;color:#161616;cursor:pointer;
+  transition:all .15s;white-space:nowrap}
+.pb:hover{background:#f0f0f0;border-color:#a8a8a8}
+.pb.active{background:#e8f0fe;border-color:#0f62fe;color:#0043ce}
+.pb.ok{border-color:#a7f0ba;color:#198038}
+.pb.warn{border-color:#f0c040;color:#8a5700}
+.pb.err{border-color:#ffb3b8;color:#da1e28}
+
+.editor-bar{display:flex;align-items:center;gap:6px;padding:6px 10px;
+  background:#f4f4f4;border-bottom:1px solid #e0e0e0;flex-shrink:0}
+.editor-bar span{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:#525252}
+.eb-btn{padding:3px 10px;border:1px solid #c6c6c6;border-radius:4px;background:#fff;
+  font-size:11.5px;font-family:inherit;cursor:pointer;font-weight:600;transition:background .12s}
+.eb-btn:hover{background:#e8e8e8}
+.eb-btn.push{background:#0f62fe;color:#fff;border-color:#0f62fe}
+.eb-btn.push:hover{background:#0353e9}
+.es{font-size:11px;margin-left:auto}
+.es.ok{color:#198038;font-weight:700}
+.es.err{color:#da1e28;font-weight:700}
+#binding-editor{flex:1;width:100%;border:none;outline:none;padding:10px 12px;
+  font-size:11px;font-family:"IBM Plex Mono","Fira Code",Consolas,monospace;
+  color:#161616;background:#fafafa;resize:none;line-height:1.6;overflow:auto}
+
+/* Drawer right: event log */
+.drawer-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.log-header{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:#f4f4f4;border-bottom:1px solid #e0e0e0;flex-shrink:0}
+.log-header span{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:#525252}
+.log-clear{margin-left:auto;padding:2px 10px;border:1px solid #c6c6c6;
+  border-radius:4px;background:#fff;font-size:11px;font-family:inherit;cursor:pointer}
+#event-log{flex:1;overflow-y:auto;padding:4px 0}
+.ev{display:flex;align-items:baseline;gap:8px;padding:5px 12px;
+  border-bottom:1px solid #f4f4f4;font-size:12px;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-2px)}to{opacity:1;transform:none}}
+.ev:last-child{border-bottom:none}
+.ev-ts{color:#a8a8a8;font-size:10px;white-space:nowrap;font-family:monospace}
+.ev-name{font-weight:700;white-space:nowrap}
+.ev-payload{color:#525252;word-break:break-all;flex:1}
+.ev.ctaClicked    .ev-name{color:#6929c4}
+.ev.actionClicked .ev-name{color:#0043ce}
+.ev.urgeClicked   .ev-name{color:#8a5700}
+.ev.commentChanged .ev-name{color:#006161}
+.ev.stepClicked   .ev-name{color:#9a1b1b}
+.log-empty{padding:20px;text-align:center;color:#a8a8a8;font-size:12px}
+
+/* Event toast */
+.ev-toast{
+  position:fixed;bottom:296px;right:24px;
+  background:#161616;color:#fff;
+  border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  opacity:0;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+  pointer-events:none;z-index:9999;max-width:340px;
+  display:flex;align-items:center;gap:8px}
+.ev-toast.show{opacity:1;transform:none}
+.ev-toast .ev-t-name{color:#78a9ff}
+.ev-toast .ev-t-val{color:#a8ff78}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     WIDGET CSS — InlineCSS.css verbatim
+     ════════════════════════════════════════════════════════════════════════ -->
+<style>
+.ard-root{font-family:"IBM Plex Sans","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:#f4f6f9;min-height:100%;padding:20px 24px;box-sizing:border-box;color:#161616;font-size:14px;line-height:1.5}
+.ard-progress-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+.ard-progress-left{flex:1}
+.ard-progress-title{font-size:22px;font-weight:700;color:#161616;margin-bottom:12px;letter-spacing:-.3px}
+.ard-stages-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ard-stages{display:flex;align-items:center;gap:0;flex:1}
+.ard-stage{display:flex;flex-direction:column;align-items:center;min-width:72px}
+.ard-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;border:2px solid transparent;transition:background .2s}
+.ard-circle.completed{background:#198038;color:#fff;border-color:#198038}
+.ard-circle.current{background:#0f62fe;color:#fff;border-color:#0f62fe}
+.ard-circle.pending{background:#fff;color:#8d8d8d;border:2px solid #c6c6c6}
+.ard-stage-label{font-size:12px;color:#6f6f6f;text-align:center;white-space:nowrap}
+.ard-stage-label.current{color:#0f62fe;font-weight:600}
+.ard-connector{flex:1;height:2px;background:#c6c6c6;min-width:24px;margin-bottom:22px;align-self:flex-start;margin-top:19px}
+.ard-connector.completed{background:#198038}
+.ard-cta-btn{background:#0f4880;color:#fff;border:none;border-radius:6px;padding:10px 20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0}
+.ard-cta-btn:hover{background:#0353e9}
+.ard-contract-title{font-size:14px;color:#525252;margin:6px 0 18px}
+.ard-main{display:flex;gap:20px;align-items:flex-start}
+.ard-left{flex:6;min-width:0;display:flex;flex-direction:column;gap:16px}
+.ard-right{flex:4;min-width:0;display:flex;flex-direction:column;gap:16px}
+.ard-panel{background:#fff;border-radius:10px;border:1px solid #e0e0e0;overflow:hidden}
+.ard-panel-header{display:flex;align-items:center;gap:8px;padding:14px 18px 10px;font-size:15px;font-weight:600;color:#161616;border-bottom:1px solid #f0f0f0}
+.ard-panel-icon{font-size:16px;line-height:1}
+.ard-chain-list{padding:8px 0}
+.ard-approver-row{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid #f4f4f4;gap:14px}
+.ard-approver-row:last-child{border-bottom:none}
+.ard-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0;color:#fff}
+.ard-avatar.completed{background:#198038}.ard-avatar.current{background:#0f62fe}.ard-avatar.pending{background:#a8a8a8}.ard-avatar.rejected{background:#da1e28}
+.ard-approver-info{flex:1;min-width:0}
+.ard-approver-name{font-size:14px;font-weight:600;color:#161616}
+.ard-approver-meta{font-size:12px;color:#6f6f6f;margin-top:2px}
+.ard-approver-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ard-urge-btn{border:1.5px solid #c8a04a;background:#fff;color:#8a6a1a;border-radius:20px;padding:4px 16px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:background .15s}
+.ard-urge-btn:hover{background:#fdf5e0}
+.ard-status-badge{border-radius:20px;padding:4px 16px;font-size:13px;font-weight:500;white-space:nowrap}
+.ard-status-badge.approved{background:#defbe6;color:#198038;border:1px solid #a7f0ba}
+.ard-status-badge.current{background:#fff3cd;color:#8a5700;border:1px solid #f0c040}
+.ard-status-badge.pending{background:#f4f4f4;color:#6f6f6f;border:1px solid #e0e0e0}
+.ard-status-badge.rejected{background:#fff1f1;color:#da1e28;border:1px solid #ffb3b8}
+.ard-status-grid{padding:14px 18px;display:flex;flex-direction:column;gap:0}
+.ard-status-row{display:flex;align-items:baseline;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f4f4f4;font-size:14px}
+.ard-status-row:last-child{border-bottom:none}
+.ard-status-label{color:#525252}.ard-status-value{color:#161616;font-weight:500;text-align:right}
+.ard-ai-score-val{color:#0f62fe;font-weight:600;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.ard-ai-link{color:#0f62fe;cursor:pointer;font-weight:600;font-size:13px;text-decoration:none}
+.ard-ai-link:hover{text-decoration:underline}
+.ard-audit-list{padding:8px 18px 14px}
+.ard-audit-event{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f4f4f4}
+.ard-audit-event:last-child{border-bottom:none}
+.ard-audit-dot{width:10px;height:10px;border-radius:50%;background:#c6c6c6;flex-shrink:0;margin-top:5px}
+.ard-audit-dot.highlighted{background:#0f62fe}.ard-audit-dot.approved{background:#198038}.ard-audit-dot.rejected{background:#da1e28}
+.ard-audit-body{flex:1;min-width:0}
+.ard-audit-ts{font-size:12px;color:#6f6f6f;font-weight:500;margin-bottom:2px}
+.ard-audit-detail{font-size:13px;color:#161616;word-break:break-word}
+.ard-audit-detail.highlighted{color:#c28a00;font-weight:600}
+.ard-action-panel{background:#fffbf0;border:1.5px solid #e8d48a;border-radius:10px;padding:0 0 16px;overflow:hidden}
+.ard-action-header{display:flex;align-items:center;gap:8px;background:#fffbf0;border-bottom:1px solid #f0e0a0;padding:14px 18px 10px;font-size:15px;font-weight:600;color:#161616}
+.ard-context-msg{font-size:13px;color:#525252;padding:12px 18px 4px;margin:0;line-height:1.6}
+.ard-action-buttons{display:flex;gap:10px;padding:10px 18px}
+.ard-action-btn{flex:1;padding:11px 8px;border:none;border-radius:6px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .15s,background .15s;color:#fff}
+.ard-action-btn:disabled{opacity:.5;cursor:not-allowed}
+.ard-action-btn:hover:not(:disabled){opacity:.88}
+.ard-action-btn.danger{background:#8b2020}.ard-action-btn.secondary{background:#6f6f6f}.ard-action-btn.primary{background:#0f4880}
+.ard-comment-section{padding:6px 18px 0}
+.ard-comment-label{display:block;font-size:12px;color:#525252;margin-bottom:6px;font-weight:500}
+.ard-comment-area{width:100%;box-sizing:border-box;border:1px solid #d0d0d0;border-radius:6px;padding:10px 12px;font-size:13px;font-family:inherit;color:#161616;background:#fff;resize:vertical;min-height:80px;line-height:1.5;outline:none;transition:border-color .15s}
+.ard-comment-area::placeholder{color:#a8a8a8}
+.ard-comment-area:focus{border-color:#0f62fe;box-shadow:0 0 0 2px rgba(15,98,254,.15)}
+.ard-route-panel{background:#fff}
+.ard-route-text{font-size:13px;color:#525252;padding:12px 18px 10px;margin:0;line-height:1.7}
+.ard-route-flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;padding:6px 18px 18px;overflow-x:auto}
+.ard-route-step{display:flex;align-items:center}
+button.ard-route-step-box{appearance:none;-webkit-appearance:none;font-family:inherit;outline:none}
+button.ard-route-step-box:focus-visible{box-shadow:0 0 0 2px #0f62fe}
+.ard-route-step-box{border-radius:8px;border:1.5px solid #c6c6c6;background:#f4f4f4;padding:8px 12px;font-size:12px;font-weight:600;text-align:center;min-width:58px;line-height:1.4;color:#525252;white-space:pre-line;cursor:pointer;transition:background .15s,box-shadow .15s}
+.ard-route-step-box:hover{filter:brightness(.96)}
+.ard-route-step-box.completed{background:#defbe6;border-color:#a7f0ba;color:#198038}
+.ard-route-step-box.current{background:#d4e5f0;border-color:#9ec8e0;color:#1a4d7a}
+.ard-route-step-box.pending{background:#f4f4f4;border-color:#c6c6c6;color:#525252}
+.ard-route-arrow{font-size:16px;color:#a8a8a8;margin:0 4px;flex-shrink:0;line-height:1}
+.ard-route-arrow.completed{color:#198038}
+.ard-cta-btn:focus-visible,.ard-action-btn:focus-visible,.ard-urge-btn:focus-visible,.ard-ai-link:focus-visible{outline:2px solid #0f62fe;outline-offset:2px}
+@media(max-width:900px){.ard-main{flex-direction:column}.ard-left,.ard-right{flex:none;width:100%}.ard-cta-btn{font-size:12px;padding:8px 14px}}
+</style>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     HTML STRUCTURE
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="app-shell">
+
+  <!-- Top nav (approved design) -->
+  <nav class="top-nav">
+    <div class="brand">e<span class="c">Contr</span>act</div>
+    <div class="nav-tabs">
+      <div class="nav-tab">起草</div>
+      <div class="nav-tab active">簽核</div>
+      <div class="nav-tab">外部簽署</div>
+      <div class="nav-tab">合約列表</div>
+    </div>
+    <div class="nav-right">
+      <div class="nav-bell">🔔</div>
+      <div class="nav-avatar">陳</div>
+    </div>
+  </nav>
+
+  <div class="app-body">
+
+    <!-- Left sidebar (approved design) -->
+    <aside class="sidebar">
+      <div class="sg-label">我的工作</div>
+      <div class="si"><span class="ico">＋</span><span class="lbl">新增合約</span></div>
+      <div class="si"><span class="ico">📄</span><span class="lbl">我的合約</span><span class="sbadge">3</span></div>
+      <div class="si active"><span class="ico">✓</span><span class="lbl">待我審核</span><span class="sbadge">2</span></div>
+      <div class="si"><span class="ico">✍</span><span class="lbl">待簽署</span></div>
+      <div class="sg-label">系統</div>
+      <div class="si"><span class="ico">□</span><span class="lbl">合約範本</span></div>
+      <div class="si"><span class="ico">■</span><span class="lbl">儀表板</span></div>
+      <div class="si"><span class="ico">⚙</span><span class="lbl">設定</span></div>
+    </aside>
+
+    <!-- Coach wrapper -->
+    <div class="coach-wrap">
+
+      <!-- Process / task header -->
+      <div class="coach-taskbar">
+        <span class="process-name">合約審核流程</span>
+        <span class="task-sep">›</span>
+        <span class="task-name">簽核審查</span>
+        <span class="spacer"></span>
+        <span class="ct-badge">COACH TESTER</span>
+      </div>
+
+      <!-- Breadcrumb -->
+      <div class="coach-breadcrumb">
+        <a>合約管理</a>
+        <span class="sep">›</span>
+        <a>待我審核</a>
+        <span class="sep">›</span>
+        <span class="current">2026 年度軟體維護服務合約 — 簽核審查</span>
+      </div>
+
+      <!-- Coach body: widget mounts here -->
+      <div class="coach-body">
+        <div id="widget-mount">
+          <!-- Widget Layout.html injected by bootWidget() -->
+        </div>
+      </div>
+
+      <!-- ── Tester drawer (bottom) ──────────────────────────────────── -->
+      <div class="tester-drawer">
+
+        <!-- Left: presets + editor -->
+        <div class="drawer-left">
+          <div class="drawer-section-title">⚗ Scenarios &amp; Binding Data</div>
+          <div class="preset-row">
+            <button class="pb active" id="pb-layer2"   onclick="loadPreset('layer2')">🔵 Layer 2</button>
+            <button class="pb warn"   id="pb-layer1"   onclick="loadPreset('layer1')">🟡 Layer 1</button>
+            <button class="pb ok"     id="pb-approved" onclick="loadPreset('approved')">✅ All Approved</button>
+            <button class="pb err"    id="pb-rejected" onclick="loadPreset('rejected')">❌ Rejected</button>
+            <button class="pb"        id="pb-external" onclick="loadPreset('external')">📨 External</button>
+            <button class="pb err"    id="pb-disabled" onclick="loadPreset('disabled')">🔒 Disabled</button>
+          </div>
+          <div class="editor-bar">
+            <span>Binding JSON</span>
+            <button class="eb-btn push" onclick="pushBinding()" title="Ctrl+Enter">▶ Push</button>
+            <button class="eb-btn"      onclick="formatEditor()">{ }</button>
+            <button class="eb-btn"      onclick="resetEditor()">↺ Reset</button>
+            <span class="es" id="editor-status">ready</span>
+          </div>
+          <textarea id="binding-editor" spellcheck="false" aria-label="Binding JSON"></textarea>
+        </div>
+
+        <!-- Right: event log -->
+        <div class="drawer-right">
+          <div class="log-header">
+            <span>Event Log</span>
+            <span id="ev-count" style="font-size:11px;color:#a8a8a8;font-weight:400;margin-left:4px"></span>
+            <button class="log-clear" onclick="clearLog()">Clear</button>
+          </div>
+          <div id="event-log">
+            <div class="log-empty" id="log-empty">Interact with the widget above to see events here ↑</div>
+          </div>
+        </div>
+
+      </div><!-- /tester-drawer -->
+
+    </div><!-- /coach-wrap -->
+  </div><!-- /app-body -->
+</div><!-- /app-shell -->
+
+<!-- Event toast -->
+<div class="ev-toast" id="ev-toast">
+  <span class="ev-t-name" id="ev-t-name"></span>
+  <span style="color:#a8a8a8">→</span>
+  <span class="ev-t-val" id="ev-t-val"></span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     WIDGET LAYOUT TEMPLATE  (Layout.html verbatim)
+     ════════════════════════════════════════════════════════════════════════ -->
+<template id="widget-tpl">
+<div class="ard-root">
+  <div class="ard-progress-row">
+    <div class="ard-progress-left">
+      <div class="ard-progress-title">簽核進度</div>
+      <div class="ard-stages-wrap">
+        <div class="ard-stages" id="ard-stages">
+          <div class="ard-stage">
+            <div class="ard-circle completed">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/></svg>
+            </div>
+            <div class="ard-stage-label">起草送件</div>
+          </div>
+          <div class="ard-connector completed"></div>
+          <div class="ard-stage">
+            <div class="ard-circle current" aria-current="step">2</div>
+            <div class="ard-stage-label current">簽核路由</div>
+          </div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage"><div class="ard-circle pending">3</div><div class="ard-stage-label">外部查署</div></div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage"><div class="ard-circle pending">4</div><div class="ard-stage-label">完成詳情</div></div>
+        </div>
+        <button class="ard-cta-btn" id="ard-cta-btn" type="button">已完成 → 外部簽署 →</button>
+      </div>
+    </div>
+  </div>
+  <div class="ard-contract-title" id="ard-contract-title">2026 年度軟體維護服務合約</div>
+  <div class="ard-main">
+    <div class="ard-left">
+      <div class="ard-panel" role="region" aria-labelledby="ard-chain-title">
+        <div class="ard-panel-header"><span class="ard-panel-icon">🐎</span><span id="ard-chain-title">串簽流程（3 層）</span></div>
+        <div class="ard-chain-list" id="ard-chain-list">
+          <div class="ard-approver-row" data-approver-index="0" data-status="approved">
+            <div class="ard-avatar completed" aria-hidden="true">王</div>
+            <div class="ard-approver-info"><div class="ard-approver-name">王志明</div><div class="ard-approver-meta">直屬主管・採購部門</div></div>
+            <div class="ard-approver-actions"><span class="ard-status-badge approved">已核准</span></div>
+          </div>
+          <div class="ard-approver-row" data-approver-index="1" data-status="current">
+            <div class="ard-avatar current" aria-hidden="true">李</div>
+            <div class="ard-approver-info"><div class="ard-approver-name">李雅婷</div><div class="ard-approver-meta">上一層主管・採購總監</div></div>
+            <div class="ard-approver-actions">
+              <button class="ard-urge-btn" type="button" data-approver-index="1" aria-label="催辦 李雅婷">催辦</button>
+              <span class="ard-status-badge current">審核中</span>
+            </div>
+          </div>
+          <div class="ard-approver-row" data-approver-index="2" data-status="pending">
+            <div class="ard-avatar pending" aria-hidden="true">張</div>
+            <div class="ard-approver-info"><div class="ard-approver-name">張文豪</div><div class="ard-approver-meta">最終核准・副總經理</div></div>
+            <div class="ard-approver-actions"><span class="ard-status-badge pending">待簽</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ard-panel" role="region" aria-label="流程狀態">
+        <div class="ard-panel-header"><span class="ard-panel-icon">⠿</span><span>流程狀態</span></div>
+        <div class="ard-status-grid">
+          <div class="ard-status-row"><span class="ard-status-label">路由類型</span><span class="ard-status-value" id="ard-route-type">串簽 Sequential</span></div>
+          <div class="ard-status-row"><span class="ard-status-label">送審時間</span><span class="ard-status-value" id="ard-submitted-at">2026-07-14 09:32</span></div>
+          <div class="ard-status-row"><span class="ard-status-label">預計完成</span><span class="ard-status-value" id="ard-est-completion">2026-07-16</span></div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">AI 審查結果</span>
+            <span class="ard-status-value ard-ai-score-val">
+              <span id="ard-ai-score">82 / 100</span>
+              <a href="#" class="ard-ai-link" id="ard-ai-link" role="button" aria-label="查看 AI 建議">建議修改</a>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="ard-panel" role="region" aria-label="審核歷程">
+        <div class="ard-panel-header"><span class="ard-panel-icon">↺</span><span>審核歷程</span></div>
+        <div class="ard-audit-list" id="ard-audit-list"></div>
+      </div>
+    </div>
+    <div class="ard-right">
+      <div class="ard-action-panel" role="region" aria-labelledby="ard-action-title">
+        <div class="ard-action-header"><span class="ard-panel-icon">⏰</span><span id="ard-action-title">待我審核</span></div>
+        <p class="ard-context-msg" id="ard-context-msg">您目前為本案第 2 層審核人，請確認合約條款並做出決策。</p>
+        <div class="ard-action-buttons" id="ard-action-buttons" role="group" aria-label="審核動作">
+          <button class="ard-action-btn danger"    type="button" data-action-key="return">退回</button>
+          <button class="ard-action-btn secondary" type="button" data-action-key="delegate">轉派</button>
+          <button class="ard-action-btn primary"   type="button" data-action-key="approve">核准</button>
+        </div>
+        <div class="ard-comment-section">
+          <label class="ard-comment-label" for="ard-comment-area">審核意見（選填）</label>
+          <textarea class="ard-comment-area" id="ard-comment-area" placeholder="填寫審核意見…" rows="4" aria-label="填寫審核意見"></textarea>
+        </div>
+      </div>
+      <div class="ard-panel ard-route-panel" role="region" aria-label="路由說明">
+        <div class="ard-panel-header"><span class="ard-panel-icon">⠿</span><span>路由說明</span></div>
+        <p class="ard-route-text" id="ard-route-text">本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。</p>
+        <div class="ard-route-flow" id="ard-route-flow" role="list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</template>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     JAVASCRIPT: BAW mock + widget engine + tester controls
+     ════════════════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── Preset data ─────────────────────────────────────────────────────────────
+var PRESETS = {
+  layer2: {
+    contractTitle:"2026 年度軟體維護服務合約",
+    progress:{currentStageIndex:1,ctaLabel:"已完成 → 外部簽署 →",ctaAction:"proceed_to_external_signing",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"current",index:1},{label:"外部查署",status:"pending",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）",routeType:"串簽",totalLayers:3,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"approved",layer:1,canUrge:false},
+        {name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"current",layer:2,canUrge:true},
+        {name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"pending",layer:3,canUrge:false}
+      ]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-14 09:32",estimatedCompletion:"2026-07-16",aiScore:82,aiMaxScore:100,aiSuggestionLabel:"建議修改",aiSuggestionAction:"view_ai_report"},
+    auditLog:{events:{items:[
+      {timestamp:"07-14 09:32",actor:"陳大明",action:"送審",detail:"陳大明送審，附 AI 報告",isHighlighted:false},
+      {timestamp:"07-14 11:05",actor:"王志明",action:"核准",detail:"王志明核准 — 「條款無誤，同意送上級」",isHighlighted:true},
+      {timestamp:"07-14 11:06",actor:"系統",action:"通知",detail:"系統通知李雅婷待審",isHighlighted:false}
+    ]}},
+    approverAction:{title:"待我審核",contextMessage:"您目前為本案第 2 層審核人，請確認合約條款並做出決策。",comment:"",decision:"",
+      actions:{items:[{label:"退回",actionKey:"return",style:"danger",enabled:true},{label:"轉派",actionKey:"delegate",style:"secondary",enabled:true},{label:"核准",actionKey:"approve",style:"primary",enabled:true}]}},
+    routeExplanation:{explanationText:"本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"completed"},{label:"上一階\n核准",sublabel:"",status:"current"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
+  },
+  layer1: {
+    contractTitle:"2026 Q3 IT 設備採購合約",
+    progress:{currentStageIndex:1,ctaLabel:"簽核進行中…",ctaAction:"view_status",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"current",index:1},{label:"外部查署",status:"pending",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）",routeType:"串簽",totalLayers:3,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"current",layer:1,canUrge:true},
+        {name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"pending",layer:2,canUrge:false},
+        {name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"pending",layer:3,canUrge:false}
+      ]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-15 10:00",estimatedCompletion:"2026-07-17",aiScore:91,aiMaxScore:100,aiSuggestionLabel:"查看報告",aiSuggestionAction:"view_ai_report"},
+    auditLog:{events:{items:[
+      {timestamp:"07-15 10:00",actor:"陳大明",action:"送審",detail:"陳大明送審，附 AI 報告（91 分）",isHighlighted:false},
+      {timestamp:"07-15 10:01",actor:"系統",action:"通知",detail:"系統通知王志明待審",isHighlighted:false}
+    ]}},
+    approverAction:{title:"等待第 1 層審核",contextMessage:"本案目前等待直屬主管王志明審核，請稍候。",comment:"",decision:"",
+      actions:{items:[{label:"退回",actionKey:"return",style:"danger",enabled:false},{label:"轉派",actionKey:"delegate",style:"secondary",enabled:false},{label:"核准",actionKey:"approve",style:"primary",enabled:false}]}},
+    routeExplanation:{explanationText:"本案金額 NT$780,000 依規則觸發 3 層串簽，所有層級核准後移交外部簽署。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"current"},{label:"上一階\n核准",sublabel:"",status:"pending"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
+  },
+  approved: {
+    contractTitle:"2025 年度資安服務合約（已完成）",
+    progress:{currentStageIndex:2,ctaLabel:"前往外部簽署 →",ctaAction:"go_external_signing",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"completed",index:1},{label:"外部查署",status:"current",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）— 全部核准",routeType:"串簽",totalLayers:3,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"approved",layer:1,canUrge:false},
+        {name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"approved",layer:2,canUrge:false},
+        {name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"approved",layer:3,canUrge:false}
+      ]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-10 08:00",estimatedCompletion:"2026-07-12",aiScore:95,aiMaxScore:100,aiSuggestionLabel:"",aiSuggestionAction:""},
+    auditLog:{events:{items:[
+      {timestamp:"07-10 08:00",actor:"陳大明",action:"送審",detail:"陳大明送審",isHighlighted:false},
+      {timestamp:"07-10 10:15",actor:"王志明",action:"核准",detail:"王志明核准 — 「條款清晰，同意」",isHighlighted:true},
+      {timestamp:"07-11 09:30",actor:"李雅婷",action:"核准",detail:"李雅婷核准 — 「金額合理，同意送上級」",isHighlighted:true},
+      {timestamp:"07-12 14:00",actor:"張文豪",action:"核准",detail:"張文豪最終核准，移交外部簽署",isHighlighted:true}
+    ]}},
+    approverAction:{title:"簽核完成",contextMessage:"所有層級均已核准，合約已自動移交外部簽署（DocuSign）。",comment:"",decision:"approved",
+      actions:{items:[{label:"查看合約",actionKey:"view_contract",style:"primary",enabled:true},{label:"下載 PDF",actionKey:"download_pdf",style:"secondary",enabled:true}]}},
+    routeExplanation:{explanationText:"3 層串簽已全部完成。系統已自動移交外部簽署（DocuSign）進行最終確認。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"completed"},{label:"上一階\n核准",sublabel:"",status:"completed"},{label:"最終核准\n執行",sublabel:"",status:"completed"},{label:"外部\n簽署",sublabel:"",status:"current"}]}}
+  },
+  rejected: {
+    contractTitle:"2026 年度廣告行銷合約（退回重審）",
+    progress:{currentStageIndex:1,ctaLabel:"重新修改送審",ctaAction:"resubmit",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"current",index:1},{label:"外部查署",status:"pending",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）— 退回",routeType:"串簽",totalLayers:3,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"rejected",layer:1,canUrge:false},
+        {name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"pending",layer:2,canUrge:false},
+        {name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"pending",layer:3,canUrge:false}
+      ]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-13 14:00",estimatedCompletion:"—",aiScore:55,aiMaxScore:100,aiSuggestionLabel:"查看退回原因",aiSuggestionAction:"view_rejection_reason"},
+    auditLog:{events:{items:[
+      {timestamp:"07-13 14:00",actor:"陳大明",action:"送審",detail:"陳大明送審",isHighlighted:false},
+      {timestamp:"07-13 16:42",actor:"王志明",action:"退回",detail:"王志明退回 — 「合約金額超出預算，請重新確認報價」",isHighlighted:true},
+      {timestamp:"07-13 16:42",actor:"系統",action:"通知",detail:"系統通知陳大明：合約已退回，請修正後重新送審",isHighlighted:false}
+    ]}},
+    approverAction:{title:"合約已退回",contextMessage:"王志明（第 1 層）已退回此合約。原因：合約金額超出預算，請重新確認報價後再次送審。",comment:"",decision:"rejected",
+      actions:{items:[{label:"修改合約",actionKey:"edit_contract",style:"primary",enabled:true},{label:"聯絡審核人",actionKey:"contact_approver",style:"secondary",enabled:true}]}},
+    routeExplanation:{explanationText:"本案因第 1 層審核人退回而暫停。請依退回意見修改合約後重新送審。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"current"},{label:"上一階\n核准",sublabel:"",status:"pending"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
+  },
+  external: {
+    contractTitle:"2026 年雲端服務訂閱合約（DocuSign 進行中）",
+    progress:{currentStageIndex:2,ctaLabel:"查看 DocuSign 狀態",ctaAction:"view_docusign",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"completed",index:1},{label:"外部查署",status:"current",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"並簽流程（2 層）— 已完成",routeType:"並簽",totalLayers:2,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"部門主管",department:"財務部門",status:"approved",layer:1,canUrge:false},
+        {name:"林美華",avatarInitial:"林",role:"法務主管",department:"法律部門",status:"approved",layer:2,canUrge:false}
+      ]}},
+    processStatus:{routeType:"並簽 Parallel",submittedAt:"2026-07-08 09:00",estimatedCompletion:"2026-07-18",aiScore:88,aiMaxScore:100,aiSuggestionLabel:"",aiSuggestionAction:""},
+    auditLog:{events:{items:[
+      {timestamp:"07-08 09:00",actor:"陳大明",action:"送審",detail:"送審，AI 評分 88 分",isHighlighted:false},
+      {timestamp:"07-09 10:30",actor:"王志明",action:"核准",detail:"財務主管核准",isHighlighted:true},
+      {timestamp:"07-09 14:00",actor:"林美華",action:"核准",detail:"法務主管核准",isHighlighted:true},
+      {timestamp:"07-09 14:01",actor:"系統",action:"發送",detail:"合約已寄送至供應商 DocuSign",isHighlighted:false}
+    ]}},
+    approverAction:{title:"外部簽署進行中",contextMessage:"合約已送出等待廠商於 DocuSign 完成簽署，預計 2026-07-18 前完成。",comment:"",decision:"pending_external",
+      actions:{items:[{label:"查看狀態",actionKey:"view_docusign",style:"primary",enabled:true},{label:"催辦廠商",actionKey:"urge_vendor",style:"secondary",enabled:true},{label:"撤回合約",actionKey:"revoke",style:"danger",enabled:false}]}},
+    routeExplanation:{explanationText:"2 層並簽已完成。合約目前等待供應商在 DocuSign 系統中完成電子簽署。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"財務主管\n核准",sublabel:"",status:"completed"},{label:"法務主管\n核准",sublabel:"",status:"completed"},{label:"最終核准\n執行",sublabel:"",status:"completed"},{label:"外部\n簽署",sublabel:"",status:"current"}]}}
+  },
+  disabled: {
+    contractTitle:"2026 年度人力派遣合約（唯讀）",
+    progress:{currentStageIndex:1,ctaLabel:"簽核進行中",ctaAction:"",
+      stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"current",index:1},{label:"外部查署",status:"pending",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）",routeType:"串簽",totalLayers:3,
+      approvers:{items:[
+        {name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"approved",layer:1,canUrge:false},
+        {name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"current",layer:2,canUrge:false},
+        {name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"pending",layer:3,canUrge:false}
+      ]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-14 09:32",estimatedCompletion:"2026-07-16",aiScore:75,aiMaxScore:100,aiSuggestionLabel:"建議修改",aiSuggestionAction:"view_ai_report"},
+    auditLog:{events:{items:[
+      {timestamp:"07-14 09:32",actor:"陳大明",action:"送審",detail:"陳大明送審",isHighlighted:false},
+      {timestamp:"07-14 11:05",actor:"王志明",action:"核准",detail:"王志明核准",isHighlighted:true}
+    ]}},
+    approverAction:{title:"唯讀模式",contextMessage:"您無此合約的審核權限，僅可查看目前審核狀態。",comment:"",decision:"",
+      actions:{items:[{label:"退回",actionKey:"return",style:"danger",enabled:false},{label:"轉派",actionKey:"delegate",style:"secondary",enabled:false},{label:"核准",actionKey:"approve",style:"primary",enabled:false}]}},
+    routeExplanation:{explanationText:"本案正在進行 3 層串簽審核，您以觀察員身份查看流程狀態。",
+      steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"completed"},{label:"上一階\n核准",sublabel:"",status:"current"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
+  }
+};
+
+// ── BAW context mock ─────────────────────────────────────────────────────────
+var _cbs=[], _data=null, _evCount=0;
+var MOCK_CTX = {
+  element: null,
+  binding: {
+    connect: function(cb){ _cbs.push(cb); if(_data!==null) cb(_data); },
+    get: function(p){ return p==='value'?_data:null; }
+  },
+  trigger: function(name, payload){ handleEvent(name, payload); }
+};
+function pushData(d){
+  _data=d;
+  for(var i=0;i<_cbs.length;i++){ try{_cbs[i](d);}catch(e){console.error(e);} }
+}
+
+// ── Widget bootstrap ─────────────────────────────────────────────────────────
+function bootWidget(){
+  var mount=document.getElementById('widget-mount');
+  var tpl=document.getElementById('widget-tpl');
+  mount.innerHTML='';
+  _cbs=[];
+  mount.appendChild(document.importNode(tpl.content,true));
+  MOCK_CTX.element=mount;
+  var inst={context:MOCK_CTX, getData:function(){return _data;}};
+  try{ WIDGET_SCRIPT.call(inst); }
+  catch(e){ mount.innerHTML='<p style="padding:20px;color:#da1e28;font-family:monospace">Widget error: '+e.message+'</p>'; console.error(e); }
+}
+
+// ── Widget script (verbatim inlineJavascript.js body) ────────────────────────
+function WIDGET_SCRIPT(){
+  var me=this;
+  if(!this.context||!this.context.element||!this.context.element.querySelector){return;}
+  var root=this.context.element.querySelector('.ard-root');
+  if(!root){return;}
+  var stagesEl=root.querySelector('#ard-stages'),ctaBtn=root.querySelector('#ard-cta-btn'),
+      contractEl=root.querySelector('#ard-contract-title'),chainTitleEl=root.querySelector('#ard-chain-title'),
+      chainListEl=root.querySelector('#ard-chain-list'),routeTypeEl=root.querySelector('#ard-route-type'),
+      submittedAtEl=root.querySelector('#ard-submitted-at'),estComplEl=root.querySelector('#ard-est-completion'),
+      aiScoreEl=root.querySelector('#ard-ai-score'),aiLinkEl=root.querySelector('#ard-ai-link'),
+      auditListEl=root.querySelector('#ard-audit-list'),actionTitleEl=root.querySelector('#ard-action-title'),
+      contextMsgEl=root.querySelector('#ard-context-msg'),actionBtnsEl=root.querySelector('#ard-action-buttons'),
+      commentArea=root.querySelector('#ard-comment-area'),routeTextEl=root.querySelector('#ard-route-text'),
+      routeFlowEl=root.querySelector('#ard-route-flow');
+  function toStr(v){if(v===null||v===undefined){return '';}if(typeof v==='string'){return v;}if(typeof v==='number'||typeof v==='boolean'){return String(v);}return '';}
+  function toNum(v){if(typeof v==='number'){return v;}var n=parseInt(String(v),10);return isNaN(n)?0:n;}
+  function toBool(v){if(typeof v==='boolean'){return v;}if(v==='true'||v===1||v==='1'){return true;}return false;}
+  function normList(raw,dk){if(!raw){return [];}if(Array.isArray(raw)){return raw;}if(raw.items&&Array.isArray(raw.items)){return raw.items;}for(var ki=0;ki<dk.length;ki++){if(raw[dk[ki]]!==undefined){return [raw];}}return [];}
+  var FB={contractTitle:"2026 年度軟體維護服務合約",
+    progress:{currentStageIndex:1,ctaLabel:"已完成 → 外部簽署 →",ctaAction:"proceed_to_external_signing",stages:{items:[{label:"起草送件",status:"completed",index:0},{label:"簽核路由",status:"current",index:1},{label:"外部查署",status:"pending",index:2},{label:"完成詳情",status:"pending",index:3}]}},
+    approvalChain:{title:"串簽流程（3 層）",routeType:"串簽",totalLayers:3,approvers:{items:[{name:"王志明",avatarInitial:"王",role:"直屬主管",department:"採購部門",status:"approved",layer:1,canUrge:false},{name:"李雅婷",avatarInitial:"李",role:"上一層主管",department:"採購總監",status:"current",layer:2,canUrge:true},{name:"張文豪",avatarInitial:"張",role:"最終核准",department:"副總經理",status:"pending",layer:3,canUrge:false}]}},
+    processStatus:{routeType:"串簽 Sequential",submittedAt:"2026-07-14 09:32",estimatedCompletion:"2026-07-16",aiScore:82,aiMaxScore:100,aiSuggestionLabel:"建議修改",aiSuggestionAction:"view_ai_report"},
+    auditLog:{events:{items:[{timestamp:"07-14 09:32",actor:"陳大明",action:"送審",detail:"陳大明送審，附 AI 報告",isHighlighted:false},{timestamp:"07-14 11:05",actor:"王志明",action:"核准",detail:"王志明核准 — 「條款無誤，同意送上級」",isHighlighted:true},{timestamp:"07-14 11:05",actor:"系統",action:"通知",detail:"系統通知李雅婷待審",isHighlighted:false}]}},
+    approverAction:{title:"待我審核",contextMessage:"您目前為本案第 2 層審核人，請確認合約條款並做出決策。",comment:"",decision:"",actions:{items:[{label:"退回",actionKey:"return",style:"danger",enabled:true},{label:"轉派",actionKey:"delegate",style:"secondary",enabled:true},{label:"核准",actionKey:"approve",style:"primary",enabled:true}]}},
+    routeExplanation:{explanationText:"本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。",steps:{items:[{label:"申請人\n送審",sublabel:"",status:"completed"},{label:"直屬主管\n核准",sublabel:"",status:"completed"},{label:"上一階\n核准",sublabel:"",status:"current"},{label:"最終核准\n執行",sublabel:"",status:"pending"},{label:"外部\n簽署",sublabel:"",status:"pending"}]}}
+  };
+  // Phase 1
+  if(ctaBtn){ctaBtn.addEventListener('click',function(){me.context.trigger('ctaClicked',ctaBtn.getAttribute('data-cta-action')||FB.progress.ctaAction);});}
+  if(aiLinkEl){aiLinkEl.addEventListener('click',function(e){e.preventDefault();me.context.trigger('ctaClicked',aiLinkEl.getAttribute('data-ai-action')||FB.processStatus.aiSuggestionAction);});}
+  if(commentArea){commentArea.addEventListener('input',function(){me.context.trigger('commentChanged',commentArea.value);});}
+  if(actionBtnsEl){actionBtnsEl.addEventListener('click',function(e){var b=e.target.closest('.ard-action-btn');if(!b||b.disabled){return;}me.context.trigger('actionClicked',b.getAttribute('data-action-key')||'');});}
+  if(chainListEl){chainListEl.addEventListener('click',function(e){var b=e.target.closest('.ard-urge-btn');if(!b){return;}me.context.trigger('urgeClicked',toNum(b.getAttribute('data-approver-index')));});}
+  if(routeFlowEl){routeFlowEl.addEventListener('click',function(e){var b=e.target.closest('.ard-route-step-box');if(!b){return;}me.context.trigger('stepClicked',toNum(b.getAttribute('data-step-index')));});}
+  // Phase 2 renderers
+  function renderProgress(d){
+    var stages=normList(d.stages,['label','status']),ci=toNum(d.currentStageIndex),cl=toStr(d.ctaLabel),ca=toStr(d.ctaAction);
+    if(stages.length===0){stages=normList(FB.progress.stages,['label','status']);ci=FB.progress.currentStageIndex;}
+    if(!cl){cl=FB.progress.ctaLabel;}if(!ca){ca=FB.progress.ctaAction;}
+    stagesEl.innerHTML='';
+    for(var i=0;i<stages.length;i++){
+      if(i>0){var conn=document.createElement('div');var ps=toStr(stages[i-1].status)||(i-1<ci?'completed':'pending');conn.className='ard-connector'+(ps==='completed'?' completed':'');stagesEl.appendChild(conn);}
+      var st=toStr(stages[i].status)||(i<ci?'completed':(i===ci?'current':'pending'));
+      var sd=document.createElement('div');sd.className='ard-stage';
+      var circ=document.createElement('div');circ.className='ard-circle '+st;
+      if(st==='completed'){circ.innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/></svg>';}
+      else{circ.textContent=String(i+1);if(st==='current'){circ.setAttribute('aria-current','step');}}
+      sd.appendChild(circ);
+      var ll=document.createElement('div');ll.className='ard-stage-label'+(st==='current'?' current':'');ll.textContent=toStr(stages[i].label)||('步驟 '+(i+1));
+      sd.appendChild(ll);stagesEl.appendChild(sd);
+    }
+    if(ctaBtn){ctaBtn.textContent=cl;ctaBtn.setAttribute('data-cta-action',ca);}
+  }
+  function renderChain(d){
+    if(chainTitleEl){chainTitleEl.textContent=toStr(d.title)||FB.approvalChain.title;}
+    var ap=normList(d.approvers,['name','status']);if(ap.length===0){ap=normList(FB.approvalChain.approvers,['name','status']);}
+    var sl={approved:'已核准',current:'審核中',pending:'待簽',rejected:'已退回'};
+    chainListEl.innerHTML='';
+    for(var i=0;i<ap.length;i++){(function(a,idx){
+      var st=toStr(a.status||'pending').toLowerCase();
+      var row=document.createElement('div');row.className='ard-approver-row';row.setAttribute('data-approver-index',idx);row.setAttribute('data-status',st);
+      var av=document.createElement('div');av.className='ard-avatar '+st;av.setAttribute('aria-hidden','true');av.textContent=toStr(a.avatarInitial)||toStr(a.name).charAt(0)||'?';row.appendChild(av);
+      var inf=document.createElement('div');inf.className='ard-approver-info';
+      var nm=document.createElement('div');nm.className='ard-approver-name';nm.textContent=toStr(a.name);
+      var mt=document.createElement('div');mt.className='ard-approver-meta';mt.textContent=[toStr(a.role),toStr(a.department)].filter(Boolean).join('・');
+      inf.appendChild(nm);inf.appendChild(mt);row.appendChild(inf);
+      var ac=document.createElement('div');ac.className='ard-approver-actions';
+      if(toBool(a.canUrge)){var ub=document.createElement('button');ub.className='ard-urge-btn';ub.type='button';ub.setAttribute('data-approver-index',idx);ub.setAttribute('aria-label','催辦 '+toStr(a.name));ub.textContent='催辦';ub.addEventListener('click',(function(i2){return function(){me.context.trigger('urgeClicked',i2);};})(idx));ac.appendChild(ub);}
+      var bdg=document.createElement('span');bdg.className='ard-status-badge '+st;bdg.textContent=sl[st]||st;ac.appendChild(bdg);row.appendChild(ac);chainListEl.appendChild(row);
+    })(ap[i],i);}
+  }
+  function renderStatus(d){
+    if(routeTypeEl){routeTypeEl.textContent=toStr(d.routeType)||FB.processStatus.routeType;}
+    if(submittedAtEl){submittedAtEl.textContent=toStr(d.submittedAt)||FB.processStatus.submittedAt;}
+    if(estComplEl){estComplEl.textContent=toStr(d.estimatedCompletion)||FB.processStatus.estimatedCompletion;}
+    var sc=toNum(d.aiScore)||FB.processStatus.aiScore,mx=toNum(d.aiMaxScore)||FB.processStatus.aiMaxScore;
+    var al=toStr(d.aiSuggestionLabel)||FB.processStatus.aiSuggestionLabel,aa=toStr(d.aiSuggestionAction)||FB.processStatus.aiSuggestionAction;
+    if(aiScoreEl){aiScoreEl.textContent=sc+' / '+mx;}
+    if(aiLinkEl){aiLinkEl.textContent=al;aiLinkEl.setAttribute('data-ai-action',aa);aiLinkEl.style.display=al?'':'none';}
+  }
+  function renderAudit(d){
+    var ev=normList(d.events,['timestamp','detail']);if(ev.length===0){ev=normList(FB.auditLog.events,['timestamp','detail']);}
+    auditListEl.innerHTML='';
+    for(var i=0;i<ev.length;i++){(function(e){
+      var hl=toBool(e.isHighlighted),alc=toStr(e.action).toLowerCase();
+      var ed=document.createElement('div');ed.className='ard-audit-event';
+      var dot=document.createElement('div');var dc='ard-audit-dot';
+      if(hl){dc+=' highlighted';}else if(alc==='核准'||alc==='approved'){dc+=' approved';}else if(alc==='退回'||alc==='rejected'){dc+=' rejected';}
+      dot.className=dc;ed.appendChild(dot);
+      var bd=document.createElement('div');bd.className='ard-audit-body';
+      var ts=document.createElement('div');ts.className='ard-audit-ts'+(hl?' highlighted':'');ts.textContent=toStr(e.timestamp);// no highlight on ts here
+      var dt=document.createElement('div');dt.className='ard-audit-detail'+(hl?' highlighted':'');dt.textContent=toStr(e.detail);
+      bd.appendChild(ts);bd.appendChild(dt);ed.appendChild(bd);auditListEl.appendChild(ed);
+    })(ev[i]);}
+  }
+  function renderAction(d){
+    if(actionTitleEl){actionTitleEl.textContent=toStr(d.title)||FB.approverAction.title;}
+    if(contextMsgEl){contextMsgEl.textContent=toStr(d.contextMessage)||FB.approverAction.contextMessage;}
+    if(commentArea){commentArea.value=toStr(d.comment);}
+    var ac=normList(d.actions,['label','actionKey']);if(ac.length===0){ac=normList(FB.approverAction.actions,['label','actionKey']);}
+    actionBtnsEl.innerHTML='';
+    for(var i=0;i<ac.length;i++){(function(a){
+      var btn=document.createElement('button');btn.type='button';btn.className='ard-action-btn '+toStr(a.style||'secondary').toLowerCase();
+      btn.textContent=toStr(a.label);btn.disabled=(a.enabled===false||a.enabled==='false');
+      btn.setAttribute('data-action-key',toStr(a.actionKey));
+      btn.addEventListener('click',(function(k){return function(){me.context.trigger('actionClicked',k);};})(toStr(a.actionKey)));
+      actionBtnsEl.appendChild(btn);
+    })(ac[i]);}
+  }
+  function renderRoute(d){
+    if(routeTextEl){routeTextEl.textContent=toStr(d.explanationText)||FB.routeExplanation.explanationText;}
+    var steps=normList(d.steps,['label','status']);if(steps.length===0){steps=normList(FB.routeExplanation.steps,['label','status']);}
+    var stxt={completed:'已完成',current:'進行中',pending:'待辦'};
+    routeFlowEl.innerHTML='';
+    for(var i=0;i<steps.length;i++){(function(s,idx){
+      if(idx>0){var aw=document.createElement('div');aw.className='ard-route-step';aw.setAttribute('role','presentation');var ar=document.createElement('div');var ps=toStr(steps[idx-1].status||'pending').toLowerCase();ar.className='ard-route-arrow'+(ps==='completed'?' completed':'');ar.setAttribute('aria-hidden','true');ar.textContent='→';aw.appendChild(ar);routeFlowEl.appendChild(aw);}
+      var st=toStr(s.status||'pending').toLowerCase(),lb=toStr(s.label)||('步驟 '+(idx+1));
+      var sw=document.createElement('div');sw.className='ard-route-step';sw.setAttribute('role','listitem');
+      var bx=document.createElement('button');bx.type='button';bx.className='ard-route-step-box '+st;bx.textContent=lb;
+      bx.setAttribute('data-step-index',idx);bx.setAttribute('aria-label','步驟 '+(idx+1)+'：'+lb.replace(/\n/g,'')+'（'+(stxt[st]||st)+'）');
+      if(st==='current'){bx.setAttribute('aria-current','step');}
+      bx.addEventListener('click',(function(i2){return function(){me.context.trigger('stepClicked',i2);};})(idx));
+      sw.appendChild(bx);routeFlowEl.appendChild(sw);
+    })(steps[i],i);}
+  }
+  function render(data){
+    try{var d=data||{};
+      if(contractEl){contractEl.textContent=toStr(d.contractTitle)||FB.contractTitle;}
+      renderProgress(d.progress||FB.progress);renderChain(d.approvalChain||FB.approvalChain);
+      renderStatus(d.processStatus||FB.processStatus);renderAudit(d.auditLog||FB.auditLog);
+      renderAction(d.approverAction||FB.approverAction);renderRoute(d.routeExplanation||FB.routeExplanation);
+    }catch(e){root.innerHTML='<p style="padding:16px;color:#da1e28;font-family:monospace;font-size:12px">Error: '+e.message+'</p>';}
+  }
+  var bound=false;
+  if(this.context&&this.context.binding&&typeof this.context.binding.connect==='function'){this.context.binding.connect(function(v){bound=true;render(v);});}
+  if(!bound){var d0=this.getData?this.getData():null;if(d0){render(d0);bound=true;}}
+  if(!bound){setTimeout(function(){try{var bv=me.context.binding.get('value');if(bv){render(bv);}}catch(e){}},300);}
+}
+
+// ── Event handling ───────────────────────────────────────────────────────────
+var _toastTimer=null;
+function handleEvent(name, payload){
+  _evCount++;
+  // Toast
+  var t=document.getElementById('ev-toast');
+  var tn=document.getElementById('ev-t-name');
+  var tv=document.getElementById('ev-t-val');
+  if(t&&tn&&tv){
+    tn.textContent=name;
+    tv.textContent=typeof payload==='string'?'"'+payload+'"':String(payload);
+    t.classList.add('show');
+    clearTimeout(_toastTimer);
+    _toastTimer=setTimeout(function(){t.classList.remove('show');},2500);
+  }
+  // Log
+  var log=document.getElementById('event-log');
+  var empty=document.getElementById('log-empty');
+  if(empty){empty.style.display='none';}
+  var now=new Date();
+  var ts=now.toTimeString().slice(0,8)+'.'+String(now.getMilliseconds()).padStart(3,'0');
+  var payStr;
+  if(typeof payload==='string'){payStr='"'+payload+'"';}
+  else if(typeof payload==='number'){payStr=String(payload);}
+  else if(payload===null||payload===undefined){payStr='null';}
+  else{try{payStr=JSON.stringify(payload);}catch(e){payStr=String(payload);}}
+  var entry=document.createElement('div');entry.className='ev '+name;
+  var tsEl=document.createElement('span');tsEl.className='ev-ts';tsEl.textContent=ts;
+  var nmEl=document.createElement('span');nmEl.className='ev-name';nmEl.textContent=name;
+  var pyEl=document.createElement('span');pyEl.className='ev-payload';pyEl.textContent='→ '+payStr;
+  entry.appendChild(tsEl);entry.appendChild(nmEl);entry.appendChild(pyEl);
+  if(log.firstChild&&log.firstChild!==empty){log.insertBefore(entry,log.firstChild);}else{log.appendChild(entry);}
+  var cnt=document.getElementById('ev-count');if(cnt){cnt.textContent='('+_evCount+')';}
+}
+function clearLog(){
+  _evCount=0;
+  document.getElementById('event-log').innerHTML='<div class="log-empty" id="log-empty">Interact with the widget above to see events here ↑</div>';
+  var cnt=document.getElementById('ev-count');if(cnt){cnt.textContent='';}
+}
+
+// ── Editor controls ──────────────────────────────────────────────────────────
+var _preset='layer2';
+function loadPreset(name){
+  _preset=name;
+  var d=PRESETS[name];if(!d){return;}
+  document.getElementById('binding-editor').value=JSON.stringify(d,null,2);
+  setStatus('','');
+  document.querySelectorAll('.pb').forEach(function(b){b.classList.remove('active');});
+  var ab=document.getElementById('pb-'+name);if(ab){ab.classList.add('active');}
+  // Re-boot widget and push fresh data so binding.connect fires cleanly
+  bootWidget();
+  pushData(d);
+}
+function pushBinding(){
+  var raw=document.getElementById('binding-editor').value.trim();
+  try{
+    var d=JSON.parse(raw);
+    // Re-boot so widget re-registers connect listeners
+    bootWidget();
+    pushData(d);
+    setStatus('ok','✓ Pushed');
+    setTimeout(function(){setStatus('','');},2000);
+  }catch(e){setStatus('err','✗ '+e.message.split('\n')[0]);}
+}
+function formatEditor(){
+  try{var d=JSON.parse(document.getElementById('binding-editor').value);document.getElementById('binding-editor').value=JSON.stringify(d,null,2);setStatus('ok','✓ Formatted');setTimeout(function(){setStatus('','');},1500);}
+  catch(e){setStatus('err','✗ '+e.message.split('\n')[0]);}
+}
+function resetEditor(){loadPreset(_preset);}
+function setStatus(cls,msg){
+  var el=document.getElementById('editor-status');if(!el){return;}
+  el.className='es'+(cls?' '+cls:'');el.textContent=msg||'ready';
+}
+
+// ── Keyboard shortcut Ctrl+Enter → push ──────────────────────────────────────
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    if(document.activeElement===document.getElementById('binding-editor')){
+      e.preventDefault();pushBinding();
+    }
+  }
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  bootWidget();
+  loadPreset('layer2');
+});
+</script>
+</body>
+</html>

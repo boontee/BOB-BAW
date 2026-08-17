@@ -1,0 +1,70 @@
+{
+  "type": "ApproverAction",
+  "description": "Business object for the approver action panel — holds approver context, editable comment/decision, and action buttons",
+  "properties": [
+    {
+      "name": "approverName",
+      "type": "String",
+      "description": "Display name of the current approver"
+    },
+    {
+      "name": "currentLayer",
+      "type": "Integer",
+      "description": "Current approval layer number (1-based)"
+    },
+    {
+      "name": "totalLayers",
+      "type": "Integer",
+      "description": "Total number of approval layers in the route"
+    },
+    {
+      "name": "contextMessage",
+      "type": "String",
+      "description": "Optional context message displayed above the comment area"
+    },
+    {
+      "name": "comment",
+      "type": "String",
+      "description": "Approver comment / review note (writable by user)"
+    },
+    {
+      "name": "decision",
+      "type": "String",
+      "description": "Current decision value set by the approver (writable); e.g. 'approve', 'reject', 'return'"
+    },
+    {
+      "name": "actions",
+      "type": "ActionButton",
+      "isList": true,
+      "description": "List of action buttons available to the approver"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "ActionButton",
+      "description": "A single action button in the approver action panel",
+      "properties": [
+        {
+          "name": "label",
+          "type": "String",
+          "description": "Button display label"
+        },
+        {
+          "name": "actionKey",
+          "type": "String",
+          "description": "Unique key identifying the action (used in actionClicked event)"
+        },
+        {
+          "name": "style",
+          "type": "String",
+          "description": "Visual style: 'primary', 'danger', 'secondary'"
+        },
+        {
+          "name": "enabled",
+          "type": "Boolean",
+          "description": "Whether the button is clickable"
+        }
+      ]
+    }
+  ]
+}

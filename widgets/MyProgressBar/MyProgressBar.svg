@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Track background -->
+  <rect x="2" y="13" width="28" height="6" rx="3" fill="#e0e0e0"/>
+  <!-- Fill — green (high-progress preview) -->
+  <rect x="2" y="13" width="20" height="6" rx="3" fill="#24a148"/>
+  <!-- Percentage label -->
+  <text x="16" y="9" text-anchor="middle" font-family="IBM Plex Sans,Arial,sans-serif"
+        font-size="7" font-weight="600" fill="#24a148">65%</text>
+  <!-- Status dot -->
+  <circle cx="16" cy="26" r="2" fill="#24a148"/>
+</svg>

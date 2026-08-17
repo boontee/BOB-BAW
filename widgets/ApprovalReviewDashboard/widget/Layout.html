@@ -1,0 +1,302 @@
+<!-- ApprovalReviewDashboard — full eContract 簽核 review panel
+     Layout is fully static: all sections are rendered in markup.
+     inlineJavascript.js overlays BAW data and wires all event handlers.
+-->
+<div class="ard-root">
+
+  <!-- ══ TOP: Progress bar + CTA ═══════════════════════════════════════════ -->
+  <div class="ard-progress-row">
+    <div class="ard-progress-left">
+      <div class="ard-progress-title">簽核進度</div>
+      <div class="ard-stages-wrap">
+
+        <!-- Progress stages — rendered by JS into this container -->
+        <div class="ard-stages" id="ard-stages">
+          <!-- Fallback static stages (replaced by JS at runtime) -->
+          <div class="ard-stage">
+            <div class="ard-circle completed">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M6 11L2 7l1.4-1.4L6 8.2l6.6-6.6L14 3z"/>
+              </svg>
+            </div>
+            <div class="ard-stage-label">起草送件</div>
+          </div>
+          <div class="ard-connector completed"></div>
+          <div class="ard-stage">
+            <div class="ard-circle current" aria-current="step">3</div>
+            <div class="ard-stage-label current">簽核路由</div>
+          </div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage">
+            <div class="ard-circle pending">4</div>
+            <div class="ard-stage-label">外部查署</div>
+          </div>
+          <div class="ard-connector"></div>
+          <div class="ard-stage">
+            <div class="ard-circle pending">5</div>
+            <div class="ard-stage-label">完成詳情</div>
+          </div>
+        </div>
+
+        <!-- CTA button — top-right, triggers ctaClicked event -->
+        <button class="ard-cta-btn" id="ard-cta-btn"
+                type="button"
+                aria-label="已完成，前往外部簽署">
+          已完成 → 外部簽署 →
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Contract sub-title ──────────────────────────────────────────────── -->
+  <div class="ard-contract-title" id="ard-contract-title">
+    2026 年度軟體維護服務合約
+  </div>
+
+  <!-- ══ MAIN: Left 60% + Right 40% ════════════════════════════════════════ -->
+  <div class="ard-main">
+
+    <!-- ── LEFT COLUMN ───────────────────────────────────────────────────── -->
+    <div class="ard-left">
+
+      <!-- ── Approval Chain ───────────────────────────────────────────────── -->
+      <div class="ard-panel" role="region" aria-labelledby="ard-chain-title">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">🐎</span>
+          <span id="ard-chain-title">串簽流程（3 層）</span>
+        </div>
+
+        <div class="ard-chain-list" id="ard-chain-list">
+
+          <!-- Row 1: 王志明 — 已核准 -->
+          <div class="ard-approver-row" data-approver-index="0" data-status="approved">
+            <div class="ard-avatar completed" aria-hidden="true">王</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">王志明</div>
+              <div class="ard-approver-meta">直屬主管・採購部門</div>
+            </div>
+            <div class="ard-approver-actions">
+              <span class="ard-status-badge approved">已核准</span>
+            </div>
+          </div>
+
+          <!-- Row 2: 李雅婷 — 催辦 + 審核中 -->
+          <div class="ard-approver-row" data-approver-index="1" data-status="current">
+            <div class="ard-avatar current" aria-hidden="true">李</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">李雅婷</div>
+              <div class="ard-approver-meta">上一層主管・採購總監</div>
+            </div>
+            <div class="ard-approver-actions">
+              <button class="ard-urge-btn"
+                      type="button"
+                      data-approver-index="1"
+                      aria-label="催辦 李雅婷">催辦</button>
+              <span class="ard-status-badge current">審核中</span>
+            </div>
+          </div>
+
+          <!-- Row 3: 張文豪 — 待簽 -->
+          <div class="ard-approver-row" data-approver-index="2" data-status="pending">
+            <div class="ard-avatar pending" aria-hidden="true">張</div>
+            <div class="ard-approver-info">
+              <div class="ard-approver-name">張文豪</div>
+              <div class="ard-approver-meta">最終核准・副總經理</div>
+            </div>
+            <div class="ard-approver-actions">
+              <span class="ard-status-badge pending">待簽</span>
+            </div>
+          </div>
+
+        </div><!-- /ard-chain-list -->
+      </div><!-- /approval chain panel -->
+
+      <!-- ── Process Status ─────────────────────────────────────────────── -->
+      <div class="ard-panel" role="region" aria-label="流程狀態">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+          <span>流程狀態</span>
+        </div>
+        <div class="ard-status-grid" id="ard-status-grid">
+          <div class="ard-status-row">
+            <span class="ard-status-label">路由類型</span>
+            <span class="ard-status-value" id="ard-route-type">串簽 Sequential</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">送審時間</span>
+            <span class="ard-status-value" id="ard-submitted-at">2026-07-14 09:32</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">預計完成</span>
+            <span class="ard-status-value" id="ard-est-completion">2026-07-16</span>
+          </div>
+          <div class="ard-status-row">
+            <span class="ard-status-label">AI 審查結果</span>
+            <span class="ard-status-value ard-ai-score-val">
+              <span id="ard-ai-score">82 / 100</span>
+              <!-- Clickable AI suggestion link — triggers ctaClicked(view_ai_report) -->
+              <a href="#" class="ard-ai-link" id="ard-ai-link"
+                 role="button" aria-label="查看 AI 建議修改報告">建議修改</a>
+            </span>
+          </div>
+        </div>
+      </div><!-- /process status panel -->
+
+      <!-- ── Audit Timeline ─────────────────────────────────────────────── -->
+      <div class="ard-panel" role="region" aria-label="審核歷程">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">↺</span>
+          <span>審核歷程</span>
+        </div>
+        <div class="ard-audit-list" id="ard-audit-list">
+
+          <div class="ard-audit-event">
+            <div class="ard-audit-dot"></div>
+            <div class="ard-audit-body">
+              <div class="ard-audit-ts">07-14 09:32</div>
+              <div class="ard-audit-detail">陳大明送審，附 AI 報告</div>
+            </div>
+          </div>
+
+          <div class="ard-audit-event">
+            <div class="ard-audit-dot highlighted"></div>
+            <div class="ard-audit-body">
+              <div class="ard-audit-ts">07-14 11:05</div>
+              <div class="ard-audit-detail highlighted">王志明核准 — 「條款無誤，同意送上級」</div>
+            </div>
+          </div>
+
+          <div class="ard-audit-event">
+            <div class="ard-audit-dot"></div>
+            <div class="ard-audit-body">
+              <div class="ard-audit-ts">07-14 11:05</div>
+              <div class="ard-audit-detail">系統通知李雅婷待審</div>
+            </div>
+          </div>
+
+        </div><!-- /ard-audit-list -->
+      </div><!-- /audit timeline panel -->
+
+    </div><!-- /ard-left -->
+
+    <!-- ── RIGHT COLUMN ──────────────────────────────────────────────────── -->
+    <div class="ard-right">
+
+      <!-- ── Approver Action Panel ─────────────────────────────────────── -->
+      <div class="ard-action-panel" role="region" aria-labelledby="ard-action-title">
+        <div class="ard-action-header">
+          <span class="ard-panel-icon" aria-hidden="true">⏰</span>
+          <span id="ard-action-title">待我審核</span>
+        </div>
+
+        <p class="ard-context-msg" id="ard-context-msg">
+          您目前為本案第 2 層審核人，請確認合約條款並做出決策。
+        </p>
+
+        <!-- Action buttons — each triggers actionClicked(actionKey) -->
+        <div class="ard-action-buttons" id="ard-action-buttons" role="group" aria-label="審核動作">
+          <button class="ard-action-btn danger"
+                  type="button"
+                  id="ard-btn-return"
+                  data-action-key="return"
+                  aria-label="退回此合約">退回</button>
+          <button class="ard-action-btn secondary"
+                  type="button"
+                  id="ard-btn-delegate"
+                  data-action-key="delegate"
+                  aria-label="轉派給他人">轉派</button>
+          <button class="ard-action-btn primary"
+                  type="button"
+                  id="ard-btn-approve"
+                  data-action-key="approve"
+                  aria-label="核准此合約">核准</button>
+        </div>
+
+        <!-- Comment textarea — triggers commentChanged on input -->
+        <div class="ard-comment-section">
+          <label class="ard-comment-label" for="ard-comment-area">
+            審核意見（選填）
+          </label>
+          <textarea class="ard-comment-area"
+                    id="ard-comment-area"
+                    name="ard-comment-area"
+                    placeholder="填寫審核意見…"
+                    rows="4"
+                    aria-label="填寫審核意見"></textarea>
+        </div>
+
+      </div><!-- /action panel -->
+
+      <!-- ── Route Explanation ─────────────────────────────────────────── -->
+      <div class="ard-panel ard-route-panel" role="region" aria-label="路由說明">
+        <div class="ard-panel-header">
+          <span class="ard-panel-icon" aria-hidden="true">⠿</span>
+          <span>路由說明</span>
+        </div>
+
+        <p class="ard-route-text" id="ard-route-text">
+          本案金額 NT$1,250,000 超過 100 萬，依規則觸發 3 層串簽。所有層級核准後，系統自動移交外部簽署（DocuSign）。
+        </p>
+
+        <!-- Route flow diagram — each box clickable, triggers stepClicked(index) -->
+        <div class="ard-route-flow" id="ard-route-flow" role="list">
+
+          <div class="ard-route-step" role="listitem">
+            <button class="ard-route-step-box completed"
+                    type="button"
+                    data-step-index="0"
+                    aria-label="步驟 1：申請人送審（已完成）">申請人&#10;送審</button>
+          </div>
+
+          <div class="ard-route-step" role="presentation">
+            <div class="ard-route-arrow completed" aria-hidden="true">→</div>
+          </div>
+
+          <div class="ard-route-step" role="listitem">
+            <button class="ard-route-step-box completed"
+                    type="button"
+                    data-step-index="1"
+                    aria-label="步驟 2：直屬主管核准（已完成）">直屬主管&#10;核准</button>
+          </div>
+
+          <div class="ard-route-step" role="presentation">
+            <div class="ard-route-arrow completed" aria-hidden="true">→</div>
+          </div>
+
+          <div class="ard-route-step" role="listitem">
+            <button class="ard-route-step-box current"
+                    type="button"
+                    data-step-index="2"
+                    aria-current="step"
+                    aria-label="步驟 3：上一階核准（進行中）">上一階&#10;核准</button>
+          </div>
+
+          <div class="ard-route-step" role="presentation">
+            <div class="ard-route-arrow" aria-hidden="true">→</div>
+          </div>
+
+          <div class="ard-route-step" role="listitem">
+            <button class="ard-route-step-box pending"
+                    type="button"
+                    data-step-index="3"
+                    aria-label="步驟 4：最終核准執行（待辦）">最終核准&#10;執行</button>
+          </div>
+
+          <div class="ard-route-step" role="presentation">
+            <div class="ard-route-arrow" aria-hidden="true">→</div>
+          </div>
+
+          <div class="ard-route-step" role="listitem">
+            <button class="ard-route-step-box pending"
+                    type="button"
+                    data-step-index="4"
+                    aria-label="步驟 5：外部簽署（待辦）">外部&#10;簽署</button>
+          </div>
+
+        </div><!-- /ard-route-flow -->
+      </div><!-- /route panel -->
+
+    </div><!-- /ard-right -->
+  </div><!-- /ard-main -->
+</div><!-- /ard-root -->

@@ -1,0 +1,566 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  eContract External Signing Coach
+  Screen: 外部簽署 (External Signing) — DocuSign workflow task
+  Layout: Two-column (60/40) mirroring the original UI design
+
+  Custom widgets used:
+    - ApprovalProgressBar  → top stage progress bar (起草送件→簽核路由→外部簽署→完成歸檔)
+    - ProgressBar           → right panel signing progress (1/2 signers done)
+    - Timeline              → Webhook event log (compact, right panel)
+
+  Standard BAW widgets used:
+    - Panel                 → section containers
+    - Horizontal Layout     → two-column body + button row
+    - Vertical Layout       → left/right column stacks
+    - Output Text           → signer rows, envelope details, footer note
+    - Button                → 重新發送提醒 (primary) / 取消此次發送 (danger)
+-->
+<teamworks>
+  <process id="1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2" name="eContract External Signing">
+    <processId>1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2</processId>
+    <processType>10</processType>
+    <isRootProcess>false</isRootProcess>
+    <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+    <isLoggingVariables>false</isLoggingVariables>
+    <isTransactional>false</isTransactional>
+    <exposedType>0</exposedType>
+    <isTrackingEnabled>true</isTrackingEnabled>
+    <cachingType>false</cachingType>
+    <mobileReady>false</mobileReady>
+    <sboSyncEnabled>true</sboSyncEnabled>
+    <isSecured>false</isSecured>
+    <isAjaxExposed>false</isAjaxExposed>
+    <isInvokedAsynchronously>false</isInvokedAsynchronously>
+    <isTransactionalFlow>false</isTransactionalFlow>
+    <description>eContract External Signing coach — DocuSign 外部簽署 screen with approval progress bar, signer status, envelope details, signing progress, and webhook event timeline.</description>
+    <guid>guid:7efb30690898472b:69d4498a:a7d3380830d:-52b3</guid>
+    <versionId>8f681f09-0bd4-4490-804c-76daa0dbe4d3</versionId>
+    <dependencySummary isNull="true" />
+
+    <!-- ═══════════════════════════════════════════════════
+         Process Variables
+         ═══════════════════════════════════════════════════ -->
+
+    <!-- Top stage progress bar: 起草送件 → 簽核路由 → 外部簽署(active) → 完成歸檔 -->
+    <processVariable name="approvalProgressData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.3cde2995-e1b0-4fb6-8bee-a7fb225f25d1</processVariableId>
+      <description>Horizontal approval stage progress bar binding</description>
+      <processId>1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2</processId>
+      <namespace>2</namespace>
+      <seq>1</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ApprovalProgressData</classId>
+      <hasDefault>true</hasDefault>
+      <defaultValue>{
+  "stages": [
+    {"index": 0, "label": "起草送件", "status": "completed"},
+    {"index": 1, "label": "簽核路由", "status": "completed"},
+    {"index": 2, "label": "外部簽署", "status": "current"},
+    {"index": 3, "label": "完成歸檔", "status": "pending"}
+  ],
+  "currentStageIndex": 2,
+  "ctaLabel": "重新發送提醒",
+  "ctaAction": "resendReminder"
+}</defaultValue>
+      <guid>guid:91060bdd-f386-6b3c-cdb7-cbdb0f7601d7</guid>
+      <versionId>ffaca9c2-e43a-4f87-94a3-cfa6f30795d6</versionId>
+    </processVariable>
+
+    <!-- Right panel: signing progress 1/2 -->
+    <processVariable name="signingProgressData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.e6538051-c667-41c3-8d69-bae85e5d24b7</processVariableId>
+      <description>Signing completion progress bar — 1 of 2 signers complete = 50%</description>
+      <processId>1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2</processId>
+      <namespace>2</namespace>
+      <seq>2</seq>
+      <isArrayOf>false</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>ProgressData</classId>
+      <hasDefault>true</hasDefault>
+      <defaultValue>{
+  "value": 50,
+  "percentage": 50,
+  "status": "等待第 2 位簽署人完成"
+}</defaultValue>
+      <guid>guid:dd44ef19-f53f-b216-4e3b-eea425725749</guid>
+      <versionId>cfebca3f-b446-4a73-932f-273ae1c852e8</versionId>
+    </processVariable>
+
+    <!-- Right panel: Webhook event timeline -->
+    <processVariable name="webhookTimelineData">
+      <lastModified isNull="true" />
+      <lastModifiedBy isNull="true" />
+      <tenantId isNull="true" />
+      <processVariableId>2056.10c9e64b-5b99-4bea-b668-403fd8efc6df</processVariableId>
+      <description>DocuSign Webhook event timeline — envelope-sent, recipient-signed, reminder-sent, envelope-completed(pending)</description>
+      <processId>1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2</processId>
+      <namespace>2</namespace>
+      <seq>3</seq>
+      <isArrayOf>true</isArrayOf>
+      <isTransient>false</isTransient>
+      <classId>TimelineData</classId>
+      <hasDefault>true</hasDefault>
+      <defaultValue>[
+  {
+    "title": "envelope-sent",
+    "description": "Envelope dispatched to all recipients",
+    "date": "07-16 14:00",
+    "status": "completed",
+    "icon": "send"
+  },
+  {
+    "title": "recipient-signed",
+    "description": "劉建國 completed signature (第 1 位)",
+    "date": "07-16 16:22",
+    "status": "completed",
+    "icon": "check"
+  },
+  {
+    "title": "reminder-sent",
+    "description": "Reminder dispatched to 陳秀萱 (已逾 2 日)",
+    "date": "07-18 14:00",
+    "status": "warning",
+    "icon": "bell"
+  },
+  {
+    "title": "envelope-completed",
+    "description": "Waiting for 陳秀萱 (第 2 位) to sign",
+    "date": "待觸發",
+    "status": "pending",
+    "icon": "clock"
+  }
+]</defaultValue>
+      <guid>guid:efd1ce55-49df-59ad-9ff2-61b687d5d6e3</guid>
+      <versionId>deeda9ed-850f-48eb-9e2f-745839e68eb5</versionId>
+    </processVariable>
+
+    <!-- ═══════════════════════════════════════════════════
+         Process Flow
+         ═══════════════════════════════════════════════════ -->
+    <item>
+      <processItemId>2025.cc8c6e40-6f54-4d94-a0d0-96059c52397b</processItemId>
+      <name>外部簽署 Coach</name>
+      <tWComponentName>CoachFlowWrapper</tWComponentName>
+      <tWComponentId>FormTask_cc8c6e40-6f54-4d94-a0d0-96059c52397b</tWComponentId>
+      <isLogEnabled>false</isLogEnabled>
+      <isTraceEnabled>false</isTraceEnabled>
+      <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+      <saveExecutionContext>true</saveExecutionContext>
+      <layoutData x="160" y="80">
+        <errorLink>
+          <controlPoints />
+          <showEndState>false</showEndState>
+          <showName>false</showName>
+        </errorLink>
+      </layoutData>
+      <TWComponent />
+    </item>
+
+    <item>
+      <processItemId>2025.bc1fa890-6304-47ae-9c84-dd3437047547</processItemId>
+      <name>Exit</name>
+      <tWComponentName>ExitPoint</tWComponentName>
+      <tWComponentId>3008.239d43bf-1cd1-4dd2-a0ee-3542e8d11e74</tWComponentId>
+      <isLogEnabled>false</isLogEnabled>
+      <isTraceEnabled>false</isTraceEnabled>
+      <isErrorHandlerEnabled>false</isErrorHandlerEnabled>
+      <saveExecutionContext>true</saveExecutionContext>
+      <layoutData x="400" y="80">
+        <errorLink>
+          <controlPoints />
+          <showEndState>false</showEndState>
+          <showName>false</showName>
+        </errorLink>
+      </layoutData>
+      <TWComponent>
+        <exitPointId>3008.239d43bf-1cd1-4dd2-a0ee-3542e8d11e74</exitPointId>
+        <haltProcess>false</haltProcess>
+        <guid>guid:d5766bed-67bf-a510-8af1-eeab34d46866</guid>
+        <versionId>2d9eef95-bf7d-4c51-9867-09b152cf4763</versionId>
+      </TWComponent>
+    </item>
+
+    <link name="to Exit">
+      <fromProcessItemId>2025.cc8c6e40-6f54-4d94-a0d0-96059c52397b</fromProcessItemId>
+      <toProcessItemId>2025.bc1fa890-6304-47ae-9c84-dd3437047547</toProcessItemId>
+      <endStateId>Out</endStateId>
+      <layoutData>
+        <controlPoints />
+        <showEndState>false</showEndState>
+        <showName>false</showName>
+      </layoutData>
+    </link>
+
+    <!-- ═══════════════════════════════════════════════════
+         Coach UI Definition
+         ═══════════════════════════════════════════════════ -->
+    <definitions
+      xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+      xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+      xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+      xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      targetNamespace="http://www.ibm.com/bpm"
+      typeLanguage="http://www.w3.org/2001/XMLSchema"
+      expressionLanguage="http://www.w3.org/1999/XPath">
+
+      <process id="1.5de5c687-c6a6-46c8-8487-d0ed66de4aa2" isExecutable="true" />
+
+      <startEvent id="StartEvent_6bee2e8d-0ef7-49ae-b4a5-4403328e3485" name="Start">
+        <outgoing />
+      </startEvent>
+
+      <userTask id="FormTask_cc8c6e40-6f54-4d94-a0d0-96059c52397b"
+                name="外部簽署 Coach" implementation="coach">
+        <incoming />
+        <outgoing />
+        <coachRef>65.cc8c6e40-6f54-4d94-a0d0-96059c52397b</coachRef>
+
+        <!-- ══════════════════════════════════════════════
+             COACH LAYOUT
+             Root: Vertical
+               ├─ [1] Page Title (Output Text) — "外部簽署"
+               ├─ [2] Subtitle (Output Text) — contract name
+               ├─ [3] ApprovalProgressBar — 4-stage horizontal bar
+               ├─ [4] Horizontal Layout — 60/40 two-column body
+               │       ├─ [Left col — Vertical]
+               │       │    ├─ Panel: 簽署邀請狀態
+               │       │    │    ├─ Output Text: Signer 1 row (劉建國, ✓已簽署)
+               │       │    │    ├─ Output Text: Signer 2 row (陳秀萱, 待簽署/逾2日)
+               │       │    │    └─ Horizontal Layout: action buttons
+               │       │    │         ├─ Button: 重新發送提醒
+               │       │    │         └─ Button: 取消此次發送
+               │       │    └─ Panel: Envelope 詳情
+               │       │         ├─ Output Text: Envelope ID
+               │       │         ├─ Output Text: 認證方式
+               │       │         ├─ Output Text: 簽署順序
+               │       │         ├─ Output Text: 發送時間
+               │       │         └─ Output Text: 逾期提醒
+               │       └─ [Right col — Vertical]
+               │            ├─ Panel: 進度
+               │            │    ├─ Output Text: "1 / 2" (counter)
+               │            │    ├─ ProgressBar (50%)
+               │            │    └─ Output Text: 等待第2位簽署人完成
+               │            ├─ Panel: Webhook 事件
+               │            │    └─ Timeline (compact, 4 events)
+               │            └─ Panel: 歸檔通知
+               │                 └─ Output Text: 完成後歸檔至 FileNet/Notes DB
+             ── ──────────────────────────────────────────── -->
+
+        <coach id="65.cc8c6e40-6f54-4d94-a0d0-96059c52397b" name="外部簽署 Coach">
+          <coachId>65.cc8c6e40-6f54-4d94-a0d0-96059c52397b</coachId>
+          <isResponsive>true</isResponsive>
+          <showBoundary>true</showBoundary>
+          <layout type="vertical" />
+
+          <!-- ─── [1] Page Title ─────────────────────────── -->
+          <item id="pageTitle" type="coachView">
+            <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+            <config>
+              <option name="text">外部簽署</option>
+              <option name="style">heading1</option>
+              <option name="visible">true</option>
+            </config>
+          </item>
+
+          <!-- ─── [2] Subtitle / Contract Name ─────────────── -->
+          <item id="pageSubtitle" type="coachView">
+            <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+            <config>
+              <option name="text">2026 年度軟體維護服務合約 — DocuSign</option>
+              <option name="style">subtitle</option>
+              <option name="visible">true</option>
+            </config>
+          </item>
+
+          <!-- ─── [3] Approval Progress Bar (custom) ────────── -->
+          <!--
+            Widget: ApprovalProgressBar
+            Catalog ID: 64.ec1a0003-aaf1-4b11-9c33-012345670001
+            Binding: tw.local.approvalProgressData (ApprovalProgress BO)
+            Shows: 起草送件✓ → 簽核路由✓ → 外部簽署(active,step 4) → 完成歸檔(step 5)
+          -->
+          <item id="approvalProgressBar" type="coachView">
+            <coachViewRef>64.ec1a0003-aaf1-4b11-9c33-012345670001</coachViewRef>
+            <binding>tw.local.approvalProgressData</binding>
+            <config>
+              <option name="label">合約審核進度</option>
+              <option name="showCta">false</option>
+              <option name="visible">true</option>
+              <option name="enabled">true</option>
+            </config>
+          </item>
+
+          <!-- ─── [4] Two-column body (Horizontal Layout 60/40) ─ -->
+          <item id="bodyLayout" type="horizontalLayout">
+            <items />
+
+            <!-- ══ LEFT COLUMN (60%) ══════════════════════════ -->
+            <contribution>
+              <item id="leftColumn" type="verticalLayout">
+                <items />
+
+                <!-- Panel: 簽署邀請狀態 ──────────────────────── -->
+                <contribution>
+                  <item id="signerStatusPanel" type="panel">
+                    <config>
+                      <option name="title">■ 簽署邀請狀態</option>
+                      <option name="visible">true</option>
+                    </config>
+
+                    <!-- Signer 1: 劉建國 — ✓已簽署 -->
+                    <item id="signer1Row" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">劉  劉建國 — 台灣數位科技　　liu.jk@tdt.com.tw · 第 1 位　　　✓ 已簽署</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <!-- Signer 2: 陳秀萱 — 待簽署 / 已逾 2 日 -->
+                    <item id="signer2Row" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">陳  陳秀萱 — 台灣數位科技　　chen.sl@tdt.com.tw · 第 2 位　　　⏳ 待簽署 · 已逾 2 日</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <!-- Action Buttons Row -->
+                    <item id="signerActionRow" type="horizontalLayout">
+                      <items />
+                      <contribution>
+                        <!-- 重新發送提醒 (primary blue) -->
+                        <item id="btnResend" type="coachView">
+                          <coachViewRef>64.7133c7d4-1a54-45c8-89cd-a8e8fa4a8e36</coachViewRef>
+                          <config>
+                            <option name="label">重新發送提醒</option>
+                            <option name="style">primary</option>
+                            <option name="action">custom</option>
+                            <option name="actionName">resendReminder</option>
+                            <option name="visible">true</option>
+                            <option name="enabled">true</option>
+                          </config>
+                        </item>
+                      </contribution>
+                      <contribution>
+                        <!-- 取消此次發送 (danger red) -->
+                        <item id="btnCancel" type="coachView">
+                          <coachViewRef>64.7133c7d4-1a54-45c8-89cd-a8e8fa4a8e36</coachViewRef>
+                          <config>
+                            <option name="label">取消此次發送</option>
+                            <option name="style">danger</option>
+                            <option name="action">custom</option>
+                            <option name="actionName">cancelSending</option>
+                            <option name="visible">true</option>
+                            <option name="enabled">true</option>
+                          </config>
+                        </item>
+                      </contribution>
+                    </item>
+                  </item>
+                </contribution>
+
+                <!-- Panel: Envelope 詳情 ───────────────────────── -->
+                <contribution>
+                  <item id="envelopePanel" type="panel">
+                    <config>
+                      <option name="title">🗂 Envelope 詳情</option>
+                      <option name="visible">true</option>
+                    </config>
+
+                    <item id="envelopeId" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">Envelope ID　　　　env-4f2a9c1b-8d3e</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <item id="envelopeAuthMethod" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">認證方式　　　　　Email OTP</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <item id="envelopeSignOrder" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">簽署順序　　　　　Sequential</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <item id="envelopeSentTime" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">發送時間　　　　　2026-07-16 14:00</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <item id="envelopeReminder" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">逾期提醒　　　　　已觸發 × 1</option>
+                        <option name="style">normal</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+                  </item>
+                </contribution>
+
+              </item>
+            </contribution>
+
+            <!-- ══ RIGHT COLUMN (40%) ═════════════════════════ -->
+            <contribution>
+              <item id="rightColumn" type="verticalLayout">
+                <items />
+
+                <!-- Panel: 進度 ──────────────────────────────── -->
+                <contribution>
+                  <item id="progressPanel" type="panel">
+                    <config>
+                      <option name="title">進度</option>
+                      <option name="visible">true</option>
+                    </config>
+
+                    <!-- "1 / 2" counter (large display text) -->
+                    <item id="signerCounter" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">1 / 2</option>
+                        <option name="style">heading1</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+
+                    <!--
+                      Widget: ProgressBar (custom)
+                      Catalog ID: 64.db824ed3-93e7-4eb6-a583-56a0a2bf25c0
+                      Binding: tw.local.signingProgressData (ProgressData BO)
+                      Value: 50% (1 of 2 signers completed)
+                      Animated, no percentage label (counter above already shows it)
+                    -->
+                    <item id="signingProgressBar" type="coachView">
+                      <coachViewRef>64.db824ed3-93e7-4eb6-a583-56a0a2bf25c0</coachViewRef>
+                      <binding>tw.local.signingProgressData</binding>
+                      <config>
+                        <option name="label">簽署完成率</option>
+                        <option name="showPercentage">false</option>
+                        <option name="showStatus">true</option>
+                        <option name="animated">true</option>
+                        <option name="visible">true</option>
+                        <option name="enabled">true</option>
+                      </config>
+                    </item>
+
+                    <!-- Sub-label: waiting message -->
+                    <item id="progressLabel" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">等待第 2 位簽署人完成</option>
+                        <option name="style">muted</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+                  </item>
+                </contribution>
+
+                <!-- Panel: Webhook 事件 ───────────────────────── -->
+                <contribution>
+                  <item id="webhookPanel" type="panel">
+                    <config>
+                      <option name="title">↻ Webhook 事件</option>
+                      <option name="visible">true</option>
+                    </config>
+
+                    <!--
+                      Widget: Timeline (custom)
+                      Catalog ID: 64.cb0da67d-4681-4d0e-aba1-df847619fe10
+                      Binding: tw.local.webhookTimelineData (TimelineEvent[] BO)
+                      Events:
+                        ● envelope-sent      07-16 14:00  (completed/green)
+                        ● recipient-signed   07-16 16:22  (completed/green)
+                        ● reminder-sent      07-18 14:00  (warning/amber)
+                        ○ envelope-completed 待觸發       (pending/grey)
+                      Mode: compact=true, showDates=true, showIcons=true
+                    -->
+                    <item id="webhookTimeline" type="coachView">
+                      <coachViewRef>64.cb0da67d-4681-4d0e-aba1-df847619fe10</coachViewRef>
+                      <binding>tw.local.webhookTimelineData</binding>
+                      <config>
+                        <option name="label">DocuSign 事件記錄</option>
+                        <option name="showDates">true</option>
+                        <option name="showIcons">true</option>
+                        <option name="compact">true</option>
+                        <option name="alternateLayout">false</option>
+                        <option name="clickable">false</option>
+                        <option name="visible">true</option>
+                        <option name="enabled">true</option>
+                      </config>
+                    </item>
+                  </item>
+                </contribution>
+
+                <!-- Panel: 歸檔通知 ─────────────────────────── -->
+                <contribution>
+                  <item id="archivePanel" type="panel">
+                    <config>
+                      <option name="title">🗄 歸檔</option>
+                      <option name="visible">true</option>
+                    </config>
+
+                    <item id="archiveNote" type="coachView">
+                      <coachViewRef>64.b8e0e5e5-e1e5-4e5e-b5e5-e5e5e5e5e5ec</coachViewRef>
+                      <config>
+                        <option name="text">完成後歸檔至 FileNet / Notes DB（含 Certificate of Completion）</option>
+                        <option name="style">muted</option>
+                        <option name="visible">true</option>
+                      </config>
+                    </item>
+                  </item>
+                </contribution>
+
+              </item>
+            </contribution>
+
+          </item>
+          <!-- end bodyLayout -->
+
+        </coach>
+      </userTask>
+
+      <endEvent id="EndEvent_bc1fa890-6304-47ae-9c84-dd3437047547" name="Exit">
+        <incoming />
+      </endEvent>
+
+      <sequenceFlow
+        id="flow_start_to_task"
+        sourceRef="StartEvent_6bee2e8d-0ef7-49ae-b4a5-4403328e3485"
+        targetRef="FormTask_cc8c6e40-6f54-4d94-a0d0-96059c52397b" />
+      <sequenceFlow
+        id="flow_task_to_end"
+        sourceRef="FormTask_cc8c6e40-6f54-4d94-a0d0-96059c52397b"
+        targetRef="EndEvent_bc1fa890-6304-47ae-9c84-dd3437047547" />
+
+    </definitions>
+  </process>
+</teamworks>

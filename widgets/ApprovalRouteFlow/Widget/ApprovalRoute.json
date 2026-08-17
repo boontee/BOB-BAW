@@ -1,0 +1,40 @@
+{
+  "type": "ApprovalRoute",
+  "description": "Business object representing the horizontal approval routing flow with step nodes",
+  "properties": [
+    {
+      "name": "steps",
+      "type": "RouteStep",
+      "isList": true,
+      "description": "Ordered list of route steps displayed left-to-right"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "RouteStep",
+      "description": "A single node in the approval route flow diagram",
+      "properties": [
+        {
+          "name": "label",
+          "type": "String",
+          "description": "Primary label shown inside or below the node"
+        },
+        {
+          "name": "sublabel",
+          "type": "String",
+          "description": "Secondary label or role shown below the main label"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "description": "Node status: 'completed', 'current', 'pending', 'rejected'"
+        },
+        {
+          "name": "colorToken",
+          "type": "String",
+          "description": "Carbon color token for the node border/fill, e.g. 'green', 'blue', 'gray'"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "type": "ApprovalChain",
+  "description": "Business object representing the full multi-layer approval chain with approver details",
+  "properties": [
+    {
+      "name": "title",
+      "type": "String",
+      "description": "Header title for the approval chain panel"
+    },
+    {
+      "name": "routeType",
+      "type": "String",
+      "description": "Routing type label, e.g. 'Sequential' or 'Parallel'"
+    },
+    {
+      "name": "totalLayers",
+      "type": "Integer",
+      "description": "Total number of approval layers"
+    },
+    {
+      "name": "approvers",
+      "type": "Approver",
+      "isList": true,
+      "description": "List of all approvers across all layers"
+    }
+  ],
+  "nestedTypes": [
+    {
+      "type": "Approver",
+      "description": "An individual approver in the approval chain",
+      "properties": [
+        {
+          "name": "name",
+          "type": "String",
+          "description": "Full display name of the approver"
+        },
+        {
+          "name": "avatarInitial",
+          "type": "String",
+          "description": "Single character or initials shown in the avatar circle"
+        },
+        {
+          "name": "role",
+          "type": "String",
+          "description": "Approver job role or title"
+        },
+        {
+          "name": "department",
+          "type": "String",
+          "description": "Approver department or business unit"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "description": "Approval status: 'pending', 'approved', 'rejected', 'current'"
+        },
+        {
+          "name": "statusColor",
+          "type": "String",
+          "description": "CSS color token for status badge background"
+        },
+        {
+          "name": "layer",
+          "type": "Integer",
+          "description": "Which layer (1-based) this approver belongs to"
+        }
+      ]
+    }
+  ]
+}

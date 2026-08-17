@@ -1,0 +1,25 @@
+<svg width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" fill="#ffffff"/>
+  <!-- Top banner -->
+  <rect x="10" y="10" width="100" height="18" rx="3" fill="#0043ce"/>
+  <text x="18" y="23" font-family="IBM Plex Sans, Arial" font-size="8" font-weight="600" fill="#ffffff">Sequential Approval</text>
+  <!-- Card body -->
+  <rect x="10" y="28" width="100" height="84" rx="4" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- Meta labels -->
+  <text x="16" y="43" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#525252">SUBMITTED</text>
+  <text x="16" y="52" font-family="IBM Plex Sans, Arial" font-size="8" fill="#161616">2026-08-15 09:32</text>
+  <text x="64" y="43" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#525252">EST. COMPLETION</text>
+  <text x="64" y="52" font-family="IBM Plex Sans, Arial" font-size="8" fill="#161616">2026-08-18</text>
+  <!-- Divider -->
+  <line x1="16" y1="58" x2="104" y2="58" stroke="#e0e0e0" stroke-width="1"/>
+  <!-- AI label -->
+  <text x="16" y="70" font-family="IBM Plex Sans, Arial" font-size="7" font-weight="600" fill="#525252">AI RISK SCORE</text>
+  <!-- Gauge track -->
+  <rect x="16" y="74" width="64" height="7" rx="3.5" fill="#e0e0e0"/>
+  <rect x="16" y="74" width="46" height="7" rx="3.5" fill="#f1c21b"/>
+  <!-- Score text -->
+  <text x="86" y="81" font-family="IBM Plex Sans, Arial" font-size="9" font-weight="700" fill="#161616">72/100</text>
+  <!-- Suggestion link -->
+  <text x="16" y="96" font-family="IBM Plex Sans, Arial" font-size="8" fill="#0043ce" text-decoration="underline">View Risk Factors</text>
+</svg>
+<!-- Made with Bob -->

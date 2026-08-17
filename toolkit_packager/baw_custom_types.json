@@ -1,0 +1,554 @@
+{
+  "description": "Custom Business Object Type Mappings - Tracks custom types and their BAW class IDs to enable reuse across widgets",
+  "version": "1.0.0",
+  "custom_types": {
+    "StepItem": {
+      "classId": "/12.cc351e20-a6a4-45e2-bab8-698faaf34d85",
+      "description": "Step item for Stepper widget",
+      "widgets": [
+        "Stepper",
+        "standalone"
+      ],
+      "created": "2026-04-30T16:03:00Z"
+    },
+    "BreadcrumbItem": {
+      "classId": "/12.a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "description": "Breadcrumb item for navigation",
+      "widgets": [
+        "Breadcrumb",
+        "standalone"
+      ],
+      "created": "2026-04-30T16:03:00Z"
+    },
+    "TaskItem": {
+      "classId": "/12.9f29bdd1-51fa-4451-96e1-30fc8397ad69",
+      "description": "Business object representing a task item with label and status",
+      "widgets": [
+        "TasksList",
+        "standalone"
+      ],
+      "created": "2026-05-01T06:09:55.822025Z"
+    },
+    "ProgressData": {
+      "classId": "/12.534faa11-5ec3-450b-9628-4e6b83e32688",
+      "description": "Business object representing progress bar data",
+      "widgets": [
+        "ProgressBar",
+        "standalone"
+      ],
+      "created": "2026-05-01T21:21:03.839127Z"
+    },
+    "Policy": {
+      "classId": "/12.ad4c69b3-bbb0-4a7a-818e-353228a3d856",
+      "description": "Central business object representing an insurance or annuity contract",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.920872Z"
+    },
+    "Insured": {
+      "classId": "/12.a1c2efcb-8927-412a-8e13-c4c5e6e8609a",
+      "description": "Person whose life or health is covered by the policy",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.922691Z"
+    },
+    "MedicalCondition": {
+      "classId": "/12.23bbdd33-cf80-447a-82da-0abada58105e",
+      "description": "Specific medical condition details",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.923475Z"
+    },
+    "Requirement": {
+      "classId": "/12.be3031d2-5ffe-4a9b-af08-60e9a485ad0a",
+      "description": "Underwriting requirement for application processing",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.924009Z"
+    },
+    "Agent": {
+      "classId": "/12.c27775df-8750-4abe-bfec-ae6e582a215c",
+      "description": "Insurance agent or broker who sells policies",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.924408Z"
+    },
+    "MedicalRating": {
+      "classId": "/12.53cec71b-22da-4351-a110-d97a2b8bed8b",
+      "description": "Medical rating applied during underwriting",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.924778Z"
+    },
+    "Policyholder": {
+      "classId": "/12.8c98dc52-ff53-4b83-b09c-3c4c7ee812c5",
+      "description": "Person or entity that owns the policy and is responsible for premium payments",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.925158Z"
+    },
+    "BankAccount": {
+      "classId": "/12.9bae5199-1158-4a17-8924-d6af2d813f7d",
+      "description": "Bank account information for payments",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.925523Z"
+    },
+    "Address": {
+      "classId": "/12.c9965660-d064-4483-a2ae-cc8142344edd",
+      "description": "Physical or mailing address",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.926156Z"
+    },
+    "Beneficiary": {
+      "classId": "/12.4a456f01-fac7-41d5-a004-0073ec237766",
+      "description": "Person or entity designated to receive policy benefits",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.926541Z"
+    },
+    "Document": {
+      "classId": "/12.eb58c659-685b-40cc-92fb-492aff70df87",
+      "description": "Document attached to application or claim",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.926928Z"
+    },
+    "Claim": {
+      "classId": "/12.7383f197-abba-4598-baaa-609c5a13e6cf",
+      "description": "Claim filed against a policy",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.927333Z"
+    },
+    "Payment": {
+      "classId": "/12.6ee9044f-772d-4e63-a6ec-6b70c09b9eb6",
+      "description": "Premium payments or benefit disbursements",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.927735Z"
+    },
+    "Application": {
+      "classId": "/12.5855583b-7ce6-4c05-9e8b-5e773dfc513a",
+      "description": "Insurance or annuity application submitted by the applicant",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.928171Z"
+    },
+    "Claimant": {
+      "classId": "/12.5025b6df-882c-4bbe-9e5b-475a3d339639",
+      "description": "Person filing a claim against a policy",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.928576Z"
+    },
+    "Rider": {
+      "classId": "/12.1360e4ec-9658-4226-9156-c66092783b0e",
+      "description": "Additional coverage or benefit attached to a base policy",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.929029Z"
+    },
+    "UnderwritingDecision": {
+      "classId": "/12.acc8fdcb-a5bf-4f5b-be4f-726757164f1b",
+      "description": "Underwriting assessment and decision for an application",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.929772Z"
+    },
+    "MedicalHistory": {
+      "classId": "/12.36250656-a530-42a0-9c72-efaa5d9146a4",
+      "description": "Medical history information for underwriting",
+      "context": "LifeInsuranceAndAnnuities",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-05-05T15:51:56.930554Z"
+    },
+    "TimelineEvent": {
+      "classId": "/12.ddec1ee9-4687-4f01-ad9e-8dbb0a9b0b25",
+      "description": "Business object representing a single event in the Timeline widget",
+      "widgets": [
+        "Timeline",
+        "standalone"
+      ],
+      "created": "2026-05-05T20:49:04.504585Z"
+    },
+    "BusinessObject": {
+      "classId": "/12.c0801764-ae45-4d9a-b467-6224beaf0a8b",
+      "description": "Business object representing progress bar data",
+      "widgets": [
+        "ProgressBar",
+        "TasksList"
+      ],
+      "created": "2026-05-06T08:59:22.495247Z"
+    },
+    "businessObject": {
+      "classId": "/12.30abdf98-b421-432f-bfc6-b3a3d644a99c",
+      "description": "Central business object representing an insurance or annuity contract",
+      "widgets": [
+        "standalone",
+        "Breadcrumb",
+        "Stepper",
+        "Timeline"
+      ],
+      "created": "2026-05-06T09:01:24.224722Z"
+    },
+    "CarouselCard": {
+      "classId": "/12.60a29b66-449b-441c-83e0-e62fe47f0ad4",
+      "description": "Business object representing a single card in the Carousel widget with flip functionality",
+      "widgets": [
+        "Carousel"
+      ],
+      "created": "2026-05-06T09:40:30.652278Z"
+    },
+    "CarouselItem": {
+      "classId": "/12.7f77016e-0049-4421-96c7-d7fd16c8197c",
+      "description": "Business object representing a single item in the Carousel widget",
+      "widgets": [
+        "Carousel"
+      ],
+      "created": "2026-05-06T11:52:27.414317Z"
+    },
+    "DocumentItem": {
+      "classId": "/12.10b837cb-babd-454b-b60f-a6900f57534a",
+      "description": "Business object representing an uploaded document with metadata",
+      "widgets": [
+        "MultiDocumentUpload",
+        "standalone"
+      ],
+      "created": "2026-05-06T15:03:49.312505Z"
+    },
+    "ProcessActivityEvent": {
+      "classId": "/12.4a104796-f99a-4273-b7f8-5201b967af63",
+      "description": "Business object representing a single process activity in the ProcessActivityTimeline widget",
+      "widgets": [
+        "ProcessActivityTimeline",
+        "standalone"
+      ],
+      "created": "2026-05-29T08:44:11.479800Z"
+    },
+    "Advisor": {
+      "classId": "/12.ab7a4b73-8c36-41db-ad9d-04c49f3351c0",
+      "description": "Financial advisor (Rådgiver) who manages customer relationships",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.205036Z"
+    },
+    "PrivateCustomer": {
+      "classId": "/12.f6a650c5-2b31-400b-8900-e02f133fd853",
+      "description": "Private customer undergoing AML compliance check",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.208094Z"
+    },
+    "CustomerAddress": {
+      "classId": "/12.ff84cdd6-500f-4f27-b384-cbc8bc716a62",
+      "description": "Customer address information",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.209651Z"
+    },
+    "InformationCorrection": {
+      "classId": "/12.1d55e8d7-e4d5-425f-94a1-88e133da53b2",
+      "description": "Record of information correction made during AML check",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.210840Z"
+    },
+    "AMLFinding": {
+      "classId": "/12.8296a41c-7079-421d-87ff-df49f68b1ed5",
+      "description": "Individual finding or issue identified during AML check",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.212132Z"
+    },
+    "AMLCheckRequest": {
+      "classId": "/12.81ecb157-0c67-4cb0-85d6-b5ce907dd32a",
+      "description": "AML compliance check request for a customer",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.213115Z"
+    },
+    "AMLCheckResult": {
+      "classId": "/12.7febbcae-a88b-4f96-aae2-a7951bfde685",
+      "description": "Result of AML compliance check",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.214375Z"
+    },
+    "KYCSpecialist": {
+      "classId": "/12.5b2fe257-8a40-4de8-bf0a-9f066669fa50",
+      "description": "Know Your Customer specialist who performs AML compliance checks",
+      "context": "AMLCompliance",
+      "widgets": [
+        "standalone"
+      ],
+      "created": "2026-06-03T12:59:35.216929Z"
+    },
+    "ApprovalChain": {
+      "classId": "/12.ea04d218-6efb-475b-b3f4-14978f2dc992",
+      "description": "Business object representing the full multi-layer approval chain with approver details",
+      "widgets": [
+        "ApprovalChain",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.511410Z"
+    },
+    "ApprovalProgress": {
+      "classId": "/12.923f5df1-5485-4c01-b678-eac5709807a4",
+      "description": "Business object for the horizontal approval progress bar with stage tracking and CTA button",
+      "widgets": [
+        "ApprovalProgressBar",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.515419Z"
+    },
+    "ApprovalRoute": {
+      "classId": "/12.15bb2f6e-43c7-4011-baf7-eafb0587d47c",
+      "description": "Business object representing the horizontal approval routing flow with step nodes",
+      "widgets": [
+        "ApprovalRouteFlow",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.518480Z"
+    },
+    "ApproverAction": {
+      "classId": "/12.fbcf2799-dac9-4173-be65-1df74ff89a9f",
+      "description": "Business object for the approver action panel — holds approver context, editable comment/decision, and action buttons",
+      "widgets": [
+        "ApproverActionPanel",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.521125Z"
+    },
+    "AuditLog": {
+      "classId": "/12.e0145554-ce9b-42b8-a835-b66a8ae6db2d",
+      "description": "Business object for the audit timeline — contains an ordered list of audit events",
+      "widgets": [
+        "AuditTimeline",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.523703Z"
+    },
+    "ProcessStatus": {
+      "classId": "/12.b9954ce1-8b11-4130-a8f8-d7479b2b6053",
+      "description": "Business object for the process metadata status card with routing info, dates, and AI risk score",
+      "widgets": [
+        "ProcessStatusCard",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.560099Z"
+    },
+    "RoutingRule": {
+      "classId": "/12.b00c721c-844d-4cc7-84cc-5a9f5cacc393",
+      "description": "Business object for the routing explanation card — shows triggered rule, threshold, and next action",
+      "widgets": [
+        "RoutingExplanation",
+        "standalone"
+      ],
+      "created": "2026-08-13T09:08:12.567688Z"
+    },
+    "ActionButton": {
+      "classId": "/12.9b076f53-02e1-4967-9235-07fea1959f32",
+      "description": "A single action button in the approver action panel",
+      "context": "widgets",
+      "widgets": [
+        "standalone",
+        "ApproverActionPanel"
+      ],
+      "created": "2026-08-13T13:46:06.816527Z"
+    },
+    "Approver": {
+      "classId": "/12.3c5aca7e-0951-487b-ab70-fe7e4c779684",
+      "description": "An individual approver in the approval chain",
+      "context": "widgets",
+      "widgets": [
+        "standalone",
+        "ApprovalChain"
+      ],
+      "created": "2026-08-13T13:46:06.817872Z"
+    },
+    "AuditEvent": {
+      "classId": "/12.3a4dde68-dfab-4fbd-9140-18fb55f25d69",
+      "description": "A single entry in the approval audit trail",
+      "context": "widgets",
+      "widgets": [
+        "standalone",
+        "AuditTimeline"
+      ],
+      "created": "2026-08-13T13:46:06.819079Z"
+    },
+    "RouteStep": {
+      "classId": "/12.dc8e3e33-3f53-4e14-9bc0-ae3cb3740f52",
+      "description": "A single node in the approval route flow diagram",
+      "context": "widgets",
+      "widgets": [
+        "standalone",
+        "ApprovalRouteFlow"
+      ],
+      "created": "2026-08-13T13:46:06.819750Z"
+    },
+    "ApprovalStage": {
+      "classId": "/12.6882e763-0d15-4507-868b-02fb02bd5f4c",
+      "description": "A single stage in the approval progress bar",
+      "context": "widgets",
+      "widgets": [
+        "standalone",
+        "ApprovalProgressBar"
+      ],
+      "created": "2026-08-13T13:46:06.820640Z"
+    },
+    "ApprovalReviewDashboard": {
+      "classId": "/12.73aaff00-806f-42e2-8072-bdf417b83477",
+      "description": "Unified business object for the full eContract approval review dashboard — aggregates progress bar, approval chain, process status, audit timeline, approver action panel, and route flow",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:31:20.428920Z"
+    },
+    "DashboardActionButton": {
+      "classId": "/12.4bc8f7ce-1deb-42ce-b89c-3de8a0ebc559",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.835671Z"
+    },
+    "DashboardApprover": {
+      "classId": "/12.ccc46ae2-8268-4a2b-8be0-b19331fddd72",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.835743Z"
+    },
+    "DashboardAuditEvent": {
+      "classId": "/12.1eca0865-1816-4e38-9882-78bad645924f",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.835820Z"
+    },
+    "DashboardProcessStatus": {
+      "classId": "/12.70217bbf-2115-4e67-9ade-c70798259e27",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.835883Z"
+    },
+    "DashboardRouteStep": {
+      "classId": "/12.540d1a85-baed-4e3d-abc3-d3b5d7969d26",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.835958Z"
+    },
+    "DashboardStage": {
+      "classId": "/12.351eef6c-54c4-4914-a202-27688fb20987",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836009Z"
+    },
+    "DashboardApprovalChain": {
+      "classId": "/12.356b8a42-1f14-46c7-a8fa-5ff7158ed9f6",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836059Z"
+    },
+    "DashboardApproverAction": {
+      "classId": "/12.874f9d47-2660-4dfe-9ff1-e3fb1942b8c6",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836116Z"
+    },
+    "DashboardAuditLog": {
+      "classId": "/12.5bc0c4fc-424d-4d44-81e2-a557e31cc564",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836176Z"
+    },
+    "DashboardProgress": {
+      "classId": "/12.9b5149f0-2139-4521-9cfc-8fa18b9d8143",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836221Z"
+    },
+    "DashboardRouteExplanation": {
+      "classId": "/12.4ed6fdb3-9cda-4e61-839d-5651d05b4f2d",
+      "description": "",
+      "widgets": [
+        "ApprovalReviewDashboard"
+      ],
+      "created": "2026-08-16T14:47:12.836350Z"
+    }
+  },
+  "notes": {
+    "usage": "This file tracks custom business objects to prevent duplicates and enable sharing across widgets",
+    "classId_format": "Custom types use /12.{guid} format where the GUID is generated once and reused",
+    "widgets": "List of widgets that use this custom type",
+    "auto_update": "This file is automatically updated when new custom types are generated"
+  }
+}

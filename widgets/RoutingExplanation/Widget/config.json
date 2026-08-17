@@ -1,0 +1,25 @@
+{
+  "name": "RoutingExplanation",
+  "description": "Routing rule explanation card showing triggered rules, thresholds, and next actions for IBM Business Automation Workflow",
+  "bindingType": {
+    "name": "RoutingRuleData",
+    "isList": false,
+    "type": "RoutingRule"
+  },
+  "configOptions": [
+    {
+      "name": "nextActionClicked",
+      "type": "Event",
+      "label": "Next Action Clicked",
+      "description": "Fired when the next action link in the explanation is clicked; carries nextAction value",
+      "parameterName": "nextAction"
+    }
+  ],
+  "businessObjects": [
+    {
+      "name": "RoutingRule",
+      "file": "RoutingRule.json"
+    }
+  ],
+  "changeFunction": true
+}
