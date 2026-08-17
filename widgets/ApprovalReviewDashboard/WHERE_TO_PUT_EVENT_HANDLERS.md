@@ -1,4 +1,7 @@
 # Where to Put the Event Handler Code
+> **BAW version: 25.0.1** — uses the modern CSHS editor.
+> Boundary Events cannot be dragged onto Coach nodes in this version.
+> Use the **Coaches tab → Navigate / Stay on Page** method instead (Step 7 below).
 
 ## The Big Picture
 
@@ -142,138 +145,121 @@ This is where you connect the widget's events to handler scripts.
 
 ---
 
-## Step 7 — Add Boundary Events to the Coach Node
+## Step 7 — Wire Coach Events (BAW 25.0.1 — Coaches Tab)
 
-**Boundary Events** are small circles that appear ON THE EDGE of the Coach node.
-They fire when an event is triggered, causing the flow to leave the Coach.
-
-```
-HOW TO ADD A BOUNDARY EVENT:
-  1. Click the Coach node
-  2. Look for a small [+] icon on the edge of the node
-  3. Click it → select "Boundary Event"
-  4. Name it (e.g. "On actionClicked")
-  5. In its Properties → Event: select "actionClicked"
-  6. Draw an arrow from this boundary event to your Script node
-
-REPEAT for: ctaClicked, urgeClicked
-(commentChanged and stepClicked use Coach View Events — see Step 8)
-```
-
-Visually on the canvas:
+> ⚠️ In BAW 25.0.1 you **cannot drag boundary events** onto a Coach node.
+> Use the **Coaches tab** in the right Properties panel instead.
 
 ```
-                ┌──────────────────────┐
-                │   Coach: 簽核審查    │
-                │                      │
-                │  [ApprovalReview     │
-                │   Dashboard widget]  │
-                │                      ●─── boundary: actionClicked
-                │                      ●─── boundary: ctaClicked
-                │                      ●─── boundary: urgeClicked
-                └──────────────────────┘
-                         │
-                    (normal exit)
-                         │
-                         ▼
-                       [End]
-```
+1. Click the Coach node (single click — do NOT open it)
 
-Each boundary `●` has an arrow going to a Script node:
+2. Right Properties panel → click the [Coaches] tab
 
-```
-  ●── actionClicked ──▶ [Script: Handle Action] ──▶ [Gateway]
-                                                        ├─ approve  → [End / next step]
-                                                        ├─ return   → [End / notify submitter]
-                                                        └─ delegate → [End / reassign]
+3. You see a table:   Widget / Event  |  Action  |  Navigate To
 
-  ●── ctaClicked    ──▶ [Script: Handle CTA]    ──▶ [End / next coach]
+4. Set each row:
 
-  ●── urgeClicked   ──▶ [Script: Handle Urge]   ──▶ [Coach] (loop back)
+   ┌─────────────────────┬────────────────┬─────────────────────────┐
+   │ Event               │ Action         │ Navigate To             │
+   ├─────────────────────┼────────────────┼─────────────────────────┤
+   │ actionClicked       │ Navigate       │ Script: Handle Action   │
+   │ ctaClicked          │ Navigate       │ Script: Handle CTA      │
+   │ urgeClicked         │ Navigate       │ Script: Handle Urge     │
+   │ commentChanged      │ Stay on Page   │ (none)                  │
+   │ stepClicked         │ Stay on Page   │ (none)                  │
+   └─────────────────────┴────────────────┴─────────────────────────┘
+
+   "Navigate"     → exits the Coach and runs the linked Script node
+   "Stay on Page" → stays on the Coach (handle in Step 8 Coach Script)
 ```
 
 ---
 
-## Step 8 — commentChanged and stepClicked (Stay-on-Coach Events)
+## Step 8 — commentChanged and stepClicked (Stay on Page)
 
-These two events should NOT leave the coach. Use **Coach View Events** instead:
-
-```
-HOW TO ADD A COACH VIEW EVENT:
-  1. Open the Coach node (double-click)
-  2. In the Coach editor → click [Events] tab at the top
-  3. Click [Add] → Event Name: commentChanged → Output: tw.local.comment
-  4. Click [Add] → Event Name: stepClicked    → Output: tw.local.stepIndex
-  5. For each → set "On Event" action to run a Script
-     OR: add a Script node outside the coach, connected via an intermediate
-         boundary event that loops back to the coach
-```
-
-Simplest pattern — loop back:
+These two stay on the coach. Paste their logic into the **Coach Script tab**:
 
 ```
-  ●── commentChanged ──▶ [Script: Save Comment] ──▶ [Coach] (back to same coach)
-  ●── stepClicked    ──▶ [Script: Handle Step]  ──▶ [Coach] (back to same coach)
+1. Double-click the Coach node to open it
+2. At the top of the Coach editor → click the [Script] tab
+3. Paste this code:
 ```
 
----
+```javascript
+// Coach Script — runs client-side, stays on same coach page
 
-## Step 9 — Paste Code into Each Script Node
+// commentChanged — sync textarea value back to the BO
+if (tw.event && tw.event.name === "commentChanged") {
+    tw.local.dashboardData.approverAction.comment = tw.local.comment;
+}
 
-Open each Script node (double-click → Script tab) and paste the relevant section
-from `EVENT_HANDLERS_CSHS.js`:
-
-```
-  Script node name          Paste this section from EVENT_HANDLERS_CSHS.js
-  ─────────────────────     ─────────────────────────────────────────────────
-  "Handle Action"       →   // ═══ EVENT 1 — actionClicked  (lines 55–83)
-  "Handle CTA"          →   // ═══ EVENT 2 — ctaClicked     (lines 101–121)
-  "Handle Urge"         →   // ═══ EVENT 3 — urgeClicked    (lines 140–163)
-  "Save Comment"        →   // ═══ EVENT 4 — commentChanged (lines 178–186)
-  "Handle Step"         →   // ═══ EVENT 5 — stepClicked    (lines 200–215)
+// stepClicked — record which route step was clicked
+if (tw.event && tw.event.name === "stepClicked") {
+    var labels = ["申請人送審","直屬主管核准","上一階核准","最終核准執行","外部簽署"];
+    log.info("Step clicked: " + labels[tw.local.stepIndex] + " (index " + tw.local.stepIndex + ")");
+    // Optional: tw.local.selectedStepIndex = tw.local.stepIndex;
+}
 ```
 
 ---
 
-## Complete CSHS Diagram (Final)
+## Step 9 — Paste Code into Each Navigate Script Node
+
+For the 3 **Navigate** events, create a Script node for each and paste the
+matching section from `EVENT_HANDLERS_CSHS.js`:
+
+```
+  Script node name     Paste section from EVENT_HANDLERS_CSHS.js
+  ──────────────────   ────────────────────────────────────────────
+  "Handle Action"  →   // ═══ EVENT 1 — actionClicked
+  "Handle CTA"     →   // ═══ EVENT 2 — ctaClicked
+  "Handle Urge"    →   // ═══ EVENT 3 — urgeClicked
+```
+
+---
+
+## Complete CSHS Diagram (Final — BAW 25.0.1)
 
 ```
 [▶ Start]
     │
     ▼
-[📄 Load Dashboard Data]   ← paste SAMPLE_DATA_CSHS.js here
+[📄 Script: Load Data]         ← paste SAMPLE_DATA_CSHS.js
     │
     ▼
-[👤 Coach: 簽核審查] ────────────────────────────────────────────────┐
-    │                                                                │
-    │   widget bound to: tw.local.dashboardData                     │
-    │   events mapped:                                              │
-    │     actionClicked  → tw.local.actionKey                       │
-    │     ctaClicked     → tw.local.ctaAction                       │
-    │     urgeClicked    → tw.local.approverIndex                   │
-    │     commentChanged → tw.local.comment                         │
-    │     stepClicked    → tw.local.stepIndex                       │
-    │                                                                │
-    │ ●── actionClicked  ──▶ [📄 Handle Action] ──▶ [◇ Gateway]    │
-    │                                                  ├─ approve   │
-    │                                                  ├─ return    │
-    │                                                  └─ delegate  │
-    │                                                               │
-    │ ●── ctaClicked     ──▶ [📄 Handle CTA]    ──▶ [◇ Gateway]    │
-    │                                                  ├─ proceed   │
-    │                                                  └─ ai_report │
-    │                                                               │
-    │ ●── urgeClicked    ──▶ [📄 Handle Urge]   ──────────────────▶│
-    │                                                (loop back)    │
-    │ ●── commentChanged ──▶ [📄 Save Comment]  ──────────────────▶│
-    │                                                (loop back)    │
-    │ ●── stepClicked    ──▶ [📄 Handle Step]   ──────────────────▶│
-    │                                                (loop back)    │
-    │                                                                │
-    └────────────────────────────────────────────────────────────────┘
+[👤 Coach: 簽核審查]
     │
+    │   Coaches tab wiring:
+    │     actionClicked  → Navigate       → [Script: Handle Action]
+    │     ctaClicked     → Navigate       → [Script: Handle CTA]
+    │     urgeClicked    → Navigate       → [Script: Handle Urge]
+    │     commentChanged → Stay on Page   (handled in Coach Script tab)
+    │     stepClicked    → Stay on Page   (handled in Coach Script tab)
+    │
+    │   (normal path — user finishes without triggering any event)
     ▼
 [⬛ End]
+
+
+[📄 Script: Handle Action]     ← paste EVENT 1 code
+    │
+    ▼
+[◇ Gateway: check actionKey]
+    ├─ actionKey == "approve"   →  [⬛ End: Approved]
+    ├─ actionKey == "return"    →  [⬛ End: Rejected]
+    └─ actionKey == "delegate"  →  [⬛ End: Delegated]
+
+
+[📄 Script: Handle CTA]        ← paste EVENT 2 code
+    │
+    ▼
+[⬛ End: External Signing]
+
+
+[📄 Script: Handle Urge]       ← paste EVENT 3 code
+    │
+    ▼
+[👤 Coach: 簽核審查]            ← loop back to same coach
 ```
 
 ---
@@ -282,9 +268,8 @@ from `EVENT_HANDLERS_CSHS.js`:
 
 | File | Node type | When |
 |---|---|---|
-| `SAMPLE_DATA_CSHS.js` | Script node | Before Coach — runs once to populate data |
-| `EVENT_HANDLERS_CSHS.js` → Event 1 | Script node (after boundary) | User clicks 退回/轉派/核准 |
-| `EVENT_HANDLERS_CSHS.js` → Event 2 | Script node (after boundary) | User clicks CTA button |
-| `EVENT_HANDLERS_CSHS.js` → Event 3 | Script node (after boundary) | User clicks 催辦 |
-| `EVENT_HANDLERS_CSHS.js` → Event 4 | Script node (loop back) | User types in comment box |
-| `EVENT_HANDLERS_CSHS.js` → Event 5 | Script node (loop back) | User clicks route step box |
+| `SAMPLE_DATA_CSHS.js` | Script node | Before Coach — runs once to load data |
+| `EVENT_HANDLERS_CSHS.js` → Event 1 | Script node (Navigate) | User clicks 退回/轉派/核准 |
+| `EVENT_HANDLERS_CSHS.js` → Event 2 | Script node (Navigate) | User clicks CTA button |
+| `EVENT_HANDLERS_CSHS.js` → Event 3 | Script node (Navigate, loops back) | User clicks 催辦 |
+| Events 4 & 5 | Coach Script tab (Stay on Page) | User types comment / clicks route step |
